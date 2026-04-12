@@ -4,7 +4,11 @@ type Claims = Record<string, unknown>;
 
 const ROLE_SET = new Set<string>(APP_ROLES);
 
-export const getRoleFromClaims = (claims: Claims): AppRole | null => {
+export const getRoleFromClaims = (claims: Claims | null | undefined): AppRole | null => {
+  if (!claims || typeof claims !== "object") {
+    return null;
+  }
+
   const rawRole = claims[ROLE_CLAIM_KEY];
 
   if (typeof rawRole !== "string") {

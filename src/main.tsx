@@ -1,8 +1,12 @@
 import { StrictMode } from "react";
-import { ClerkProvider } from "@clerk/clerk-react";
+import { esES } from "@clerk/localizations";
+import { ClerkProvider } from "@clerk/react-router";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter } from "react-router";
 
 import { App } from "./App";
+import { AppContextProvider } from "./context/app-context";
+import "./styles.css";
 
 const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -18,8 +22,12 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <ClerkProvider publishableKey={publishableKey} afterSignOutUrl="/">
-      <App />
-    </ClerkProvider>
+    <BrowserRouter>
+      <ClerkProvider publishableKey={publishableKey} afterSignOutUrl="/sign-in" localization={esES}>
+        <AppContextProvider>
+          <App />
+        </AppContextProvider>
+      </ClerkProvider>
+    </BrowserRouter>
   </StrictMode>
 );
