@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { ConfirmModal } from "../components/ui/confirm-modal";
@@ -7,8 +8,10 @@ import { ContributorStatusBadge } from "../components/ui/state-badge";
 import { useAppContext } from "../context/app-context";
 import { useApiClient } from "../hooks/use-api-client";
 import { useContributors } from "../hooks/use-contributors";
+import { useInvalidateResources } from "../hooks/use-resource-invalidation";
 import { useSettings } from "../hooks/use-settings";
 import { formatCentsAsInputValue, parseMoneyInputToCents } from "../lib/money";
+import { RESOURCE_KEYS } from "../lib/resource-invalidation";
 import type { Contributor } from "../types/domain";
 
 type ContributorDraft = {
@@ -24,6 +27,7 @@ const emptyContributorDraft: ContributorDraft = {
 export const SettingsPage = () => {
   const { role } = useAppContext();
   const api = useApiClient();
+  const invalidateResources = useInvalidateResources();
 
   const settings = useSettings();
   const contributors = useContributors("all");
@@ -79,7 +83,7 @@ export const SettingsPage = () => {
     }
 
     toast.success("Monto mensual actualizado.");
-    settings.reload();
+    invalidateResources(RESOURCE_KEYS.settings, RESOURCE_KEYS.summary);
   };
 
   const createContributor = async () => {
@@ -104,7 +108,7 @@ export const SettingsPage = () => {
 
     toast.success("Contribuidor creado.");
     setNewContributor(emptyContributorDraft);
-    contributors.reload();
+    invalidateResources(RESOURCE_KEYS.contributors, RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
   };
 
   const startEditingContributor = (contributor: Contributor) => {
@@ -141,7 +145,7 @@ export const SettingsPage = () => {
 
     toast.success("Contribuidor actualizado.");
     setEditingContributor(null);
-    contributors.reload();
+    invalidateResources(RESOURCE_KEYS.contributors, RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
   };
 
   const deactivateContributor = async () => {
@@ -162,7 +166,7 @@ export const SettingsPage = () => {
 
     toast.success("Contribuidor desactivado.");
     setPendingDeactivate(null);
-    contributors.reload();
+    invalidateResources(RESOURCE_KEYS.contributors, RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
   };
 
   return (
@@ -284,53 +288,84 @@ export const SettingsPage = () => {
         </div>
       </article>
 
-      {editingContributor ? (
-        <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <h3 className="text-lg font-semibold text-slate-900">Editar contribuidor</h3>
+      <Transition appear show={Boolean(editingContributor)} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={savingContributor ? () => undefined : () => setEditingContributor(null)}>
+          <TransitionChild
+            as={Fragment}
+            enter="ease-out duration-200"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-150"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-[1px]" />
+          </TransitionChild>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="font-medium text-slate-700">Nombre</span>
-              <input
-                type="text"
-                value={editDraft.name}
-                onChange={(event) => setEditDraft((previous) => ({ ...previous, name: event.target.value }))}
-                className="rounded-lg border border-slate-300 px-3 py-2"
-              />
-            </label>
+          <div className="fixed inset-0 overflow-y-auto p-4">
+            <div className="flex min-h-full items-center justify-center">
+              <TransitionChild
+                as={Fragment}
+                enter="ease-out duration-200"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-150"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <DialogPanel className="w-full max-w-lg rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+                  <DialogTitle className="text-lg font-semibold text-slate-900">Editar contribuidor</DialogTitle>
 
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="font-medium text-slate-700">Email (opcional)</span>
-              <input
-                type="email"
-                value={editDraft.email}
-                onChange={(event) => setEditDraft((previous) => ({ ...previous, email: event.target.value }))}
-                className="rounded-lg border border-slate-300 px-3 py-2"
-              />
-            </label>
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                    <label className="flex flex-col gap-1 text-sm">
+                      <span className="font-medium text-slate-700">Nombre</span>
+                      <input
+                        type="text"
+                        value={editDraft.name}
+                        onChange={(event) => setEditDraft((previous) => ({ ...previous, name: event.target.value }))}
+                        className="rounded-lg border border-slate-300 px-3 py-2"
+                        disabled={savingContributor}
+                      />
+                    </label>
+
+                    <label className="flex flex-col gap-1 text-sm">
+                      <span className="font-medium text-slate-700">Email (opcional)</span>
+                      <input
+                        type="email"
+                        value={editDraft.email}
+                        onChange={(event) => setEditDraft((previous) => ({ ...previous, email: event.target.value }))}
+                        className="rounded-lg border border-slate-300 px-3 py-2"
+                        disabled={savingContributor}
+                      />
+                    </label>
+                  </div>
+
+                  <div className="mt-6 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                      onClick={() => setEditingContributor(null)}
+                      disabled={savingContributor}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded-md bg-slate-800 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-900 disabled:opacity-60"
+                      onClick={() => {
+                        void saveContributorEdit();
+                      }}
+                      disabled={savingContributor}
+                    >
+                      {savingContributor ? "Guardando..." : "Guardar cambios"}
+                    </button>
+                  </div>
+                </DialogPanel>
+              </TransitionChild>
+            </div>
           </div>
-
-          <div className="mt-4 flex justify-end gap-2">
-            <button
-              type="button"
-              className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
-              onClick={() => setEditingContributor(null)}
-            >
-              Cancelar
-            </button>
-            <button
-              type="button"
-              className="rounded-md bg-slate-800 px-3 py-1.5 text-sm font-semibold text-white hover:bg-slate-900 disabled:opacity-60"
-              onClick={() => {
-                void saveContributorEdit();
-              }}
-              disabled={savingContributor}
-            >
-              {savingContributor ? "Guardando..." : "Guardar cambios"}
-            </button>
-          </div>
-        </article>
-      ) : null}
+        </Dialog>
+      </Transition>
 
       <ConfirmModal
         open={Boolean(pendingDeactivate)}

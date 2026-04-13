@@ -2,6 +2,7 @@ import { useCallback } from "react";
 
 import { useApiClient } from "./use-api-client";
 import { useApiResource } from "./use-api-resource";
+import { RESOURCE_KEYS } from "../lib/resource-invalidation";
 import type { SummaryData } from "../types/domain";
 
 export const useSummary = (year: number) => {
@@ -12,5 +13,5 @@ export const useSummary = (year: number) => {
     [api, year]
   );
 
-  return useApiResource(loader, [year]);
+  return useApiResource(loader, [year], [RESOURCE_KEYS.summary]);
 };

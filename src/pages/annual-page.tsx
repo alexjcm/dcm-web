@@ -7,9 +7,12 @@ import { ContributionStateBadge, ContributorStatusBadge, getContributionCellStat
 import { useAppContext } from "../context/app-context";
 import { useApiClient } from "../hooks/use-api-client";
 import { useContributionsYearAll } from "../hooks/use-contributions-year-all";
+import { useInvalidateResources } from "../hooks/use-resource-invalidation";
 import { useSummary } from "../hooks/use-summary";
+import { getCurrentBusinessMonth } from "../lib/business-time";
 import { getMonthLabel } from "../lib/date";
 import { formatCentsAsCurrency } from "../lib/money";
+import { RESOURCE_KEYS } from "../lib/resource-invalidation";
 import type { Contribution, SummaryContributor } from "../types/domain";
 
 type SelectedCell = {
@@ -40,6 +43,7 @@ const byCellKey = (contributorId: number, month: number): string => `${contribut
 export const AnnualPage = () => {
   const { activeYear, canMutateCurrentPeriod, contributionRestrictionMessage } = useAppContext();
   const api = useApiClient();
+  const invalidateResources = useInvalidateResources();
 
   const summary = useSummary(activeYear);
   const allContributions = useContributionsYearAll(activeYear);
@@ -119,8 +123,7 @@ export const AnnualPage = () => {
 
     toast.success(selectedCell.existingContribution ? "Aporte actualizado." : "Aporte registrado.");
     setSelectedCell(null);
-    summary.reload();
-    allContributions.reload();
+    invalidateResources(RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
   };
 
   return (
@@ -206,7 +209,7 @@ export const AnnualPage = () => {
           }))}
         monthlyAmountCents={monthlyAmountCents}
         defaultYear={activeYear}
-        defaultMonth={selectedCell?.month ?? new Date().getMonth() + 1}
+        defaultMonth={selectedCell?.month ?? getCurrentBusinessMonth()}
         initialContribution={selectedCell?.existingContribution}
         fixedContributorId={selectedCell?.contributor.contributorId}
         fixedMonth={selectedCell?.month}

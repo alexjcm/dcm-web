@@ -9,8 +9,11 @@ import { useAppContext } from "../context/app-context";
 import { useApiClient } from "../hooks/use-api-client";
 import { useContributions } from "../hooks/use-contributions";
 import { useContributors } from "../hooks/use-contributors";
+import { useInvalidateResources } from "../hooks/use-resource-invalidation";
 import { useSettings } from "../hooks/use-settings";
+import { getCurrentBusinessMonth } from "../lib/business-time";
 import { formatCentsAsCurrency } from "../lib/money";
+import { RESOURCE_KEYS } from "../lib/resource-invalidation";
 import type { Contribution, Contributor } from "../types/domain";
 
 const PAGE_SIZE = 10;
@@ -23,6 +26,7 @@ type EditState = {
 export const ContributionsPage = () => {
   const { activeYear, canMutateCurrentPeriod, contributionRestrictionMessage } = useAppContext();
   const api = useApiClient();
+  const invalidateResources = useInvalidateResources();
 
   const contributors = useContributors("all");
   const settings = useSettings();
@@ -106,7 +110,7 @@ export const ContributionsPage = () => {
 
     toast.success(editState.contribution ? "Aporte actualizado." : "Aporte registrado.");
     setEditState({ contribution: null, open: false });
-    contributions.reload();
+    invalidateResources(RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
   };
 
   const handleDelete = async () => {
@@ -127,7 +131,7 @@ export const ContributionsPage = () => {
 
     toast.success("Aporte desactivado.");
     setPendingDelete(null);
-    contributions.reload();
+    invalidateResources(RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
   };
 
   return (
@@ -261,7 +265,7 @@ export const ContributionsPage = () => {
         contributors={activeContributorOptions}
         monthlyAmountCents={settings.monthlyAmountCents}
         defaultYear={activeYear}
-        defaultMonth={new Date().getMonth() + 1}
+        defaultMonth={getCurrentBusinessMonth()}
         initialContribution={editState.contribution}
         lockedReason={canMutateCurrentPeriod ? null : contributionRestrictionMessage}
         submitting={submitting}

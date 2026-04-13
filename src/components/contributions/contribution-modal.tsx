@@ -2,6 +2,7 @@ import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@
 import { Fragment, useEffect, useMemo, useState } from "react";
 
 import type { Contribution, Contributor } from "../../types/domain";
+import { getMonthLongLabel } from "../../lib/date";
 import { formatCentsAsInputValue, parseMoneyInputToCents } from "../../lib/money";
 
 export type ContributionPayload = {
@@ -226,7 +227,7 @@ export const ContributionModal = ({
                     >
                       {monthOptions.map((month) => (
                         <option key={month} value={month}>
-                          {month}
+                          {getMonthLongLabel(month)}
                         </option>
                       ))}
                     </select>

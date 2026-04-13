@@ -2,6 +2,7 @@ import { useCallback } from "react";
 
 import { useApiClient } from "./use-api-client";
 import { useApiResource } from "./use-api-resource";
+import { RESOURCE_KEYS } from "../lib/resource-invalidation";
 import type { ContributionsListData } from "../types/domain";
 
 export type UseContributionsParams = {
@@ -28,5 +29,5 @@ export const useContributions = ({ year, contributorId, pageNumber, pageSize }: 
     [api, year, contributorId, pageNumber, pageSize]
   );
 
-  return useApiResource(loader, [year, contributorId, pageNumber, pageSize]);
+  return useApiResource(loader, [year, contributorId, pageNumber, pageSize], [RESOURCE_KEYS.contributions]);
 };

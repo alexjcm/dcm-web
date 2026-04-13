@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 
 import type { ApiResponse } from "../types/api";
+import type { ResourceKey } from "../lib/resource-invalidation";
+import { useResourceVersion } from "./use-resource-invalidation";
 
 type Loader<T> = (signal: AbortSignal) => Promise<ApiResponse<T>>;
 
@@ -11,11 +13,16 @@ type ResourceState<T> = {
   reload: () => void;
 };
 
-export const useApiResource = <T>(loader: Loader<T>, deps: ReadonlyArray<unknown>): ResourceState<T> => {
+export const useApiResource = <T>(
+  loader: Loader<T>,
+  deps: ReadonlyArray<unknown>,
+  invalidationKeys: ReadonlyArray<ResourceKey> = []
+): ResourceState<T> => {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadNonce, setReloadNonce] = useState<number>(0);
+  const invalidationVersion = useResourceVersion(invalidationKeys);
 
   const reload = useCallback(() => {
     setReloadNonce((previous) => previous + 1);
@@ -56,7 +63,7 @@ export const useApiResource = <T>(loader: Loader<T>, deps: ReadonlyArray<unknown
       active = false;
       controller.abort();
     };
-  }, [loader, reloadNonce, ...deps]);
+  }, [loader, reloadNonce, invalidationVersion, ...deps]);
 
   return {
     data,
