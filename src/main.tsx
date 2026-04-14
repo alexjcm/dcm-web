@@ -1,22 +1,12 @@
 import { StrictMode } from "react";
-import { esES } from "@clerk/localizations";
-import { ClerkProvider } from "@clerk/react-router";
+import { Auth0Provider } from "@auth0/auth0-react";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router";
 
 import { App } from "./App";
+import { AUTH0_AUDIENCE, AUTH0_CLIENT_ID, AUTH0_DOMAIN } from "./config/auth";
 import { AppContextProvider } from "./context/app-context";
 import "./styles.css";
-
-const publishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-
-if (!publishableKey) {
-  throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY");
-}
-
-if (!publishableKey.startsWith("pk_")) {
-  throw new Error("VITE_CLERK_PUBLISHABLE_KEY must be a Clerk publishable key (pk_...)");
-}
 
 const PRELOAD_RELOAD_WINDOW_MS = 10_000;
 const LAST_PRELOAD_RELOAD_AT_KEY = "__vite_preload_reload_at__";
@@ -45,11 +35,18 @@ if (!rootElement) {
 createRoot(rootElement).render(
   <StrictMode>
     <BrowserRouter>
-      <ClerkProvider publishableKey={publishableKey} afterSignOutUrl="/sign-in" localization={esES}>
+      <Auth0Provider
+        domain={AUTH0_DOMAIN}
+        clientId={AUTH0_CLIENT_ID}
+        authorizationParams={{
+          audience: AUTH0_AUDIENCE,
+          redirect_uri: window.location.origin
+        }}
+      >
         <AppContextProvider>
           <App />
         </AppContextProvider>
-      </ClerkProvider>
+      </Auth0Provider>
     </BrowserRouter>
   </StrictMode>
 );

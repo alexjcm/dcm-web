@@ -9,7 +9,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           react: ["react", "react-dom", "react-router"],
-          clerk: ["@clerk/react-router", "@clerk/localizations"],
+          auth0: ["@auth0/auth0-react"],
           ui: ["@headlessui/react", "sonner"]
         }
       }

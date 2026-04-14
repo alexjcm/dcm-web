@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 import { ConfirmModal } from "../components/ui/confirm-modal";
 import { SectionLoader } from "../components/ui/loaders";
+import { APP_PERMISSIONS } from "../config/permissions";
 import { ContributorStatusBadge } from "../components/ui/state-badge";
 import { useAppContext } from "../context/app-context";
 import { useApiClient } from "../hooks/use-api-client";
@@ -25,7 +26,7 @@ const emptyContributorDraft: ContributorDraft = {
 };
 
 export const SettingsPage = () => {
-  const { role } = useAppContext();
+  const { permissionsLoaded, hasPermission } = useAppContext();
   const api = useApiClient();
   const invalidateResources = useInvalidateResources();
 
@@ -52,10 +53,14 @@ export const SettingsPage = () => {
     return [...(contributors.data?.items ?? [])].sort((left, right) => left.name.localeCompare(right.name, "es"));
   }, [contributors.data]);
 
-  if (role !== "superadmin") {
+  if (!permissionsLoaded) {
+    return <SectionLoader label="Cargando permisos..." />;
+  }
+
+  if (!hasPermission(APP_PERMISSIONS.settingsWrite)) {
     return (
       <section className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm font-medium text-amber-900">
-        Esta sección está restringida a superadmin.
+        Esta sección está restringida a usuarios con permiso <code>{APP_PERMISSIONS.settingsWrite}</code>.
       </section>
     );
   }

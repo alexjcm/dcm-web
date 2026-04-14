@@ -7,14 +7,13 @@
     "node": ">=24 <25"
   },
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 5173 --strictPort",
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@clerk/localizations": "^4.4.0",
-    "@clerk/react-router": "^3.0.12",
+    "@auth0/auth0-react": "^2.16.1",
     "@headlessui/react": "^2.2.10",
     "@tailwindcss/vite": "^4.2.2",
     "react": "^19.2.0",

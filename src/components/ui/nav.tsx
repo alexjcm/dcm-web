@@ -1,6 +1,7 @@
+import { useAuth0 } from "@auth0/auth0-react";
 import { NavLink } from "react-router";
-import { UserButton } from "@clerk/react-router";
 
+import { APP_PERMISSIONS } from "../../config/permissions";
 import { useAppContext } from "../../context/app-context";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }): string => {
@@ -22,8 +23,19 @@ const getYearOptions = (currentYear: number): number[] => {
 };
 
 export const AppNav = () => {
-  const { activeYear, setActiveYear, currentBusinessYear, role, contributionRestrictionMessage } = useAppContext();
+  const { logout } = useAuth0();
+  const {
+    activeYear,
+    setActiveYear,
+    currentBusinessYear,
+    userEmail,
+    hasPermission,
+    permissionsLoaded,
+    contributionRestrictionMessage
+  } = useAppContext();
+
   const yearOptions = getYearOptions(currentBusinessYear);
+  const canManageSettings = hasPermission(APP_PERMISSIONS.settingsWrite);
 
   return (
     <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/80 backdrop-blur">
@@ -52,10 +64,26 @@ export const AppNav = () => {
             </label>
 
             <div className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
-              Rol: {role ?? "sin-rol"}
+              {permissionsLoaded ? "Permisos cargados" : "Cargando permisos"}
             </div>
 
-            <UserButton />
+            <div className="max-w-[220px] truncate rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs text-slate-700">
+              {userEmail ?? "Usuario autenticado"}
+            </div>
+
+            <button
+              type="button"
+              className="rounded-md border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+              onClick={() => {
+                void logout({
+                  logoutParams: {
+                    returnTo: window.location.origin
+                  }
+                });
+              }}
+            >
+              Cerrar sesión
+            </button>
           </div>
         </div>
 
@@ -69,7 +97,7 @@ export const AppNav = () => {
           <NavLink to="/contributions" className={navLinkClass}>
             Aportes
           </NavLink>
-          {role === "superadmin" ? (
+          {canManageSettings ? (
             <NavLink to="/settings" className={navLinkClass}>
               Ajustes
             </NavLink>

@@ -1,10 +1,11 @@
 import { lazy, Suspense, type ReactNode } from "react";
 import { Navigate, Route, Routes } from "react-router";
 
+import { PermissionRoute } from "./components/auth/permission-route";
 import { ProtectedRoute } from "./components/auth/protected-route";
-import { RoleRoute } from "./components/auth/role-route";
 import { AppShell } from "./components/layout/app-shell";
 import { PageLoader } from "./components/ui/loaders";
+import { APP_PERMISSIONS } from "./config/permissions";
 
 const SignInPage = lazy(async () => {
   const module = await import("./pages/sign-in-page");
@@ -60,9 +61,9 @@ export const App = () => {
         <Route
           path="settings"
           element={
-            <RoleRoute allowed={["superadmin"]}>
+            <PermissionRoute required={APP_PERMISSIONS.settingsWrite}>
               {withSuspense(<SettingsPage />)}
-            </RoleRoute>
+            </PermissionRoute>
           }
         />
       </Route>

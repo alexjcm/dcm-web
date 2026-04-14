@@ -1,24 +1,36 @@
-import type { AppRole } from "../config/auth";
-
-export const canMutateContributions = (role: AppRole | null, activeYear: number, currentBusinessYear: number): boolean => {
-  if (!role) {
-    return false;
-  }
-
-  if (role === "viewer") {
-    return false;
-  }
-
-  return activeYear === currentBusinessYear;
+export const canMutateContributions = (
+  hasContributionWritePermission: boolean,
+  activeYear: number,
+  currentBusinessYear: number
+): boolean => {
+  return hasContributionWritePermission && activeYear === currentBusinessYear;
 };
 
-export const getContributionRestrictionMessage = (role: AppRole | null, activeYear: number, currentBusinessYear: number): string | null => {
-  if (!role) {
-    return "El claim de rol no está disponible en la sesión.";
+type RestrictionMessageParams = {
+  isSignedIn: boolean;
+  permissionsLoaded: boolean;
+  hasContributionWritePermission: boolean;
+  activeYear: number;
+  currentBusinessYear: number;
+};
+
+export const getContributionRestrictionMessage = ({
+  isSignedIn,
+  permissionsLoaded,
+  hasContributionWritePermission,
+  activeYear,
+  currentBusinessYear
+}: RestrictionMessageParams): string | null => {
+  if (!isSignedIn) {
+    return "Se requiere sesión autenticada.";
   }
 
-  if (role === "viewer") {
-    return "Modo solo lectura: este usuario no puede crear, editar ni desactivar aportes.";
+  if (!permissionsLoaded) {
+    return null;
+  }
+
+  if (!hasContributionWritePermission) {
+    return "No tienes permiso para crear, editar ni desactivar aportes.";
   }
 
   if (activeYear !== currentBusinessYear) {

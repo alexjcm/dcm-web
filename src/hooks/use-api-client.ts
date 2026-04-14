@@ -1,15 +1,30 @@
 import { useMemo } from "react";
-import { useAuth } from "@clerk/react-router";
+import { useAuth0 } from "@auth0/auth0-react";
 
+import { AUTH0_AUDIENCE } from "../config/auth";
 import { ApiClient } from "../lib/http";
 
 export const useApiClient = (): ApiClient => {
-  const { getToken } = useAuth();
+  const { getAccessTokenSilently, isAuthenticated } = useAuth0();
 
   return useMemo(() => {
     return new ApiClient(async () => {
-      const token = await getToken();
-      return token ?? null;
+      if (!isAuthenticated) {
+        return null;
+      }
+
+      try {
+        const token = await getAccessTokenSilently({
+          authorizationParams: {
+            audience: AUTH0_AUDIENCE
+          }
+        });
+
+        return token ?? null;
+      } catch (error) {
+        console.warn("No se pudo obtener access token de Auth0 para la API.", error);
+        return null;
+      }
     });
-  }, [getToken]);
+  }, [getAccessTokenSilently, isAuthenticated]);
 };
