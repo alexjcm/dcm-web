@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { 
+  Plus, 
+  Search, 
+  Filter, 
+  Edit2, 
+  Trash2, 
+  ChevronLeft, 
+  ChevronRight,
+  ReceiptText
+} from "lucide-react";
 
 import { ContributionModal, type ContributionPayload } from "../components/contributions/contribution-modal";
 import { ConfirmModal } from "../components/ui/confirm-modal";
@@ -15,6 +25,9 @@ import { getCurrentBusinessMonth } from "../lib/business-time";
 import { formatCentsAsCurrency } from "../lib/money";
 import { RESOURCE_KEYS } from "../lib/resource-invalidation";
 import type { Contribution, Contributor } from "../types/domain";
+import { Button } from "../components/ui/button";
+import { Select } from "../components/ui/fields";
+import { Card } from "../components/ui/card";
 
 const PAGE_SIZE = 10;
 
@@ -135,59 +148,95 @@ export const ContributionsPage = () => {
   };
 
   return (
-    <section className="space-y-5">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Listado de aportes</h2>
-          <p className="text-sm text-slate-600">Filtro por año y contribuidor con paginación de 10 registros por página.</p>
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 text-primary-600 shadow-inner">
+            <ReceiptText size={24} />
+          </div>
+          <div>
+            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Listado de Aportes</h2>
+            <p className="text-sm text-slate-500">Gestión histórica y registro de contribuciones del período.</p>
+          </div>
         </div>
 
-        <button
-          type="button"
+        <Button
+          icon={Plus}
           onClick={openCreateModal}
-          className="rounded-lg bg-cyan-700 px-4 py-2 text-sm font-semibold text-white hover:bg-cyan-800 disabled:opacity-60"
           disabled={!canMutateCurrentPeriod}
+          className="shadow-md shadow-primary-200 w-full sm:w-auto"
         >
-          Nuevo aporte
-        </button>
+          Nuevo Aporte
+        </Button>
       </header>
 
-      <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-3">
-        <label className="flex flex-col gap-1 text-sm">
-          <span className="font-medium text-slate-700">Contribuidor</span>
-          <select
-            value={contributorIdFilter ?? ""}
-            onChange={(event) => setContributorIdFilter(event.target.value ? Number(event.target.value) : null)}
-            className="rounded-lg border border-slate-300 px-3 py-2"
-          >
-            <option value="">Todos</option>
-            {contributorOptions.map((contributor) => (
-              <option key={contributor.id} value={contributor.id}>
-                {contributor.name}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+      <Card className="p-4" bodyClassName="p-0">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+           <div className="flex-1">
+             <Select
+                label="Filtrar por Contribuidor"
+                value={contributorIdFilter ?? ""}
+                onChange={(event) => setContributorIdFilter(event.target.value ? Number(event.target.value) : null)}
+              >
+                <option value="">Todos los contribuidores</option>
+                {contributorOptions.map((contributor) => (
+                  <option key={contributor.id} value={contributor.id}>
+                    {contributor.name}
+                  </option>
+                ))}
+              </Select>
+           </div>
+           <Button variant="outline" icon={Filter} className="hidden sm:flex shrink-0">
+              Más filtros
+           </Button>
+        </div>
+      </Card>
 
       {contributions.loading && !contributions.data ? <SectionLoader label="Cargando aportes..." /> : null}
       {contributions.error ? (
-        <div className="rounded-xl border border-rose-300 bg-rose-50 p-4 text-sm font-medium text-rose-800">
+        <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm font-medium text-rose-800 animate-in fade-in">
           No se pudo cargar el listado: {contributions.error}
         </div>
       ) : null}
 
       {contributions.data ? (
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <Card bodyClassName="p-0" footer={
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              Página {contributions.data.pagination.number} de {Math.max(1, contributions.data.pagination.totalPages || 1)}
+            </p>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                icon={ChevronLeft}
+                onClick={() => setPageNumber((previous) => Math.max(1, previous - 1))}
+                disabled={!contributions.data.pagination.hasPrevPage}
+              >
+                Anterior
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                icon={ChevronRight}
+                iconPosition="right"
+                onClick={() => setPageNumber((previous) => previous + 1)}
+                disabled={!contributions.data.pagination.hasNextPage}
+              >
+                Siguiente
+              </Button>
+            </div>
+          </div>
+        }>
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead className="bg-slate-50">
+            <table className="w-full text-sm">
+              <thead className="border-b border-slate-100 bg-slate-50/50">
                 <tr>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700">Contribuidor</th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700">Período</th>
-                  <th className="px-4 py-3 text-right font-semibold text-slate-700">Monto</th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700">Pago</th>
-                  <th className="px-4 py-3 text-left font-semibold text-slate-700">Acciones</th>
+                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-slate-600 text-[11px]">Contribuidor</th>
+                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-slate-600 text-[11px]">Período</th>
+                  <th className="px-6 py-4 text-right font-bold uppercase tracking-wider text-slate-600 text-[11px]">Monto</th>
+                  <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-slate-600 text-[11px]">Fecha de Pago</th>
+                  <th className="px-6 py-4 text-right font-bold uppercase tracking-wider text-slate-600 text-[11px]">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -195,36 +244,45 @@ export const ContributionsPage = () => {
                   const contributor = contributorById.get(item.contributorId);
 
                   return (
-                    <tr key={item.id}>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-slate-900">{item.contributorName}</span>
-                          {contributor ? <ContributorStatusBadge status={contributor.status} /> : null}
+                    <tr key={item.id} className="group hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-700">
+                            {item.contributorName.charAt(0)}
+                          </div>
+                          <div>
+                            <span className="font-bold text-slate-900 leading-none">{item.contributorName}</span>
+                            {contributor && (
+                              <div className="mt-1">
+                                <ContributorStatusBadge status={contributor.status} />
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3 text-slate-700">
-                        {item.month}/{item.year}
+                      <td className="px-6 py-4">
+                        <span className="inline-flex items-center rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-600">
+                          {item.month}/{item.year}
+                        </span>
                       </td>
-                      <td className="px-4 py-3 text-right font-semibold text-slate-900">{formatCentsAsCurrency(item.amountCents)}</td>
-                      <td className="px-4 py-3 text-slate-700">{item.paidAt ?? "Sin fecha"}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            className="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                      <td className="px-6 py-4 text-right font-extrabold text-slate-900">{formatCentsAsCurrency(item.amountCents)}</td>
+                      <td className="px-6 py-4 text-slate-500 font-medium">{item.paidAt ?? "Sin fecha registrada"}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            icon={Edit2}
                             onClick={() => openEditModal(item)}
                             disabled={!canMutateCurrentPeriod || contributor?.status === 0}
-                          >
-                            Editar
-                          </button>
-                          <button
-                            type="button"
-                            className="rounded-md border border-rose-300 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50 disabled:opacity-60"
+                          />
+                          <Button
+                            size="sm"
+                            variant="danger"
+                            icon={Trash2}
                             onClick={() => setPendingDelete(item)}
                             disabled={!canMutateCurrentPeriod || contributor?.status === 0}
-                          >
-                            Desactivar
-                          </button>
+                          />
                         </div>
                       </td>
                     </tr>
@@ -233,31 +291,7 @@ export const ContributionsPage = () => {
               </tbody>
             </table>
           </div>
-
-          <div className="flex items-center justify-between border-t border-slate-200 px-4 py-3 text-sm text-slate-700">
-            <p>
-              Página {contributions.data.pagination.number} de {Math.max(1, contributions.data.pagination.totalPages || 1)}
-            </p>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                className="rounded-md border border-slate-300 px-3 py-1.5 font-medium hover:bg-slate-50 disabled:opacity-60"
-                onClick={() => setPageNumber((previous) => Math.max(1, previous - 1))}
-                disabled={!contributions.data.pagination.hasPrevPage}
-              >
-                Anterior
-              </button>
-              <button
-                type="button"
-                className="rounded-md border border-slate-300 px-3 py-1.5 font-medium hover:bg-slate-50 disabled:opacity-60"
-                onClick={() => setPageNumber((previous) => previous + 1)}
-                disabled={!contributions.data.pagination.hasNextPage}
-              >
-                Siguiente
-              </button>
-            </div>
-          </div>
-        </div>
+        </Card>
       ) : null}
 
       <ContributionModal
@@ -289,6 +323,7 @@ export const ContributionsPage = () => {
           void handleDelete();
         }}
       />
-    </section>
+    </div>
   );
 };
+

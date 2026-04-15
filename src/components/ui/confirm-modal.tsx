@@ -1,5 +1,7 @@
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import { Fragment } from "react";
+import { AlertTriangle, Info } from "lucide-react";
+import { Button } from "./button";
 
 type ConfirmModalProps = {
   open: boolean;
@@ -29,50 +31,62 @@ export const ConfirmModal = ({
       <Dialog as="div" className="relative z-50" onClose={loading ? () => undefined : onCancel}>
         <TransitionChild
           as={Fragment}
-          enter="ease-out duration-200"
+          enter="ease-out duration-300"
           enterFrom="opacity-0"
           enterTo="opacity-100"
-          leave="ease-in duration-150"
+          leave="ease-in duration-200"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-[1px]" />
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" />
         </TransitionChild>
 
-        <div className="fixed inset-0 overflow-y-auto p-4">
+        <div className="fixed inset-0 overflow-y-auto p-4 md:p-8">
           <div className="flex min-h-full items-center justify-center">
             <TransitionChild
               as={Fragment}
-              enter="ease-out duration-200"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-150"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-4 scale-95"
+              enterTo="opacity-100 translate-y-0 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 translate-y-0 scale-100"
+              leaveTo="opacity-0 translate-y-4 scale-95"
             >
-              <DialogPanel className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
-                <DialogTitle className="text-lg font-semibold text-slate-900">{title}</DialogTitle>
-                <p className="mt-2 text-sm text-slate-600">{description}</p>
+              <DialogPanel className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl transition-all">
+                <div className="p-8">
+                  <div className="flex items-start gap-4">
+                    <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-sm ${
+                      danger ? "bg-rose-50 text-rose-600 border border-rose-100" : "bg-primary-50 text-primary-600 border border-primary-100"
+                    }`}>
+                      {danger ? <AlertTriangle size={24} /> : <Info size={24} />}
+                    </div>
+                    <div>
+                      <DialogTitle className="text-xl font-extrabold text-slate-900 tracking-tight">
+                        {title}
+                      </DialogTitle>
+                      <p className="mt-2 text-sm text-slate-500 leading-relaxed font-medium">
+                        {description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-                <div className="mt-6 flex justify-end gap-3">
-                  <button
-                    type="button"
-                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                <div className="bg-slate-50 px-8 py-6 flex flex-col sm:flex-row-reverse gap-3 border-t border-slate-100">
+                  <Button
+                    variant={danger ? "danger" : "primary"}
+                    onClick={onConfirm}
+                    isLoading={loading}
+                    className="sm:min-w-[120px]"
+                  >
+                    {confirmLabel}
+                  </Button>
+                  <Button
+                    variant="ghost"
                     onClick={onCancel}
                     disabled={loading}
                   >
                     {cancelLabel}
-                  </button>
-                  <button
-                    type="button"
-                    className={`rounded-lg px-4 py-2 text-sm font-semibold text-white disabled:opacity-60 ${
-                      danger ? "bg-rose-600 hover:bg-rose-700" : "bg-slate-800 hover:bg-slate-900"
-                    }`}
-                    onClick={onConfirm}
-                    disabled={loading}
-                  >
-                    {loading ? "Procesando..." : confirmLabel}
-                  </button>
+                  </Button>
                 </div>
               </DialogPanel>
             </TransitionChild>
@@ -82,3 +96,4 @@ export const ConfirmModal = ({
     </Transition>
   );
 };
+

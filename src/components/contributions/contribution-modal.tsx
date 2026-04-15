@@ -1,9 +1,20 @@
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import { Fragment, useEffect, useMemo, useState } from "react";
+import { 
+  ReceiptText, 
+  User, 
+  Calendar, 
+  DollarSign, 
+  CalendarCheck, 
+  FileText,
+  AlertCircle
+} from "lucide-react";
 
 import type { Contribution, Contributor } from "../../types/domain";
 import { getMonthLongLabel } from "../../lib/date";
 import { formatCentsAsInputValue, parseMoneyInputToCents } from "../../lib/money";
+import { Button } from "../ui/button";
+import { Input, Select } from "../ui/fields";
 
 export type ContributionPayload = {
   contributorId: number;
@@ -160,136 +171,133 @@ export const ContributionModal = ({
       <Dialog as="div" className="relative z-50" onClose={submitting ? () => undefined : onClose}>
         <TransitionChild
           as={Fragment}
-          enter="ease-out duration-200"
+          enter="ease-out duration-300"
           enterFrom="opacity-0"
           enterTo="opacity-100"
-          leave="ease-in duration-150"
+          leave="ease-in duration-200"
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-[1px]" />
+          <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm" />
         </TransitionChild>
 
-        <div className="fixed inset-0 overflow-y-auto p-4">
+        <div className="fixed inset-0 overflow-y-auto p-4 md:p-8">
           <div className="flex min-h-full items-center justify-center">
             <TransitionChild
               as={Fragment}
-              enter="ease-out duration-200"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-150"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-4 scale-95"
+              enterTo="opacity-100 translate-y-0 scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 translate-y-0 scale-100"
+              leaveTo="opacity-0 translate-y-4 scale-95"
             >
-              <DialogPanel className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
-                <DialogTitle className="text-lg font-semibold text-slate-900">
-                  {initialContribution ? "Editar aporte" : "Registrar aporte"}
-                </DialogTitle>
+              <DialogPanel className="w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-2xl transition-all">
+                <div className="bg-slate-50 px-8 py-6 border-b border-slate-100 flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-primary-600 shadow-sm">
+                    <ReceiptText size={20} />
+                  </div>
+                  <div>
+                    <DialogTitle className="text-lg font-extrabold text-slate-900">
+                      {initialContribution ? "Edición de Aporte" : "Registro de Aporte"}
+                    </DialogTitle>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Gestión de Tesorería Familiar</p>
+                  </div>
+                </div>
 
-                <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                  <label className="flex flex-col gap-1 text-sm">
-                    <span className="font-medium text-slate-700">Contribuidor</span>
-                    <select
-                      value={form.contributorId}
-                      onChange={(event) => setForm((previous) => ({ ...previous, contributorId: event.target.value }))}
-                      className="rounded-lg border border-slate-300 px-3 py-2"
-                      disabled={!canEditContributor || submitting}
-                    >
-                      <option value="">Seleccionar...</option>
-                      {sortedContributors.map((contributor) => (
-                        <option key={contributor.id} value={contributor.id}>
-                          {contributor.name}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                <div className="p-8 grid gap-6 sm:grid-cols-2">
+                  <Select
+                    label="Contribuidor"
+                    value={form.contributorId}
+                    onChange={(event) => setForm((previous) => ({ ...previous, contributorId: event.target.value }))}
+                    disabled={!canEditContributor || submitting}
+                  >
+                    <option value="">Seleccionar...</option>
+                    {sortedContributors.map((contributor) => (
+                      <option key={contributor.id} value={contributor.id}>
+                        {contributor.name}
+                      </option>
+                    ))}
+                  </Select>
 
-                  <label className="flex flex-col gap-1 text-sm">
-                    <span className="font-medium text-slate-700">Año</span>
-                    <input
-                      type="number"
-                      min={2000}
-                      max={2100}
-                      value={form.year}
-                      onChange={(event) => setForm((previous) => ({ ...previous, year: event.target.value }))}
-                      className="rounded-lg border border-slate-300 px-3 py-2"
-                      disabled={submitting}
-                    />
-                  </label>
+                  <Input
+                    label="Año"
+                    type="number"
+                    min={2000}
+                    max={2100}
+                    value={form.year}
+                    onChange={(event) => setForm((previous) => ({ ...previous, year: event.target.value }))}
+                    disabled={submitting}
+                  />
 
-                  <label className="flex flex-col gap-1 text-sm">
-                    <span className="font-medium text-slate-700">Mes</span>
-                    <select
-                      value={form.month}
-                      onChange={(event) => setForm((previous) => ({ ...previous, month: event.target.value }))}
-                      className="rounded-lg border border-slate-300 px-3 py-2"
-                      disabled={!canEditMonth || submitting}
-                    >
-                      {monthOptions.map((month) => (
-                        <option key={month} value={month}>
-                          {getMonthLongLabel(month)}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                  <Select
+                    label="Mes Correspondiente"
+                    value={form.month}
+                    onChange={(event) => setForm((previous) => ({ ...previous, month: event.target.value }))}
+                    disabled={!canEditMonth || submitting}
+                  >
+                    {monthOptions.map((month) => (
+                      <option key={month} value={month}>
+                        {getMonthLongLabel(month)}
+                      </option>
+                    ))}
+                  </Select>
 
-                  <label className="flex flex-col gap-1 text-sm">
-                    <span className="font-medium text-slate-700">Monto (USD)</span>
-                    <input
-                      type="text"
-                      inputMode="decimal"
-                      value={form.amount}
-                      onChange={(event) => setForm((previous) => ({ ...previous, amount: event.target.value }))}
-                      className="rounded-lg border border-slate-300 px-3 py-2"
-                      disabled={submitting}
-                    />
-                  </label>
+                  <Input
+                    label="Monto Pagado (USD)"
+                    type="text"
+                    inputMode="decimal"
+                    value={form.amount}
+                    onChange={(event) => setForm((previous) => ({ ...previous, amount: event.target.value }))}
+                    disabled={submitting}
+                  />
 
-                  <label className="flex flex-col gap-1 text-sm">
-                    <span className="font-medium text-slate-700">Fecha de pago (opcional)</span>
-                    <input
-                      type="date"
-                      value={form.paidAt}
-                      onChange={(event) => setForm((previous) => ({ ...previous, paidAt: event.target.value }))}
-                      className="rounded-lg border border-slate-300 px-3 py-2"
-                      disabled={submitting}
-                    />
-                  </label>
+                  <Input
+                    label="Fecha de Ejecución (opcional)"
+                    type="date"
+                    value={form.paidAt}
+                    onChange={(event) => setForm((previous) => ({ ...previous, paidAt: event.target.value }))}
+                    disabled={submitting}
+                  />
 
-                  <label className="flex flex-col gap-1 text-sm sm:col-span-2">
-                    <span className="font-medium text-slate-700">Notas (opcional)</span>
+                  <div className="flex flex-col gap-1.5 sm:col-span-2">
+                    <label className="text-sm font-medium text-slate-700">Notas de Auditoría (opcional)</label>
                     <textarea
                       value={form.notes}
                       onChange={(event) => setForm((previous) => ({ ...previous, notes: event.target.value }))}
-                      className="min-h-24 rounded-lg border border-slate-300 px-3 py-2"
+                      className="min-h-24 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 transition-colors"
                       maxLength={500}
                       disabled={submitting}
+                      placeholder="Agrega cualquier observación relevante..."
                     />
-                  </label>
+                  </div>
+                  
+                  {(formError || lockedReason) && (
+                    <div className="sm:col-span-2 flex items-start gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50">
+                       <AlertCircle size={18} className="text-amber-600 mt-0.5 shrink-0" />
+                       <p className="text-xs font-semibold text-amber-900 leading-relaxed uppercase tracking-tighter">
+                          {formError || lockedReason}
+                       </p>
+                    </div>
+                  )}
                 </div>
 
-                {formError ? <p className="mt-3 text-sm font-medium text-rose-700">{formError}</p> : null}
-                {lockedReason ? <p className="mt-3 text-sm font-medium text-amber-700">{lockedReason}</p> : null}
-
-                <div className="mt-6 flex justify-end gap-3">
-                  <button
-                    type="button"
-                    className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                <div className="bg-slate-50 px-8 py-6 flex flex-col sm:flex-row-reverse gap-3 border-t border-slate-100">
+                  <Button
+                    onClick={handleSubmit}
+                    isLoading={submitting}
+                    disabled={Boolean(lockedReason)}
+                    className="sm:min-w-[160px]"
+                  >
+                    {submitLabel}
+                  </Button>
+                  <Button
+                    variant="ghost"
                     onClick={onClose}
                     disabled={submitting}
                   >
-                    Cancelar
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-lg bg-slate-800 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-900 disabled:opacity-60"
-                    onClick={() => {
-                      void handleSubmit();
-                    }}
-                    disabled={submitting || Boolean(lockedReason)}
-                  >
-                    {submitting ? "Guardando..." : submitLabel}
-                  </button>
+                    Descartar
+                  </Button>
                 </div>
               </DialogPanel>
             </TransitionChild>
@@ -299,3 +307,4 @@ export const ContributionModal = ({
     </Transition>
   );
 };
+
