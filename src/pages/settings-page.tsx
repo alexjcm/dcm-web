@@ -318,6 +318,7 @@ export const SettingsPage = () => {
                             size="sm"
                             icon={Edit2}
                             onClick={() => startEditingContributor(contributor)}
+                            aria-label="Editar contribuidor"
                           />
                           <Button
                             size="sm"
@@ -325,6 +326,7 @@ export const SettingsPage = () => {
                             icon={Trash2}
                             onClick={() => setPendingDeactivate(contributor)}
                             disabled={contributor.status === 0}
+                            aria-label="Desactivar contribuidor"
                           />
                         </div>
                       </td>
@@ -369,7 +371,6 @@ export const SettingsPage = () => {
                      </div>
                      <div>
                         <DialogTitle className="text-lg font-extrabold text-slate-900">Editar Perfil</DialogTitle>
-                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Ajuste de Credenciales de Acceso</p>
                      </div>
                   </div>
 

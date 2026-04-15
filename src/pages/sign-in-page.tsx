@@ -32,11 +32,6 @@ export const SignInPage = () => {
         </div>
 
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-8 shadow-2xl shadow-slate-200/50">
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-slate-900">Acceso Seguro</h2>
-            <p className="mt-1 text-sm text-slate-500 font-medium">Inicia sesión con tu cuenta autorizada para continuar.</p>
-          </div>
-
           {error ? (
             <div className="mb-6 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 animate-in slide-in-from-top-2">
               <div className="h-2 w-2 rounded-full bg-rose-500 mt-1.5 shrink-0" />
@@ -54,16 +49,10 @@ export const SignInPage = () => {
             Entrar al Sistema
           </Button>
 
-          <div className="mt-8 flex flex-col gap-4 border-t border-slate-100 pt-8">
-            <div className="flex items-center gap-3 text-xs font-bold text-slate-400 uppercase tracking-tighter">
-               <ChevronRight size={14} className="text-primary-500" />
-               Protección de Datos Grado Bancario
-            </div>
-          </div>
         </div>
 
         <p className="mt-8 text-center text-xs font-bold text-slate-400 uppercase tracking-widest">
-          &copy; {new Date().getFullYear()} DMC Contributions • v2.0
+          &copy; {new Date().getFullYear()} DMC
         </p>
       </div>
     </main>

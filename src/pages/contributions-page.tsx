@@ -275,6 +275,7 @@ export const ContributionsPage = () => {
                             icon={Edit2}
                             onClick={() => openEditModal(item)}
                             disabled={!canMutateCurrentPeriod || contributor?.status === 0}
+                            aria-label="Editar aporte"
                           />
                           <Button
                             size="sm"
@@ -282,6 +283,7 @@ export const ContributionsPage = () => {
                             icon={Trash2}
                             onClick={() => setPendingDelete(item)}
                             disabled={!canMutateCurrentPeriod || contributor?.status === 0}
+                            aria-label="Eliminar aporte"
                           />
                         </div>
                       </td>

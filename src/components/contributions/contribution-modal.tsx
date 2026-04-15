@@ -201,7 +201,6 @@ export const ContributionModal = ({
                     <DialogTitle className="text-lg font-extrabold text-slate-900">
                       {initialContribution ? "Edición de Aporte" : "Registro de Aporte"}
                     </DialogTitle>
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest">Gestión de Tesorería Familiar</p>
                   </div>
                 </div>
 

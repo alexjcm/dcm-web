@@ -63,7 +63,7 @@ export const AppNav = () => {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-tighter">
                 <Calendar size={14} className="text-slate-400" />
-                Año Fiscal
+                Año
               </div>
               <Select
                 value={activeYear}
@@ -96,6 +96,7 @@ export const AppNav = () => {
                 value={activeYear}
                 onChange={(e) => setActiveYear(Number(e.target.value))}
                 className="h-9 min-w-[80px]"
+                aria-label="Seleccionar año"
               >
                 {yearOptions.map((year) => (
                   <option key={year} value={year}>{year}</option>

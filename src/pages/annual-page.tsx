@@ -206,6 +206,13 @@ export const AnnualPage = () => {
                             canMutateCurrentPeriod && contributor.status === 1 ? "cursor-pointer hover:border-primary-300 hover:ring-2 hover:ring-primary-100" : "cursor-not-allowed opacity-60"
                           }`}
                           disabled={!canMutateCurrentPeriod || contributor.status === 0}
+                          aria-label={
+                            canMutateCurrentPeriod
+                              ? contributor.status === 0
+                                ? "Contribuidor inactivo"
+                                : "Gestionar aporte"
+                              : contributionRestrictionMessage ?? "No editable"
+                          }
                           title={
                             canMutateCurrentPeriod
                               ? contributor.status === 0
