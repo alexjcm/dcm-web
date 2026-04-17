@@ -15,7 +15,7 @@ import { useApiClient } from "../hooks/use-api-client";
 import { useContributors } from "../hooks/use-contributors";
 import { useInvalidateResources } from "../hooks/use-resource-invalidation";
 import { useSettings } from "../hooks/use-settings";
-import { formatCentsAsInputValue, parseMoneyInputToCents } from "../lib/money";
+import { formatCentsAsInputValue, parseMoneyInputToCents, sanitizeMoneyInput } from "../lib/money";
 import { RESOURCE_KEYS } from "../lib/resource-invalidation";
 import type { Contributor } from "../types/domain";
 
@@ -215,7 +215,7 @@ export const SettingsPage = () => {
       return;
     }
 
-    toast.success("Contribuidor creado.");
+    toast.success("Contribuyente creado.");
     setNewContributor(emptyContributorDraft);
     setIsCreateContributorOpen(false);
     invalidateResources(RESOURCE_KEYS.contributors, RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
@@ -253,7 +253,7 @@ export const SettingsPage = () => {
       return;
     }
 
-    toast.success("Contribuidor actualizado.");
+    toast.success("Contribuyente actualizado.");
     setEditingContributor(null);
     invalidateResources(RESOURCE_KEYS.contributors, RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
   };
@@ -274,7 +274,7 @@ export const SettingsPage = () => {
       return;
     }
 
-    toast.success("Contribuidor desactivado.");
+    toast.success("Contribuyente desactivado.");
     setPendingDeactivate(null);
     invalidateResources(RESOURCE_KEYS.contributors, RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
   };
@@ -287,7 +287,7 @@ export const SettingsPage = () => {
         </div>
         <div>
           <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Panel de Administración</h2>
-          <p className="text-sm text-slate-500">Configuración avanzada de plataforma y gestión de activos.</p>
+          <p className="mt-1 text-sm text-slate-500">Configura el monto base y administra el directorio de contribuyentes.</p>
         </div>
       </header>
 
@@ -311,9 +311,9 @@ export const SettingsPage = () => {
                     type="text"
                     inputMode="decimal"
                     value={amountInput}
-                    onChange={(event) => setAmountInput(event.target.value)}
+                    onChange={(event) => setAmountInput(sanitizeMoneyInput(event.target.value))}
                   />
-                  <Button icon={Save} onClick={saveMonthlyAmount} isLoading={savingAmount} className="w-full">
+                  <Button icon={Save} onClick={saveMonthlyAmount} isLoading={savingAmount} className="w-full sm:w-auto">
                     Actualizar Monto
                   </Button>
                 </>
@@ -328,11 +328,11 @@ export const SettingsPage = () => {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2">
                   <Users size={18} className="text-primary-600" />
-                  Directorio de Contribuidores
+                  Directorio de Contribuyentes
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="rounded bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                    {sortedContributors.length} Registros
+                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-500">
+                    {sortedContributors.length} registros
                   </span>
                   <Button
                     size="sm"
@@ -342,7 +342,7 @@ export const SettingsPage = () => {
                       setIsCreateContributorOpen(true);
                     }}
                   >
-                    Nuevo contribuidor
+                    Nuevo contribuyente
                   </Button>
                 </div>
               </div>
@@ -353,39 +353,34 @@ export const SettingsPage = () => {
               <table className="w-full text-sm">
                 <thead className="border-b border-slate-100 bg-slate-50/50">
                   <tr>
-                    <th className="px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-slate-600">Identidad</th>
-                    <th className="px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-slate-600">Estado</th>
-                    <th className="px-6 py-4 text-right text-[11px] font-bold uppercase tracking-wider text-slate-600">Acciones</th>
+                    <th className="px-6 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-600">Identidad</th>
+                    <th className="px-6 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-600">Estado</th>
+                    <th className="px-6 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-slate-600">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {sortedContributors.map((contributor) => (
                     <tr key={contributor.id} className="group transition-colors hover:bg-slate-50/50">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl border border-primary-100 bg-primary-50 font-bold text-primary-700 transition-colors group-hover:bg-primary-100">
-                            {contributor.name.charAt(0)}
-                          </div>
-                          <div>
-                            <div className="font-bold leading-tight text-slate-900">{contributor.name}</div>
-                            <div className="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-400">
-                              <Mail size={10} />
-                              {contributor.email ?? "Sin correo"}
-                            </div>
+                      <td className="px-6 py-3.5">
+                        <div>
+                          <div className="font-bold leading-tight text-slate-900">{contributor.name}</div>
+                          <div className="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-slate-400">
+                            <Mail size={10} />
+                            {contributor.email ?? "Sin correo"}
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-3.5">
                         <ContributorStatusBadge status={contributor.status} />
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-end gap-2 opacity-100 transition-opacity lg:opacity-0 lg:group-hover:opacity-100">
+                      <td className="px-6 py-3.5">
+                        <div className="flex justify-end gap-2">
                           <Button
                             variant="outline"
                             size="sm"
                             icon={Edit2}
                             onClick={() => startEditingContributor(contributor)}
-                            aria-label="Editar contribuidor"
+                            aria-label="Editar contribuyente"
                           />
                           <Button
                             size="sm"
@@ -393,7 +388,7 @@ export const SettingsPage = () => {
                             icon={Trash2}
                             onClick={() => setPendingDeactivate(contributor)}
                             disabled={contributor.status === 0}
-                            aria-label="Desactivar contribuidor"
+                            aria-label="Desactivar contribuyente"
                           />
                         </div>
                       </td>
@@ -408,7 +403,7 @@ export const SettingsPage = () => {
 
       <ContributorModal
         open={isCreateContributorOpen}
-        title="Nuevo Contribuidor"
+        title="Nuevo Contribuyente"
         submitLabel="Registrar"
         draft={newContributor}
         submitting={savingContributor}
@@ -422,7 +417,7 @@ export const SettingsPage = () => {
 
       <ContributorModal
         open={Boolean(editingContributor)}
-        title="Editar Contribuidor"
+        title="Editar Contribuyente"
         submitLabel="Guardar cambios"
         draft={editDraft}
         submitting={savingContributor}
@@ -433,8 +428,8 @@ export const SettingsPage = () => {
 
       <ConfirmModal
         open={Boolean(pendingDeactivate)}
-        title="Desactivar contribuidor"
-        description={pendingDeactivate ? `Se desactivará a ${pendingDeactivate.name}. No podrá realizar nuevos aportes pero se conserva su historial.` : ""}
+        title="Desactivar contribuyente"
+        description={pendingDeactivate ? `Se desactivará a ${pendingDeactivate.name}. No podrá realizar nuevos aportes, pero se conserva su historial.` : ""}
         confirmLabel="Desactivar"
         danger
         loading={deactivating}

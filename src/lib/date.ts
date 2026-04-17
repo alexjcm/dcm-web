@@ -6,7 +6,7 @@ export const getMonthLabel = (month: number): string => {
     return "Mes";
   }
 
-  return MONTH_FORMATTER.format(new Date(Date.UTC(2026, month - 1, 1))).replace(".", "");
+  return MONTH_FORMATTER.format(new Date(Date.UTC(2026, month - 1, 1, 12))).replace(".", "");
 };
 
 export const getMonthLongLabel = (month: number): string => {
@@ -14,6 +14,6 @@ export const getMonthLongLabel = (month: number): string => {
     return "Mes";
   }
 
-  const label = MONTH_LONG_FORMATTER.format(new Date(Date.UTC(2026, month - 1, 1)));
+  const label = MONTH_LONG_FORMATTER.format(new Date(Date.UTC(2026, month - 1, 1, 12)));
   return label.charAt(0).toUpperCase() + label.slice(1);
 };

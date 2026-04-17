@@ -1,26 +1,47 @@
 import { useMemo } from "react";
-import { 
-  TrendingUp, 
-  Target, 
-  Scale, 
-  Users,
-  ArrowUpRight,
-  ChevronRight
-} from "lucide-react";
+import { TrendingUp, Scale, ChevronRight } from "lucide-react";
 
 import { SectionLoader } from "../components/ui/loaders";
-import { ContributionStateBadge, ContributorStatusBadge } from "../components/ui/state-badge";
+import { ContributionStateBadge } from "../components/ui/state-badge";
 import { useAppContext } from "../context/app-context";
 import { formatCentsAsCurrency } from "../lib/money";
 import { useSummary } from "../hooks/use-summary";
 import { Card } from "../components/ui/card";
+import type { ContributionState } from "../types/domain";
+
+const getStatePriority = (state: ContributionState): number => {
+  switch (state) {
+    case "pending":
+      return 0;
+    case "incomplete":
+      return 1;
+    case "overpaid":
+      return 2;
+    case "complete":
+      return 3;
+    default:
+      return 4;
+  }
+};
 
 export const DashboardPage = () => {
   const { activeYear } = useAppContext();
   const summary = useSummary(activeYear);
 
   const contributors = useMemo(() => {
-    return [...(summary.data?.contributors ?? [])].sort((left, right) => left.name.localeCompare(right.name, "es"));
+    return [...(summary.data?.contributors ?? [])].sort((left, right) => {
+      const stateDiff = getStatePriority(left.state) - getStatePriority(right.state);
+
+      if (stateDiff !== 0) {
+        return stateDiff;
+      }
+
+      if (left.status !== right.status) {
+        return right.status - left.status;
+      }
+
+      return left.name.localeCompare(right.name, "es");
+    });
   }, [summary.data]);
 
   if (summary.loading && !summary.data) {
@@ -40,6 +61,32 @@ export const DashboardPage = () => {
   }
 
   const { totals } = summary.data;
+  const pendingCount = contributors.filter((item) => item.state === "pending").length;
+  const incompleteCount = contributors.filter((item) => item.state === "incomplete").length;
+  const completeCount = contributors.filter((item) => item.state === "complete").length;
+  const overpaidCount = contributors.filter((item) => item.state === "overpaid").length;
+  const operationalStats = [
+    {
+      label: "Pendientes",
+      value: pendingCount,
+      className: "bg-slate-100 text-slate-600"
+    },
+    {
+      label: "Incompletos",
+      value: incompleteCount,
+      className: "bg-amber-50 text-amber-700"
+    },
+    {
+      label: "Completos",
+      value: completeCount,
+      className: "bg-emerald-50 text-emerald-700"
+    },
+    {
+      label: "Excedentes",
+      value: overpaidCount,
+      className: "bg-indigo-50 text-indigo-700"
+    }
+  ].filter((item) => item.value > 0);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -50,69 +97,47 @@ export const DashboardPage = () => {
           {summary.data.year}
         </div>
         <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">Dashboard de Aportes</h2>
-        <p className="mt-1 text-sm text-slate-500">Estado general, flujo de caja y seguimiento de contribuidores.</p>
+        <p className="mt-1 text-sm text-slate-500">Resumen anual y prioridades operativas.</p>
       </header>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-3 opacity-10">
-            <TrendingUp size={48} className="text-primary-600" />
+      <Card className="relative overflow-hidden" bodyClassName="p-4 sm:p-6">
+        <div className="absolute right-4 top-4 hidden opacity-10 sm:block">
+          <div className="flex items-center gap-3 text-slate-400">
+            <TrendingUp size={38} className="text-primary-600" />
+            <Scale size={38} className="text-amber-600" />
           </div>
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Recaudado</p>
-          <div className="mt-3 flex items-baseline gap-2">
-            <p className="text-2xl font-extrabold text-slate-900">{formatCentsAsCurrency(totals.collectedCents)}</p>
-            <span className="flex items-center text-xs font-bold text-emerald-600">
-              <ArrowUpRight size={14} />
-              Actual
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 sm:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)] sm:items-start">
+          <div>
+            <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Pendiente por cubrir</p>
+            <p className="mt-1.5 text-xl font-extrabold text-slate-900 sm:text-3xl">{formatCentsAsCurrency(Math.abs(totals.differenceCents))}</p>
+            <p className="mt-1 text-[11px] font-medium text-slate-400">Meta anual: {formatCentsAsCurrency(totals.expectedCents)}</p>
+          </div>
+
+          <div className="rounded-xl border border-slate-100 bg-slate-50/70 px-3 py-2.5 sm:rounded-2xl sm:px-4 sm:py-3">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500">Recaudado</p>
+            <p className="mt-1.5 text-xl font-extrabold text-slate-900 sm:text-2xl">{formatCentsAsCurrency(totals.collectedCents)}</p>
+            <p className="mt-0.5 text-[11px] font-medium text-slate-400">Acumulado del año</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card header="Avance Operativo por Contribuyente" bodyClassName="p-0">
+        <div className="flex flex-wrap items-center gap-3 border-b border-slate-100 bg-white px-6 py-3">
+          {operationalStats.map((item) => (
+            <span key={item.label} className={`rounded-full px-3 py-1 text-[11px] font-semibold ${item.className}`}>
+              {item.label}: {item.value}
             </span>
-          </div>
-        </Card>
-
-        <Card className="relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-3 opacity-10">
-            <Target size={48} className="text-indigo-600" />
-          </div>
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Esperado</p>
-          <div className="mt-3">
-            <p className="text-2xl font-extrabold text-slate-900">{formatCentsAsCurrency(totals.expectedCents)}</p>
-            <p className="text-[10px] font-medium text-slate-400 mt-1 italic">Meta anual del período</p>
-          </div>
-        </Card>
-
-        <Card className="relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-3 opacity-10">
-            <Scale size={48} className="text-amber-600" />
-          </div>
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Diferencia</p>
-          <div className="mt-3">
-            <p className="text-2xl font-extrabold text-slate-900">{formatCentsAsCurrency(totals.differenceCents)}</p>
-            <p className="text-[10px] font-medium text-slate-400 mt-1 italic">Balance de aportes</p>
-          </div>
-        </Card>
-
-        <Card className="relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-3 opacity-10">
-            <Users size={48} className="text-slate-600" />
-          </div>
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Contribuidores</p>
-          <div className="mt-3">
-            <p className="text-2xl font-extrabold text-slate-900">{totals.contributorsCount}</p>
-            <p className="text-xs font-medium text-slate-500 mt-1">
-              <span className="text-primary-600">{totals.activeContributorsCount} activos</span> · {totals.inactiveContributorsCount} inactivos
-            </p>
-          </div>
-        </Card>
-      </div>
-
-      <Card header="Avance Detallado por Contribuidor" bodyClassName="p-0">
+          ))}
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="border-b border-slate-100 bg-slate-50/50">
               <tr>
-                <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-slate-600 text-[11px]">Contribuidor</th>
+                <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-slate-600 text-[11px]">Contribuyente</th>
                 <th className="px-6 py-4 text-left font-bold uppercase tracking-wider text-slate-600 text-[11px]">Estado</th>
                 <th className="px-6 py-4 text-right font-bold uppercase tracking-wider text-slate-600 text-[11px]">Pagado</th>
-                <th className="px-6 py-4 text-right font-bold uppercase tracking-wider text-slate-600 text-[11px]">Esperado</th>
                 <th className="px-6 py-4 text-right font-bold uppercase tracking-wider text-slate-600 text-[11px]">Balance</th>
                 <th className="px-6 py-4 text-right font-bold uppercase tracking-wider text-slate-600 text-[11px]">Progreso Anual</th>
               </tr>
@@ -121,15 +146,11 @@ export const DashboardPage = () => {
               {contributors.map((item) => (
                 <tr key={item.contributorId} className="group hover:bg-slate-50/80 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-primary-700 group-hover:bg-primary-100 group-hover:text-primary-800 transition-colors">
-                        {item.name.charAt(0)}
+                    <div>
+                      <div className="text-sm font-bold text-slate-900">
+                        {item.name}
                       </div>
                       <div>
-                        <div className="flex items-center gap-2 text-sm font-bold text-slate-900">
-                          {item.name}
-                          <ContributorStatusBadge status={item.status} />
-                        </div>
                         {item.email && <p className="text-xs text-slate-400">{item.email}</p>}
                       </div>
                     </div>
@@ -138,7 +159,6 @@ export const DashboardPage = () => {
                     <ContributionStateBadge state={item.state} />
                   </td>
                   <td className="px-6 py-4 text-right font-extrabold text-slate-900">{formatCentsAsCurrency(item.totalPaidCents)}</td>
-                  <td className="px-6 py-4 text-right text-slate-500">{formatCentsAsCurrency(item.expectedCents)}</td>
                   <td className={`px-6 py-4 text-right font-semibold ${item.differenceCents < 0 ? 'text-rose-600' : 'text-emerald-600'}`}>
                     {formatCentsAsCurrency(item.differenceCents)}
                   </td>
@@ -162,4 +182,3 @@ export const DashboardPage = () => {
     </div>
   );
 };
-

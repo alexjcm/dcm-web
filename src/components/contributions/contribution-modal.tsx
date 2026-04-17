@@ -4,7 +4,7 @@ import { ReceiptText, AlertCircle } from "lucide-react";
 
 import type { Contribution, Contributor } from "../../types/domain";
 import { getMonthLongLabel } from "../../lib/date";
-import { formatCentsAsInputValue, parseMoneyInputToCents } from "../../lib/money";
+import { formatCentsAsInputValue, parseMoneyInputToCents, sanitizeMoneyInput } from "../../lib/money";
 import { Button } from "../ui/button";
 import { Input, Select } from "../ui/fields";
 
@@ -13,7 +13,6 @@ export type ContributionPayload = {
   year: number;
   month: number;
   amountCents: number;
-  notes: string | null;
 };
 
 type ContributionModalProps = {
@@ -36,7 +35,6 @@ type FormState = {
   year: string;
   month: string;
   amount: string;
-  notes: string;
 };
 
 const monthOptions = Array.from({ length: 12 }, (_, index) => index + 1);
@@ -50,8 +48,7 @@ const buildInitialState = (
     contributorId: String(params.fixedContributorId ?? source?.contributorId ?? ""),
     year: String(source?.year ?? params.defaultYear),
     month: String(params.fixedMonth ?? source?.month ?? params.defaultMonth),
-    amount: formatCentsAsInputValue(source?.amountCents ?? params.monthlyAmountCents),
-    notes: source?.notes ?? ""
+    amount: formatCentsAsInputValue(source?.amountCents ?? params.monthlyAmountCents)
   };
 };
 
@@ -121,7 +118,7 @@ export const ContributionModal = ({
     const amountCents = parseMoneyInputToCents(form.amount);
 
     if (!Number.isInteger(contributorId) || contributorId < 1) {
-      setFormError("Selecciona un contribuidor válido.");
+      setFormError("Selecciona un contribuyente válido.");
       return;
     }
 
@@ -144,8 +141,7 @@ export const ContributionModal = ({
       contributorId,
       year,
       month,
-      amountCents,
-      notes: form.notes.trim() ? form.notes.trim() : null
+      amountCents
     });
   };
 
@@ -189,7 +185,7 @@ export const ContributionModal = ({
 
                 <div className="p-8 grid gap-6 sm:grid-cols-2">
                   <Select
-                    label="Contribuidor"
+                    label="Contribuyente"
                     value={form.contributorId}
                     onChange={(event) => setForm((previous) => ({ ...previous, contributorId: event.target.value }))}
                     disabled={!canEditContributor || submitting}
@@ -232,21 +228,11 @@ export const ContributionModal = ({
                     type="text"
                     inputMode="decimal"
                     value={form.amount}
-                    onChange={(event) => setForm((previous) => ({ ...previous, amount: event.target.value }))}
+                    onChange={(event) =>
+                      setForm((previous) => ({ ...previous, amount: sanitizeMoneyInput(event.target.value) }))
+                    }
                     disabled={submitting}
                   />
-
-                  <div className="flex flex-col gap-1.5 sm:col-span-2">
-                    <label className="text-sm font-medium text-slate-700">Notas de Auditoría (opcional)</label>
-                    <textarea
-                      value={form.notes}
-                      onChange={(event) => setForm((previous) => ({ ...previous, notes: event.target.value }))}
-                      className="min-h-24 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 transition-colors"
-                      maxLength={500}
-                      disabled={submitting}
-                      placeholder="Agrega cualquier observación relevante..."
-                    />
-                  </div>
                   
                   {(formError || lockedReason) && (
                     <div className="sm:col-span-2 flex items-start gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50">

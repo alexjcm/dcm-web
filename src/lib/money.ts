@@ -11,6 +11,18 @@ export const formatCentsAsInputValue = (amountCents: number): string => {
   return (amountCents / 100).toFixed(2);
 };
 
+export const sanitizeMoneyInput = (value: string): string => {
+  const normalized = value.replace(/,/g, ".").replace(/[^\d.]/g, "");
+  const [wholePart = "", ...decimalParts] = normalized.split(".");
+  const decimalPart = decimalParts.join("").slice(0, 2);
+
+  if (normalized.includes(".")) {
+    return decimalPart.length > 0 ? `${wholePart}.${decimalPart}` : `${wholePart}.`;
+  }
+
+  return wholePart;
+};
+
 export const parseMoneyInputToCents = (value: string): number | null => {
   const normalized = value.trim().replace(/,/g, "");
 

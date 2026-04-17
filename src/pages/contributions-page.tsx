@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Edit2, Filter, Plus, ReceiptText, Trash2, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Edit2, Plus, ReceiptText, Trash2, X } from "lucide-react";
 
 import { ContributionModal, type ContributionPayload } from "../components/contributions/contribution-modal";
 import { Button } from "../components/ui/button";
@@ -8,10 +8,9 @@ import { Card } from "../components/ui/card";
 import { ConfirmModal } from "../components/ui/confirm-modal";
 import { Select } from "../components/ui/fields";
 import { SectionLoader } from "../components/ui/loaders";
-import { ContributorStatusBadge } from "../components/ui/state-badge";
 import { useAppContext } from "../context/app-context";
 import { useApiClient } from "../hooks/use-api-client";
-import { useContributionsYearAll } from "../hooks/use-contributions-year-all";
+import { useContributionsYearsAll } from "../hooks/use-contributions-years-all";
 import { useContributors } from "../hooks/use-contributors";
 import { useInvalidateResources } from "../hooks/use-resource-invalidation";
 import { useSettings } from "../hooks/use-settings";
@@ -34,6 +33,13 @@ type ContributionsMonthGroup = {
   items: Contribution[];
 };
 
+type ContributionsYearGroup = {
+  year: number;
+  months: ContributionsMonthGroup[];
+};
+
+const MIN_YEAR_WITH_DATA = 2023;
+
 const formatPeriodLabel = (month: number, year: number): string =>
   `${getMonthLabel(month).replace(/^./, (value) => value.toUpperCase())}/${year}`;
 
@@ -41,13 +47,13 @@ export const ContributionsPage = () => {
   const { activeYear, canMutateCurrentPeriod, contributionRestrictionMessage } = useAppContext();
   const api = useApiClient();
   const invalidateResources = useInvalidateResources();
+  const currentBusinessMonth = getCurrentBusinessMonth();
 
   const contributors = useContributors("all");
   const settings = useSettings();
-  const contributions = useContributionsYearAll(activeYear);
 
   const [contributorIdFilter, setContributorIdFilter] = useState<number | null>(null);
-  const [filtersOpen, setFiltersOpen] = useState<boolean>(true);
+  const [loadedYears, setLoadedYears] = useState<number[]>([activeYear]);
   const [openMonths, setOpenMonths] = useState<Record<string, boolean>>({});
 
   const [editState, setEditState] = useState<EditState>({ contribution: null, open: false });
@@ -55,6 +61,13 @@ export const ContributionsPage = () => {
 
   const [pendingDelete, setPendingDelete] = useState<Contribution | null>(null);
   const [deleting, setDeleting] = useState<boolean>(false);
+
+  const contributions = useContributionsYearsAll(loadedYears);
+
+  useEffect(() => {
+    setLoadedYears([activeYear]);
+    setOpenMonths({});
+  }, [activeYear]);
 
   const contributorById = useMemo(() => {
     const map = new Map<number, Contributor>();
@@ -74,60 +87,91 @@ export const ContributionsPage = () => {
     return contributorOptions.filter((contributor) => contributor.status === 1);
   }, [contributorOptions]);
 
-  const filteredItems = useMemo(() => {
-    const items = contributions.data?.items ?? [];
+  const yearGroups = useMemo<ContributionsYearGroup[]>(() => {
+    const itemsByYear = contributions.data?.itemsByYear ?? {};
 
-    if (contributorIdFilter === null) {
-      return items;
-    }
+    return [...loadedYears]
+      .sort((left, right) => right - left)
+      .map((year) => {
+        const yearItems = itemsByYear[year] ?? [];
+        const filteredYearItems =
+          contributorIdFilter === null
+            ? yearItems
+            : yearItems.filter((item) => item.contributorId === contributorIdFilter);
 
-    return items.filter((item) => item.contributorId === contributorIdFilter);
-  }, [contributions.data, contributorIdFilter]);
+        const months = new Map<string, ContributionsMonthGroup>();
 
-  const monthGroups = useMemo<ContributionsMonthGroup[]>(() => {
-    const groups = new Map<string, ContributionsMonthGroup>();
+        for (const item of filteredYearItems) {
+          const key = `${item.year}-${String(item.month).padStart(2, "0")}`;
+          const existing = months.get(key);
 
-    for (const item of filteredItems) {
-      const key = `${item.year}-${String(item.month).padStart(2, "0")}`;
-      const existing = groups.get(key);
+          if (existing) {
+            existing.items.push(item);
+            continue;
+          }
 
-      if (existing) {
-        existing.items.push(item);
-        continue;
-      }
+          months.set(key, {
+            key,
+            label: formatPeriodLabel(item.month, item.year),
+            month: item.month,
+            year: item.year,
+            items: [item]
+          });
+        }
 
-      groups.set(key, {
-        key,
-        label: formatPeriodLabel(item.month, item.year),
-        month: item.month,
-        year: item.year,
-        items: [item]
-      });
-    }
+        if (year === activeYear && !months.has(`${year}-${String(currentBusinessMonth).padStart(2, "0")}`)) {
+          months.set(`${year}-${String(currentBusinessMonth).padStart(2, "0")}`, {
+            key: `${year}-${String(currentBusinessMonth).padStart(2, "0")}`,
+            label: formatPeriodLabel(currentBusinessMonth, year),
+            month: currentBusinessMonth,
+            year,
+            items: []
+          });
+        }
 
-    return Array.from(groups.values()).sort((left, right) => {
-      if (left.year !== right.year) {
-        return right.year - left.year;
-      }
+        const sortedMonths = Array.from(months.values()).sort((left, right) => {
+          if (year === activeYear) {
+            const leftIsCurrent = left.month === currentBusinessMonth;
+            const rightIsCurrent = right.month === currentBusinessMonth;
 
-      return right.month - left.month;
-    });
-  }, [filteredItems]);
+            if (leftIsCurrent && !rightIsCurrent) {
+              return -1;
+            }
+
+            if (!leftIsCurrent && rightIsCurrent) {
+              return 1;
+            }
+          }
+
+          return right.month - left.month;
+        });
+
+        return {
+          year,
+          months: sortedMonths
+        };
+      })
+      .filter((group) => group.months.length > 0);
+  }, [activeYear, contributions.data, contributorIdFilter, currentBusinessMonth, loadedYears]);
 
   const hasActiveFilters = contributorIdFilter !== null;
+  const oldestLoadedYear = Math.min(...loadedYears);
+  const canLoadPreviousYear = oldestLoadedYear > MIN_YEAR_WITH_DATA;
 
-  const isMonthOpen = (group: ContributionsMonthGroup, index: number) => {
+  const isMonthOpen = (group: ContributionsMonthGroup) => {
     const explicitState = openMonths[group.key];
 
     if (explicitState !== undefined) {
       return explicitState;
     }
 
-    if (index === 0) {
+    const isCurrentMonthOfActiveYear = group.year === activeYear && group.month === currentBusinessMonth;
+
+    if (isCurrentMonthOfActiveYear) {
       return true;
     }
 
-    return group.month === getCurrentBusinessMonth() && group.year === activeYear;
+    return false;
   };
 
   const toggleMonth = (key: string, nextValue: boolean) => {
@@ -155,7 +199,7 @@ export const ContributionsPage = () => {
     }
 
     if (contributorStatus === 0) {
-      toast.info("Contribuidor inactivo: este aporte no es editable.");
+      toast.info("Contribuyente inactivo: este aporte no es editable.");
       return;
     }
 
@@ -202,6 +246,26 @@ export const ContributionsPage = () => {
     invalidateResources(RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
   };
 
+  const handleLoadPreviousYear = () => {
+    if (!canLoadPreviousYear) {
+      return;
+    }
+
+    const previousYear = oldestLoadedYear - 1;
+
+    setLoadedYears((current) => {
+      if (current.includes(previousYear)) {
+        return current;
+      }
+
+      return [...current, previousYear];
+    });
+  };
+
+  const totalVisibleItems = yearGroups.reduce((total, yearGroup) => {
+    return total + yearGroup.months.reduce((monthsTotal, monthGroup) => monthsTotal + monthGroup.items.length, 0);
+  }, 0);
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -210,7 +274,8 @@ export const ContributionsPage = () => {
             <ReceiptText size={24} />
           </div>
           <div>
-            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Listado de Aportes</h2>
+            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Registro de Aportes</h2>
+            <p className="mt-1 text-sm text-slate-500">Gestión detallada por mes para crear, corregir y eliminar aportes del período.</p>
           </div>
         </div>
 
@@ -224,165 +289,180 @@ export const ContributionsPage = () => {
         </Button>
       </header>
 
-      <Card className="p-4" bodyClassName="p-0">
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-500">Filtros</p>
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
+      <Card bodyClassName="p-4">
+        <div className="grid gap-3 sm:grid-cols-[minmax(240px,320px)_auto] sm:items-end sm:justify-between">
+          <div className="grid gap-3 sm:grid-cols-[minmax(220px,320px)_auto] sm:items-end">
+            <Select
+              label="Contribuyente"
+              value={contributorIdFilter ?? ""}
+              onChange={(event) => setContributorIdFilter(event.target.value ? Number(event.target.value) : null)}
+              className="h-10"
+            >
+              <option value="">Todos los contribuyentes</option>
+              {contributorOptions.map((contributor) => (
+                <option key={contributor.id} value={contributor.id}>
+                  {contributor.name}
+                </option>
+              ))}
+            </Select>
+
+            <div className="flex gap-2 sm:pb-0.5">
               {hasActiveFilters ? (
                 <Button
                   variant="ghost"
                   size="sm"
                   icon={X}
                   onClick={() => setContributorIdFilter(null)}
-                  className="justify-center"
-                >
-                  Limpiar filtros
-                </Button>
+                  aria-label="Limpiar filtro"
+                />
               ) : null}
-              <Button
-                variant="outline"
-                size="sm"
-                icon={Filter}
-                onClick={() => setFiltersOpen((previous) => !previous)}
-                className="justify-center sm:min-w-[140px]"
-              >
-                {filtersOpen ? "Ocultar filtros" : "Más filtros"}
-              </Button>
             </div>
           </div>
 
-          {filtersOpen ? (
-            <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-              <Select
-                label="Filtrar por Contribuidor"
-                value={contributorIdFilter ?? ""}
-                onChange={(event) => setContributorIdFilter(event.target.value ? Number(event.target.value) : null)}
-              >
-                <option value="">Todos los contribuidores</option>
-                {contributorOptions.map((contributor) => (
-                  <option key={contributor.id} value={contributor.id}>
-                    {contributor.name}
-                  </option>
-                ))}
-              </Select>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
-                <span className="font-semibold text-slate-900">Año activo:</span> {activeYear}
-              </div>
-            </div>
-          ) : null}
+          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 sm:justify-self-end">
+            <span className="font-semibold text-slate-900">Mes actual:</span> {formatPeriodLabel(currentBusinessMonth, activeYear)}
+          </div>
         </div>
       </Card>
 
-      {contributions.loading && !contributions.data ? <SectionLoader label="Cargando aportes..." /> : null}
+      {contributions.loading && !contributions.data ? <SectionLoader label="Cargando registro de aportes..." /> : null}
       {contributions.error ? (
         <div className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm font-medium text-rose-800 animate-in fade-in">
           No se pudo cargar el listado: {contributions.error}
         </div>
       ) : null}
 
-      {contributions.data && monthGroups.length === 0 ? (
+      {contributions.data && totalVisibleItems === 0 ? (
         <Card>
           <div className="py-8 text-center">
             <p className="text-base font-bold text-slate-900">
               {hasActiveFilters ? "No hay aportes para el filtro aplicado." : "No hay aportes registrados para este año."}
             </p>
             <p className="mt-2 text-sm text-slate-500">
-              {hasActiveFilters ? "Prueba con otro contribuidor o limpia el filtro." : "Registra un aporte para comenzar a poblar el historial."}
+              {hasActiveFilters
+                ? "Prueba con otro contribuyente o limpia el filtro."
+                : canLoadPreviousYear
+                  ? "Puedes cargar años anteriores o registrar un aporte para comenzar a poblar el historial."
+                  : "Registra un aporte para comenzar a poblar el historial."}
             </p>
           </div>
         </Card>
       ) : null}
 
-      {monthGroups.map((group, index) => {
-        const expanded = isMonthOpen(group, index);
+      {yearGroups.map((yearGroup) => (
+        <section key={yearGroup.year} className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-extrabold text-slate-900">Aportes {yearGroup.year}</h3>
+            </div>
+          </div>
 
-        return (
-          <Card key={group.key} bodyClassName="p-0">
-            <button
-              type="button"
-              onClick={() => toggleMonth(group.key, !expanded)}
-              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50"
-            >
-              <div>
-                <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-500">Período</p>
-                <h3 className="mt-1 text-xl font-extrabold text-slate-900">{group.label}</h3>
-              </div>
-              <span className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600">
-                {expanded ? "Ocultar" : "Ver aportes"}
-              </span>
-            </button>
+          {yearGroup.months.map((group) => {
+            const expanded = isMonthOpen(group);
+            const isCurrentMonth = group.year === activeYear && group.month === currentBusinessMonth;
 
-            {expanded ? (
-              <div className="border-t border-slate-100 p-4 sm:p-5">
-                <div className="space-y-3">
-                  {group.items.map((item) => {
-                    const contributor = contributorById.get(item.contributorId);
+            return (
+              <Card key={group.key} bodyClassName="p-0">
+                <button
+                  type="button"
+                  onClick={() => toggleMonth(group.key, !expanded)}
+                  className="flex w-full items-center justify-between gap-4 px-5 py-2.5 text-left transition-colors hover:bg-slate-50"
+                >
+                  <div className="flex items-center gap-3">
+                    <p className="text-base font-extrabold text-slate-900">{group.label}</p>
+                    {isCurrentMonth ? (
+                      <span className="rounded-full bg-primary-50 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-primary-700">
+                        Actual
+                      </span>
+                    ) : null}
+                  </div>
+                  <span className="flex items-center text-slate-500">
+                    {expanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                  </span>
+                </button>
 
-                    return (
-                      <article
-                        key={item.id}
-                        className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-slate-300"
-                      >
-                        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                          <div className="min-w-0">
-                            <div className="flex items-start gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold text-slate-700">
-                                {item.contributorName.charAt(0)}
-                              </div>
-                              <div className="min-w-0">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  <p className="truncate text-base font-bold text-slate-900">{item.contributorName}</p>
-                                  {contributor ? <ContributorStatusBadge status={contributor.status} /> : null}
+                {expanded ? (
+                  <div className="border-t border-slate-100">
+                    {group.items.length === 0 ? (
+                      <div className="px-5 py-4 text-sm text-slate-500">
+                        No hay aportes registrados en {group.label}.
+                      </div>
+                    ) : null}
+                    <div className="divide-y divide-slate-100">
+                      {group.items.map((item) => {
+                        const contributor = contributorById.get(item.contributorId);
+
+                        return (
+                          <article
+                            key={item.id}
+                            className="grid gap-2 px-4 py-2.5 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:px-5"
+                          >
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-3">
+                                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700">
+                                  {item.contributorName.charAt(0)}
                                 </div>
-                                <p className="mt-2 text-lg font-extrabold text-slate-900">{formatCentsAsCurrency(item.amountCents)}</p>
-                                {item.notes ? <p className="mt-2 text-sm leading-relaxed text-slate-500">{item.notes}</p> : null}
+                                <div className="min-w-0">
+                                  <p className="truncate text-sm font-bold text-slate-900">{item.contributorName}</p>
+                                </div>
                               </div>
                             </div>
-                          </div>
 
-                          <div className="flex gap-2 md:shrink-0">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              icon={Edit2}
-                              onClick={() => openEditModal(item)}
-                              disabled={!canMutateCurrentPeriod || contributor?.status === 0}
-                              className="flex-1 md:flex-none"
-                            >
-                              Editar
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="danger"
-                              icon={Trash2}
-                              onClick={() => setPendingDelete(item)}
-                              disabled={!canMutateCurrentPeriod || contributor?.status === 0}
-                              className="flex-1 md:flex-none"
-                            >
-                              Eliminar
-                            </Button>
-                          </div>
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              </div>
-            ) : null}
-          </Card>
-        );
-      })}
+                            <div className="text-sm font-extrabold text-slate-900 sm:min-w-[110px] sm:text-right">
+                              {formatCentsAsCurrency(item.amountCents)}
+                            </div>
+
+                            <div className="flex gap-2 sm:justify-end">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                icon={Edit2}
+                                onClick={() => openEditModal(item)}
+                                disabled={!canMutateCurrentPeriod || contributor?.status === 0}
+                                aria-label={`Editar aporte de ${item.contributorName}`}
+                                className="px-2.5"
+                              />
+                              <Button
+                                size="sm"
+                                variant="danger"
+                                icon={Trash2}
+                                onClick={() => setPendingDelete(item)}
+                                disabled={!canMutateCurrentPeriod || contributor?.status === 0}
+                                aria-label={`Eliminar aporte de ${item.contributorName}`}
+                                className="px-2.5"
+                              />
+                            </div>
+                          </article>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ) : null}
+              </Card>
+            );
+          })}
+        </section>
+      ))}
+
+      {contributions.data ? (
+        <div className="flex justify-center pt-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLoadPreviousYear}
+            disabled={!canLoadPreviousYear || contributions.loading}
+          >
+            {canLoadPreviousYear ? `Cargar ${oldestLoadedYear - 1}` : "Sin más años"}
+          </Button>
+        </div>
+      ) : null}
 
       <ContributionModal
         open={editState.open}
         contributors={activeContributorOptions}
         monthlyAmountCents={settings.monthlyAmountCents}
         defaultYear={activeYear}
-        defaultMonth={getCurrentBusinessMonth()}
+        defaultMonth={currentBusinessMonth}
         initialContribution={editState.contribution}
         lockedReason={canMutateCurrentPeriod ? null : contributionRestrictionMessage}
         submitting={submitting}

@@ -40,7 +40,7 @@ export const AppNav = () => {
   const canManageSettings = hasPermission(APP_PERMISSIONS.settingsWrite);
 
   const navLinkClass = ({ isActive }: { isActive: boolean }): string => {
-    return `flex items-center gap-2 px-4 py-2 text-sm font-semibold transition-all rounded-lg ${
+    return `shrink-0 flex items-center gap-1 px-2.5 py-2 text-[13px] font-semibold transition-all rounded-lg sm:gap-2 sm:px-4 sm:text-sm ${
       isActive 
         ? "bg-primary-600 text-white shadow-md shadow-primary-200" 
         : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
@@ -105,22 +105,22 @@ export const AppNav = () => {
           </div>
         </div>
 
-        <nav className="flex items-center gap-1 pb-4 overflow-x-auto scrollbar-hide">
+        <nav className="flex items-center gap-1 pb-4 pr-4 overflow-x-auto whitespace-nowrap scrollbar-hide">
           <NavLink to="/contributions" className={navLinkClass}>
-            <ReceiptText size={18} />
-            Aportes
-          </NavLink>
-          <NavLink to="/dashboard" className={navLinkClass}>
-            <LayoutDashboard size={18} />
-            Dashboard
+            <ReceiptText size={16} className="sm:h-[18px] sm:w-[18px]" />
+            Registro
           </NavLink>
           <NavLink to="/annual" className={navLinkClass}>
-            <CalendarDays size={18} />
-            Vista Anual
+            <CalendarDays size={16} className="sm:h-[18px] sm:w-[18px]" />
+            Seguimiento
+          </NavLink>
+          <NavLink to="/dashboard" className={navLinkClass}>
+            <LayoutDashboard size={16} className="sm:h-[18px] sm:w-[18px]" />
+            Dashboard
           </NavLink>
           {canManageSettings && (
             <NavLink to="/settings" className={navLinkClass}>
-              <Settings2 size={18} />
+              <Settings2 size={16} className="sm:h-[18px] sm:w-[18px]" />
               Ajustes
             </NavLink>
           )}
