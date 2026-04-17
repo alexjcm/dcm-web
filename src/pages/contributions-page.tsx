@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, Edit2, Filter, Plus, ReceiptText, Trash2, X } from "lucide-react";
+import { Edit2, Filter, Plus, ReceiptText, Trash2, X } from "lucide-react";
 
 import { ContributionModal, type ContributionPayload } from "../components/contributions/contribution-modal";
 import { Button } from "../components/ui/button";
@@ -11,7 +11,7 @@ import { SectionLoader } from "../components/ui/loaders";
 import { ContributorStatusBadge } from "../components/ui/state-badge";
 import { useAppContext } from "../context/app-context";
 import { useApiClient } from "../hooks/use-api-client";
-import { useContributions } from "../hooks/use-contributions";
+import { useContributionsYearAll } from "../hooks/use-contributions-year-all";
 import { useContributors } from "../hooks/use-contributors";
 import { useInvalidateResources } from "../hooks/use-resource-invalidation";
 import { useSettings } from "../hooks/use-settings";
@@ -21,11 +21,17 @@ import { formatCentsAsCurrency } from "../lib/money";
 import { RESOURCE_KEYS } from "../lib/resource-invalidation";
 import type { Contribution, Contributor } from "../types/domain";
 
-const PAGE_SIZE = 10;
-
 type EditState = {
   contribution: Contribution | null;
   open: boolean;
+};
+
+type ContributionsMonthGroup = {
+  key: string;
+  label: string;
+  month: number;
+  year: number;
+  items: Contribution[];
 };
 
 const formatPeriodLabel = (month: number, year: number): string =>
@@ -38,27 +44,17 @@ export const ContributionsPage = () => {
 
   const contributors = useContributors("all");
   const settings = useSettings();
+  const contributions = useContributionsYearAll(activeYear);
 
   const [contributorIdFilter, setContributorIdFilter] = useState<number | null>(null);
-  const [pageNumber, setPageNumber] = useState<number>(1);
   const [filtersOpen, setFiltersOpen] = useState<boolean>(true);
+  const [openMonths, setOpenMonths] = useState<Record<string, boolean>>({});
 
   const [editState, setEditState] = useState<EditState>({ contribution: null, open: false });
   const [submitting, setSubmitting] = useState<boolean>(false);
 
   const [pendingDelete, setPendingDelete] = useState<Contribution | null>(null);
   const [deleting, setDeleting] = useState<boolean>(false);
-
-  const contributions = useContributions({
-    year: activeYear,
-    contributorId: contributorIdFilter,
-    pageNumber,
-    pageSize: PAGE_SIZE
-  });
-
-  useEffect(() => {
-    setPageNumber(1);
-  }, [activeYear, contributorIdFilter]);
 
   const contributorById = useMemo(() => {
     const map = new Map<number, Contributor>();
@@ -78,7 +74,68 @@ export const ContributionsPage = () => {
     return contributorOptions.filter((contributor) => contributor.status === 1);
   }, [contributorOptions]);
 
+  const filteredItems = useMemo(() => {
+    const items = contributions.data?.items ?? [];
+
+    if (contributorIdFilter === null) {
+      return items;
+    }
+
+    return items.filter((item) => item.contributorId === contributorIdFilter);
+  }, [contributions.data, contributorIdFilter]);
+
+  const monthGroups = useMemo<ContributionsMonthGroup[]>(() => {
+    const groups = new Map<string, ContributionsMonthGroup>();
+
+    for (const item of filteredItems) {
+      const key = `${item.year}-${String(item.month).padStart(2, "0")}`;
+      const existing = groups.get(key);
+
+      if (existing) {
+        existing.items.push(item);
+        continue;
+      }
+
+      groups.set(key, {
+        key,
+        label: formatPeriodLabel(item.month, item.year),
+        month: item.month,
+        year: item.year,
+        items: [item]
+      });
+    }
+
+    return Array.from(groups.values()).sort((left, right) => {
+      if (left.year !== right.year) {
+        return right.year - left.year;
+      }
+
+      return right.month - left.month;
+    });
+  }, [filteredItems]);
+
   const hasActiveFilters = contributorIdFilter !== null;
+
+  const isMonthOpen = (group: ContributionsMonthGroup, index: number) => {
+    const explicitState = openMonths[group.key];
+
+    if (explicitState !== undefined) {
+      return explicitState;
+    }
+
+    if (index === 0) {
+      return true;
+    }
+
+    return group.month === getCurrentBusinessMonth() && group.year === activeYear;
+  };
+
+  const toggleMonth = (key: string, nextValue: boolean) => {
+    setOpenMonths((previous) => ({
+      ...previous,
+      [key]: nextValue
+    }));
+  };
 
   const openCreateModal = () => {
     if (!canMutateCurrentPeriod) {
@@ -140,7 +197,7 @@ export const ContributionsPage = () => {
       return;
     }
 
-    toast.success("Aporte desactivado.");
+    toast.success("Aporte eliminado.");
     setPendingDelete(null);
     invalidateResources(RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
   };
@@ -172,7 +229,6 @@ export const ContributionsPage = () => {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-500">Filtros</p>
-              <p className="mt-1 text-sm text-slate-500">Refina el listado por contribuidor y limpia el contexto actual cuando haga falta.</p>
             </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               {hasActiveFilters ? (
@@ -228,162 +284,98 @@ export const ContributionsPage = () => {
         </div>
       ) : null}
 
-      {contributions.data ? (
-        <Card
-          bodyClassName="p-0"
-          footer={
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Página {contributions.data.pagination.number} de {Math.max(1, contributions.data.pagination.totalPages || 1)}
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  icon={ChevronLeft}
-                  onClick={() => setPageNumber((previous) => Math.max(1, previous - 1))}
-                  disabled={!contributions.data.pagination.hasPrevPage}
-                >
-                  Anterior
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  icon={ChevronRight}
-                  iconPosition="right"
-                  onClick={() => setPageNumber((previous) => previous + 1)}
-                  disabled={!contributions.data.pagination.hasNextPage}
-                >
-                  Siguiente
-                </Button>
-              </div>
-            </div>
-          }
-        >
-          <div className="space-y-3 p-4 sm:hidden">
-            {contributions.data.items.map((item) => {
-              const contributor = contributorById.get(item.contributorId);
-
-              return (
-                <article key={item.id} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold text-slate-700">
-                          {item.contributorName.charAt(0)}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="truncate font-bold text-slate-900">{item.contributorName}</p>
-                          {contributor ? (
-                            <div className="mt-1">
-                              <ContributorStatusBadge status={contributor.status} />
-                            </div>
-                          ) : null}
-                        </div>
-                      </div>
-                    </div>
-                    <span className="shrink-0 rounded-lg bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
-                      {formatPeriodLabel(item.month, item.year)}
-                    </span>
-                  </div>
-
-                  <div className="mt-4 rounded-xl bg-slate-50 px-3 py-3 text-sm">
-                    <p className="text-[11px] font-bold uppercase tracking-wide text-slate-500">Monto</p>
-                    <p className="mt-1 font-extrabold text-slate-900">{formatCentsAsCurrency(item.amountCents)}</p>
-                  </div>
-
-                  <div className="mt-4 flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      icon={Edit2}
-                      onClick={() => openEditModal(item)}
-                      disabled={!canMutateCurrentPeriod || contributor?.status === 0}
-                      className="flex-1"
-                    >
-                      Editar
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="danger"
-                      icon={Trash2}
-                      onClick={() => setPendingDelete(item)}
-                      disabled={!canMutateCurrentPeriod || contributor?.status === 0}
-                      className="flex-1"
-                    >
-                      Desactivar
-                    </Button>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-
-          <div className="hidden overflow-x-auto sm:block">
-            <table className="w-full min-w-[760px] text-sm">
-              <thead className="border-b border-slate-100 bg-slate-50/50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-slate-600">Contribuidor</th>
-                  <th className="px-6 py-4 text-left text-[11px] font-bold uppercase tracking-wider text-slate-600">Período</th>
-                  <th className="px-6 py-4 text-right text-[11px] font-bold uppercase tracking-wider text-slate-600">Monto</th>
-                  <th className="px-6 py-4 text-right text-[11px] font-bold uppercase tracking-wider text-slate-600">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {contributions.data.items.map((item) => {
-                  const contributor = contributorById.get(item.contributorId);
-
-                  return (
-                    <tr key={item.id} className="group transition-colors hover:bg-slate-50/50">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-700">
-                            {item.contributorName.charAt(0)}
-                          </div>
-                          <div>
-                            <span className="font-bold leading-none text-slate-900">{item.contributorName}</span>
-                            {contributor ? (
-                              <div className="mt-1">
-                                <ContributorStatusBadge status={contributor.status} />
-                              </div>
-                            ) : null}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-600">
-                          {formatPeriodLabel(item.month, item.year)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right font-extrabold text-slate-900">{formatCentsAsCurrency(item.amountCents)}</td>
-                      <td className="px-6 py-4">
-                        <div className="flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            icon={Edit2}
-                            onClick={() => openEditModal(item)}
-                            disabled={!canMutateCurrentPeriod || contributor?.status === 0}
-                            aria-label="Editar aporte"
-                          />
-                          <Button
-                            size="sm"
-                            variant="danger"
-                            icon={Trash2}
-                            onClick={() => setPendingDelete(item)}
-                            disabled={!canMutateCurrentPeriod || contributor?.status === 0}
-                            aria-label="Eliminar aporte"
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+      {contributions.data && monthGroups.length === 0 ? (
+        <Card>
+          <div className="py-8 text-center">
+            <p className="text-base font-bold text-slate-900">
+              {hasActiveFilters ? "No hay aportes para el filtro aplicado." : "No hay aportes registrados para este año."}
+            </p>
+            <p className="mt-2 text-sm text-slate-500">
+              {hasActiveFilters ? "Prueba con otro contribuidor o limpia el filtro." : "Registra un aporte para comenzar a poblar el historial."}
+            </p>
           </div>
         </Card>
       ) : null}
+
+      {monthGroups.map((group, index) => {
+        const expanded = isMonthOpen(group, index);
+
+        return (
+          <Card key={group.key} bodyClassName="p-0">
+            <button
+              type="button"
+              onClick={() => toggleMonth(group.key, !expanded)}
+              className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left transition-colors hover:bg-slate-50"
+            >
+              <div>
+                <p className="text-xs font-bold uppercase tracking-[0.22em] text-slate-500">Período</p>
+                <h3 className="mt-1 text-xl font-extrabold text-slate-900">{group.label}</h3>
+              </div>
+              <span className="rounded-full border border-slate-200 px-3 py-1 text-xs font-semibold text-slate-600">
+                {expanded ? "Ocultar" : "Ver aportes"}
+              </span>
+            </button>
+
+            {expanded ? (
+              <div className="border-t border-slate-100 p-4 sm:p-5">
+                <div className="space-y-3">
+                  {group.items.map((item) => {
+                    const contributor = contributorById.get(item.contributorId);
+
+                    return (
+                      <article
+                        key={item.id}
+                        className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-slate-300"
+                      >
+                        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                          <div className="min-w-0">
+                            <div className="flex items-start gap-3">
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold text-slate-700">
+                                {item.contributorName.charAt(0)}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  <p className="truncate text-base font-bold text-slate-900">{item.contributorName}</p>
+                                  {contributor ? <ContributorStatusBadge status={contributor.status} /> : null}
+                                </div>
+                                <p className="mt-2 text-lg font-extrabold text-slate-900">{formatCentsAsCurrency(item.amountCents)}</p>
+                                {item.notes ? <p className="mt-2 text-sm leading-relaxed text-slate-500">{item.notes}</p> : null}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex gap-2 md:shrink-0">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              icon={Edit2}
+                              onClick={() => openEditModal(item)}
+                              disabled={!canMutateCurrentPeriod || contributor?.status === 0}
+                              className="flex-1 md:flex-none"
+                            >
+                              Editar
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="danger"
+                              icon={Trash2}
+                              onClick={() => setPendingDelete(item)}
+                              disabled={!canMutateCurrentPeriod || contributor?.status === 0}
+                              className="flex-1 md:flex-none"
+                            >
+                              Eliminar
+                            </Button>
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+          </Card>
+        );
+      })}
 
       <ContributionModal
         open={editState.open}
@@ -400,13 +392,13 @@ export const ContributionsPage = () => {
 
       <ConfirmModal
         open={Boolean(pendingDelete)}
-        title="Desactivar aporte"
+        title="Eliminar aporte"
         description={
           pendingDelete
-            ? `Se desactivará el aporte de ${pendingDelete.contributorName} (${formatPeriodLabel(pendingDelete.month, pendingDelete.year)}).`
+            ? `El aporte de ${pendingDelete.contributorName} en ${formatPeriodLabel(pendingDelete.month, pendingDelete.year)} dejará de mostrarse en el listado activo. Esta acción no borra el historial interno.`
             : ""
         }
-        confirmLabel="Desactivar"
+        confirmLabel="Eliminar"
         danger
         loading={deleting}
         onCancel={() => setPendingDelete(null)}
