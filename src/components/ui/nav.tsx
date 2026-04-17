@@ -92,7 +92,8 @@ export const AppNav = () => {
           </div>
 
           <div className="flex lg:hidden">
-             <Select
+            <div className="flex items-center gap-2">
+              <Select
                 value={activeYear}
                 onChange={(e) => setActiveYear(Number(e.target.value))}
                 className="h-9 min-w-[80px]"
@@ -102,6 +103,16 @@ export const AppNav = () => {
                   <option key={year} value={year}>{year}</option>
                 ))}
               </Select>
+              <Button
+                variant="outline"
+                size="sm"
+                icon={LogOut}
+                onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+                aria-label="Cerrar sesión"
+              >
+                Salir
+              </Button>
+            </div>
           </div>
         </div>
 

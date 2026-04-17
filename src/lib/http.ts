@@ -1,6 +1,7 @@
 import { API_BASE_URL } from "../config/app";
 import type { ApiResponse } from "../types/api";
 import { isApiResponse } from "../types/api";
+import { AuthSessionError, normalizeApiErrorDetail } from "./auth-session";
 
 type Primitive = string | number | boolean;
 
@@ -63,7 +64,33 @@ export class ApiClient {
   }
 
   private async request<T>(method: string, path: string, options: RequestOptions): Promise<ApiResponse<T>> {
-    const token = await this.getToken();
+    let token: string | null;
+
+    try {
+      token = await this.getToken();
+    } catch (error) {
+      if (error instanceof AuthSessionError) {
+        return {
+          ok: false,
+          status: 401,
+          data: null,
+          error: {
+            code: "UNAUTHENTICATED",
+            detail: error.message
+          }
+        };
+      }
+
+      return {
+        ok: false,
+        status: 500,
+        data: null,
+        error: {
+          code: "AUTH_TOKEN_ERROR",
+          detail: "No fue posible validar la sesión actual."
+        }
+      };
+    }
 
     const headers: HeadersInit = {
       Accept: "application/json"
@@ -94,6 +121,16 @@ export class ApiClient {
       }
 
       if (isApiResponse<T>(payload)) {
+        if (!payload.ok) {
+          return {
+            ...payload,
+            error: {
+              ...payload.error,
+              detail: normalizeApiErrorDetail(payload.status, payload.error.code, payload.error.detail)
+            }
+          };
+        }
+
         return payload;
       }
 
