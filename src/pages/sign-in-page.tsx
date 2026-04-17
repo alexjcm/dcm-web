@@ -21,10 +21,11 @@ export const SignInPage = () => {
 
   const returnTo = useMemo(() => normalizeReturnTo(searchParams.get("returnTo")), [searchParams]);
   const reason = searchParams.get("reason");
-  const canAutoRecover = isSessionRecoveryReason(reason) && canAttemptSessionRecovery(returnTo);
+  const isSessionRecovery = isSessionRecoveryReason(reason);
+  const canAutoRecover = isSessionRecovery && canAttemptSessionRecovery(returnTo);
 
   useEffect(() => {
-    if (!isSessionRecoveryReason(reason) || !canAutoRecover || isLoading || isAuthenticated) {
+    if (!isSessionRecovery || !canAutoRecover || isLoading) {
       return;
     }
 
@@ -40,21 +41,21 @@ export const SignInPage = () => {
       console.warn("No se pudo redirigir automáticamente al login.", redirectError);
       setAutoRedirecting(false);
     });
-  }, [canAutoRecover, isAuthenticated, isLoading, loginWithRedirect, reason, returnTo]);
+  }, [canAutoRecover, isLoading, isSessionRecovery, loginWithRedirect, returnTo]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (!isAuthenticated || isSessionRecovery) {
       return;
     }
 
     clearSessionRecoveryAttempt();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isSessionRecovery]);
 
   if (isLoading) {
     return <PageLoader label="Cargando autenticación..." />;
   }
 
-  if (isAuthenticated) {
+  if (isAuthenticated && !isSessionRecovery) {
     return <Navigate to={returnTo} replace />;
   }
 
@@ -78,7 +79,7 @@ export const SignInPage = () => {
         </div>
 
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white p-8 shadow-2xl shadow-slate-200/50">
-          {reason === SESSION_RECOVERY_QUERY_REASON ? (
+          {isSessionRecovery ? (
             <div className="mb-6 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 animate-in slide-in-from-top-2">
               <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-amber-500" />
               <p className="text-sm font-bold leading-relaxed text-amber-900">
@@ -109,7 +110,7 @@ export const SignInPage = () => {
             className="w-full h-12 text-base font-bold"
             icon={LogIn}
           >
-            {reason === SESSION_RECOVERY_QUERY_REASON ? "Volver a iniciar sesión" : "Entrar al Sistema"}
+            {isSessionRecovery ? "Volver a iniciar sesión" : "Entrar al Sistema"}
           </Button>
 
         </div>
