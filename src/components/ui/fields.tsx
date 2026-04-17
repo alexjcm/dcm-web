@@ -1,4 +1,4 @@
-import { type InputHTMLAttributes, type SelectHTMLAttributes, forwardRef } from "react";
+import { type InputHTMLAttributes, type SelectHTMLAttributes, forwardRef, useId } from "react";
 import { LucideIcon } from "lucide-react";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -9,10 +9,13 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, icon: Icon, className = "", ...props }, ref) => {
+    const generatedId = useId();
+    const inputId = props.id ?? generatedId;
+
     return (
       <div className="flex flex-col gap-1.5 w-full">
         {label && (
-          <label className="text-sm font-medium text-slate-700">
+          <label htmlFor={inputId} className="text-sm font-medium text-slate-700">
             {label}
           </label>
         )}
@@ -24,6 +27,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
           <input
             ref={ref}
+            id={inputId}
             className={`
               w-full rounded-lg border border-slate-300 bg-white py-2 text-sm text-slate-900 transition-colors
               placeholder:text-slate-400
@@ -52,10 +56,13 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, error, icon: Icon, className = "", children, ...props }, ref) => {
+    const generatedId = useId();
+    const selectId = props.id ?? generatedId;
+
     return (
       <div className="flex flex-col gap-1.5 w-full">
         {label && (
-          <label className="text-sm font-medium text-slate-700">
+          <label htmlFor={selectId} className="text-sm font-medium text-slate-700">
             {label}
           </label>
         )}
@@ -67,6 +74,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           )}
           <select
             ref={ref}
+            id={selectId}
             className={`
               w-full appearance-none rounded-lg border border-slate-300 bg-white py-2 text-sm text-slate-900 transition-colors
               focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500
@@ -92,4 +100,3 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
 );
 
 Select.displayName = "Select";
-

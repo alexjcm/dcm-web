@@ -42,9 +42,9 @@ export const SettingsContributorsCard = ({
         <table className="w-full text-sm">
           <thead className="border-b border-slate-100 bg-slate-50/50">
             <tr>
-              <th className="px-6 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-600">Identidad</th>
+              <th className="px-6 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-600">Nombres</th>
               <th className="px-6 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-600">Estado</th>
-              <th className="px-6 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-slate-600">Acciones</th>
+              <th className="px-6 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-600">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
@@ -63,7 +63,7 @@ export const SettingsContributorsCard = ({
                   <ContributorStatusBadge status={contributor.status} />
                 </td>
                 <td className="px-6 py-3.5">
-                  <div className="flex justify-end gap-2">
+                  <div className="flex justify-start gap-2">
                     <Button
                       variant="outline"
                       size="sm"

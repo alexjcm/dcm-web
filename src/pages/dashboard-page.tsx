@@ -94,11 +94,6 @@ export const DashboardPage = () => {
       <header>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500">
-              Resumen Ejecutivo
-              <ChevronRight size={12} />
-              {summary.data.year}
-            </div>
             <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">Dashboard de Aportes</h2>
             <p className="mt-1 text-sm text-slate-500">Resumen anual y prioridades operativas.</p>
           </div>

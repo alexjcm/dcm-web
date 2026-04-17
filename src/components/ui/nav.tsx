@@ -32,10 +32,6 @@ export const AppNav = () => {
         <div className="flex h-20 items-center justify-between gap-4">
           <div className="flex flex-col">
             <h1 className="text-lg font-bold tracking-tight text-slate-900">Aportes Familiares</h1>
-            <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-primary-700">
-              <span className="flex h-1.5 w-1.5 rounded-full bg-primary-600"></span>
-              Panel Operativo
-            </div>
           </div>
 
           <div className="hidden items-center gap-4 lg:flex">
@@ -60,7 +56,7 @@ export const AppNav = () => {
               size="sm"
               icon={LogOut}
               onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-              aria-label="Cerrar sesión"
+              aria-label="Salir"
             >
               Salir
             </Button>

@@ -196,11 +196,6 @@ export const AnnualPage = () => {
       <header>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500">
-              Matriz de Seguimiento
-              <ChevronRight size={12} />
-              {summary.data.year}
-            </div>
             <div className="flex items-baseline gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 text-primary-600 shadow-inner">
                 <CalendarDays size={24} />

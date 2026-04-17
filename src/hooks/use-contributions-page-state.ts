@@ -31,7 +31,6 @@ export const useContributionsPageState = () => {
   const currentBusinessMonth = getCurrentBusinessMonth();
 
   const contributors = useContributors("all");
-  const settings = useSettings();
   const [contributorIdFilter, setContributorIdFilter] = useState<number | null>(null);
   const [loadedYears, setLoadedYears] = useState<number[]>([activeYear]);
   const [openMonths, setOpenMonths] = useState<Record<string, boolean>>({});
@@ -39,6 +38,7 @@ export const useContributionsPageState = () => {
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [pendingDelete, setPendingDelete] = useState<Contribution | null>(null);
   const [deleting, setDeleting] = useState<boolean>(false);
+  const settings = useSettings(editState.open);
 
   const contributions = useContributionsYearsAll(loadedYears);
 

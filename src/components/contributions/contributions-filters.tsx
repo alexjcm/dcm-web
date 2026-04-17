@@ -22,12 +22,12 @@ export const ContributionsFilters = ({
 }: ContributionsFiltersProps) => {
   return (
     <Card bodyClassName="p-4">
-      <div className="flex min-w-0 items-center gap-3">
-        <div className="shrink-0 text-sm font-medium text-slate-700">Contribuyente</div>
+      <div className="flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:justify-start">
+        <div className="shrink-0 text-sm font-medium text-slate-700 md:min-w-[110px]">Contribuyente</div>
         <Select
           value={contributorIdFilter ?? ""}
           onChange={(event) => onChangeContributorFilter(event.target.value ? Number(event.target.value) : null)}
-          className="h-10 min-w-0 flex-1"
+          className="h-10 min-w-0 w-full md:w-[360px] lg:w-[420px]"
         >
           <option value="">Todos los contribuyentes</option>
           {contributorOptions.map((contributor) => (

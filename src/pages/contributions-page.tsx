@@ -1,6 +1,6 @@
+import { lazy, Suspense } from "react";
 import { Plus, ReceiptText } from "lucide-react";
 
-import { ContributionModal } from "../components/contributions/contribution-modal";
 import { ContributionsFilters } from "../components/contributions/contributions-filters";
 import { ContributionsYearGroups } from "../components/contributions/contributions-year-groups";
 import { Button } from "../components/ui/button";
@@ -8,6 +8,11 @@ import { Card } from "../components/ui/card";
 import { ConfirmModal } from "../components/ui/confirm-modal";
 import { SectionLoader } from "../components/ui/loaders";
 import { useContributionsPageState } from "../hooks/use-contributions-page-state";
+
+const ContributionModal = lazy(async () => {
+  const module = await import("../components/contributions/contribution-modal");
+  return { default: module.ContributionModal };
+});
 
 export const ContributionsPage = () => {
   const {
@@ -123,18 +128,22 @@ export const ContributionsPage = () => {
         </div>
       ) : null}
 
-      <ContributionModal
-        open={editState.open}
-        contributors={activeContributorOptions}
-        monthlyAmountCents={settings.monthlyAmountCents}
-        defaultYear={activeYear}
-        defaultMonth={currentBusinessMonth}
-        initialContribution={editState.contribution}
-        lockedReason={canMutateCurrentPeriod ? null : contributionRestrictionMessage}
-        submitting={submitting}
-        onClose={closeEditModal}
-        onSubmit={handleSave}
-      />
+      {editState.open ? (
+        <Suspense fallback={null}>
+          <ContributionModal
+            open={editState.open}
+            contributors={activeContributorOptions}
+            monthlyAmountCents={settings.monthlyAmountCents}
+            defaultYear={activeYear}
+            defaultMonth={currentBusinessMonth}
+            initialContribution={editState.contribution}
+            lockedReason={canMutateCurrentPeriod ? null : contributionRestrictionMessage}
+            submitting={submitting}
+            onClose={closeEditModal}
+            onSubmit={handleSave}
+          />
+        </Suspense>
+      ) : null}
 
       <ConfirmModal
         open={Boolean(pendingDelete)}

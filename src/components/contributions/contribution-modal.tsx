@@ -258,7 +258,7 @@ export const ContributionModal = ({
                     onClick={onClose}
                     disabled={submitting}
                   >
-                    Descartar
+                    Cancelar
                   </Button>
                 </div>
               </DialogPanel>

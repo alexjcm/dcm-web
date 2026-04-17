@@ -16,10 +16,11 @@ type ResourceState<T> = {
 export const useApiResource = <T>(
   loader: Loader<T>,
   deps: ReadonlyArray<unknown>,
-  invalidationKeys: ReadonlyArray<ResourceKey> = []
+  invalidationKeys: ReadonlyArray<ResourceKey> = [],
+  enabled: boolean = true
 ): ResourceState<T> => {
   const [data, setData] = useState<T | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(enabled);
   const [error, setError] = useState<string | null>(null);
   const [reloadNonce, setReloadNonce] = useState<number>(0);
   const invalidationVersion = useResourceVersion(invalidationKeys);
@@ -29,6 +30,12 @@ export const useApiResource = <T>(
   }, []);
 
   useEffect(() => {
+    if (!enabled) {
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
     let active = true;
     const controller = new AbortController();
 
@@ -63,7 +70,7 @@ export const useApiResource = <T>(
       active = false;
       controller.abort();
     };
-  }, [loader, reloadNonce, invalidationVersion, ...deps]);
+  }, [enabled, loader, reloadNonce, invalidationVersion, ...deps]);
 
   return {
     data,
