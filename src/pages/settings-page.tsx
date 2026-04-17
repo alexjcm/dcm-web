@@ -1,7 +1,7 @@
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Edit2, Mail, Plus, Save, Settings, ShieldAlert, Trash2, User, Users } from "lucide-react";
+import { Check, Edit2, Mail, Plus, Save, Settings, ShieldAlert, Trash2, User, Users } from "lucide-react";
 
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
@@ -130,6 +130,7 @@ export const SettingsPage = () => {
   const contributors = useContributors("all");
 
   const [amountInput, setAmountInput] = useState<string>("32.00");
+  const [pendingAmountCents, setPendingAmountCents] = useState<number | null>(null);
   const [savingAmount, setSavingAmount] = useState<boolean>(false);
 
   const [newContributor, setNewContributor] = useState<ContributorDraft>(emptyContributorDraft);
@@ -139,8 +140,8 @@ export const SettingsPage = () => {
   const [editingContributor, setEditingContributor] = useState<Contributor | null>(null);
   const [editDraft, setEditDraft] = useState<ContributorDraft>(emptyContributorDraft);
 
-  const [pendingDeactivate, setPendingDeactivate] = useState<Contributor | null>(null);
-  const [deactivating, setDeactivating] = useState<boolean>(false);
+  const [pendingStatusChange, setPendingStatusChange] = useState<Contributor | null>(null);
+  const [changingStatus, setChangingStatus] = useState<boolean>(false);
 
   useEffect(() => {
     setAmountInput(formatCentsAsInputValue(settings.monthlyAmountCents));
@@ -170,10 +171,8 @@ export const SettingsPage = () => {
   }
 
   const saveMonthlyAmount = async () => {
-    const amountCents = parseMoneyInputToCents(amountInput);
-
-    if (!amountCents || amountCents < 1) {
-      toast.error("El monto mensual debe ser mayor a 0.");
+    if (!pendingAmountCents || pendingAmountCents < 1) {
+      setPendingAmountCents(null);
       return;
     }
 
@@ -181,10 +180,11 @@ export const SettingsPage = () => {
 
     const response = await api.put<{ key: string; value: string }>("/api/settings", {
       key: "monthly_amount_cents",
-      value: String(amountCents)
+      value: String(pendingAmountCents)
     });
 
     setSavingAmount(false);
+    setPendingAmountCents(null);
 
     if (!response.ok) {
       toast.error(response.error.detail);
@@ -258,24 +258,27 @@ export const SettingsPage = () => {
     invalidateResources(RESOURCE_KEYS.contributors, RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
   };
 
-  const deactivateContributor = async () => {
-    if (!pendingDeactivate) {
+  const changeContributorStatus = async () => {
+    if (!pendingStatusChange) {
       return;
     }
 
-    setDeactivating(true);
+    const nextStatus = pendingStatusChange.status === 1 ? 0 : 1;
+    setChangingStatus(true);
 
-    const response = await api.delete<Contributor>(`/api/contributors/${pendingDeactivate.id}`);
+    const response = await api.put<Contributor>(`/api/contributors/${pendingStatusChange.id}`, {
+      status: nextStatus
+    });
 
-    setDeactivating(false);
+    setChangingStatus(false);
 
     if (!response.ok) {
       toast.error(response.error.detail);
       return;
     }
 
-    toast.success("Contribuyente desactivado.");
-    setPendingDeactivate(null);
+    toast.success(nextStatus === 1 ? "Contribuyente activado." : "Contribuyente desactivado.");
+    setPendingStatusChange(null);
     invalidateResources(RESOURCE_KEYS.contributors, RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
   };
 
@@ -287,7 +290,7 @@ export const SettingsPage = () => {
         </div>
         <div>
           <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Panel de Administración</h2>
-          <p className="mt-1 text-sm text-slate-500">Configura el monto base y administra el directorio de contribuyentes.</p>
+          <p className="mt-1 text-sm text-slate-500">Configura el monto base y administra la lista de contribuyentes.</p>
         </div>
       </header>
 
@@ -313,7 +316,21 @@ export const SettingsPage = () => {
                     value={amountInput}
                     onChange={(event) => setAmountInput(sanitizeMoneyInput(event.target.value))}
                   />
-                  <Button icon={Save} onClick={saveMonthlyAmount} isLoading={savingAmount} className="w-full sm:w-auto">
+                  <Button
+                    icon={Save}
+                    onClick={() => {
+                      const amountCents = parseMoneyInputToCents(amountInput);
+
+                      if (!amountCents || amountCents < 1) {
+                        toast.error("El monto mensual debe ser mayor a 0.");
+                        return;
+                      }
+
+                      setPendingAmountCents(amountCents);
+                    }}
+                    isLoading={savingAmount}
+                    className="w-full sm:w-auto"
+                  >
                     Actualizar Monto
                   </Button>
                 </>
@@ -328,7 +345,7 @@ export const SettingsPage = () => {
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-2">
                   <Users size={18} className="text-primary-600" />
-                  Directorio de Contribuyentes
+                  Lista de Contribuyentes
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-semibold text-slate-500">
@@ -384,12 +401,13 @@ export const SettingsPage = () => {
                           />
                           <Button
                             size="sm"
-                            variant="danger"
-                            icon={Trash2}
-                            onClick={() => setPendingDeactivate(contributor)}
-                            disabled={contributor.status === 0}
-                            aria-label="Desactivar contribuyente"
-                          />
+                            variant={contributor.status === 1 ? "danger" : "secondary"}
+                            icon={contributor.status === 1 ? Trash2 : Check}
+                            onClick={() => setPendingStatusChange(contributor)}
+                            aria-label={contributor.status === 1 ? "Desactivar contribuyente" : "Activar contribuyente"}
+                          >
+                            {contributor.status === 1 ? "Desactivar" : "Activar"}
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -427,15 +445,37 @@ export const SettingsPage = () => {
       />
 
       <ConfirmModal
-        open={Boolean(pendingDeactivate)}
-        title="Desactivar contribuyente"
-        description={pendingDeactivate ? `Se desactivará a ${pendingDeactivate.name}. No podrá realizar nuevos aportes, pero se conserva su historial.` : ""}
-        confirmLabel="Desactivar"
-        danger
-        loading={deactivating}
-        onCancel={() => setPendingDeactivate(null)}
+        open={pendingAmountCents !== null}
+        title="Confirmar actualización de monto"
+        description={
+          pendingAmountCents !== null
+            ? `Se actualizará el monto base mensual a ${formatCentsAsInputValue(pendingAmountCents)} USD. Este cambio impactará los cálculos y resúmenes del sistema.`
+            : ""
+        }
+        confirmLabel="Actualizar monto"
+        loading={savingAmount}
+        onCancel={() => setPendingAmountCents(null)}
         onConfirm={() => {
-          void deactivateContributor();
+          void saveMonthlyAmount();
+        }}
+      />
+
+      <ConfirmModal
+        open={Boolean(pendingStatusChange)}
+        title={pendingStatusChange?.status === 1 ? "Desactivar contribuyente" : "Activar contribuyente"}
+        description={
+          pendingStatusChange
+            ? pendingStatusChange.status === 1
+              ? `Se desactivará a ${pendingStatusChange.name}. No podrá realizar nuevos aportes, pero se conserva su historial.`
+              : `Se activará nuevamente a ${pendingStatusChange.name}. Volverá a estar disponible para registrar aportes.`
+            : ""
+        }
+        confirmLabel={pendingStatusChange?.status === 1 ? "Desactivar" : "Activar"}
+        danger={pendingStatusChange?.status === 1}
+        loading={changingStatus}
+        onCancel={() => setPendingStatusChange(null)}
+        onConfirm={() => {
+          void changeContributorStatus();
         }}
       />
     </div>

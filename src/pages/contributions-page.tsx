@@ -8,6 +8,7 @@ import { Card } from "../components/ui/card";
 import { ConfirmModal } from "../components/ui/confirm-modal";
 import { Select } from "../components/ui/fields";
 import { SectionLoader } from "../components/ui/loaders";
+import { YearSelect } from "../components/ui/year-select";
 import { useAppContext } from "../context/app-context";
 import { useApiClient } from "../hooks/use-api-client";
 import { useContributionsYearsAll } from "../hooks/use-contributions-years-all";
@@ -44,7 +45,8 @@ const formatPeriodLabel = (month: number, year: number): string =>
   `${getMonthLabel(month).replace(/^./, (value) => value.toUpperCase())}/${year}`;
 
 export const ContributionsPage = () => {
-  const { activeYear, canMutateCurrentPeriod, contributionRestrictionMessage } = useAppContext();
+  const { activeYear, currentBusinessYear, setActiveYear, canMutateCurrentPeriod, contributionRestrictionMessage } =
+    useAppContext();
   const api = useApiClient();
   const invalidateResources = useInvalidateResources();
   const currentBusinessMonth = getCurrentBusinessMonth();
@@ -290,23 +292,22 @@ export const ContributionsPage = () => {
       </header>
 
       <Card bodyClassName="p-4">
-        <div className="grid gap-3 sm:grid-cols-[minmax(240px,320px)_auto] sm:items-end sm:justify-between">
-          <div className="grid gap-3 sm:grid-cols-[minmax(220px,320px)_auto] sm:items-end">
-            <Select
-              label="Contribuyente"
-              value={contributorIdFilter ?? ""}
-              onChange={(event) => setContributorIdFilter(event.target.value ? Number(event.target.value) : null)}
-              className="h-10"
-            >
-              <option value="">Todos los contribuyentes</option>
-              {contributorOptions.map((contributor) => (
-                <option key={contributor.id} value={contributor.id}>
-                  {contributor.name}
-                </option>
-              ))}
-            </Select>
-
-            <div className="flex gap-2 sm:pb-0.5">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="shrink-0 text-sm font-medium text-slate-700">Contribuyente</div>
+              <Select
+                value={contributorIdFilter ?? ""}
+                onChange={(event) => setContributorIdFilter(event.target.value ? Number(event.target.value) : null)}
+                className="h-10 min-w-0 flex-1"
+              >
+                <option value="">Todos los contribuyentes</option>
+                {contributorOptions.map((contributor) => (
+                  <option key={contributor.id} value={contributor.id}>
+                    {contributor.name}
+                  </option>
+                ))}
+              </Select>
               {hasActiveFilters ? (
                 <Button
                   variant="ghost"
@@ -317,10 +318,12 @@ export const ContributionsPage = () => {
                 />
               ) : null}
             </div>
-          </div>
-
-          <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 sm:justify-self-end">
-            <span className="font-semibold text-slate-900">Mes actual:</span> {formatPeriodLabel(currentBusinessMonth, activeYear)}
+            <YearSelect
+              activeYear={activeYear}
+              currentBusinessYear={currentBusinessYear}
+              setActiveYear={setActiveYear}
+              compact
+            />
           </div>
         </div>
       </Card>
@@ -395,42 +398,39 @@ export const ContributionsPage = () => {
                         return (
                           <article
                             key={item.id}
-                            className="grid gap-2 px-4 py-2.5 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:px-5"
+                            className="grid gap-2 px-4 py-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-5"
                           >
                             <div className="min-w-0">
-                              <div className="flex items-center gap-3">
-                                <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-[11px] font-bold text-slate-700">
-                                  {item.contributorName.charAt(0)}
-                                </div>
-                                <div className="min-w-0">
-                                  <p className="truncate text-sm font-bold text-slate-900">{item.contributorName}</p>
-                                </div>
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-bold text-slate-900">{item.contributorName}</p>
+                                <p className="mt-0.5 text-xs font-medium text-slate-500">
+                                  {formatPeriodLabel(item.month, item.year)}
+                                </p>
                               </div>
                             </div>
 
-                            <div className="text-sm font-extrabold text-slate-900 sm:min-w-[110px] sm:text-right">
-                              {formatCentsAsCurrency(item.amountCents)}
-                            </div>
-
-                            <div className="flex gap-2 sm:justify-end">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                icon={Edit2}
-                                onClick={() => openEditModal(item)}
-                                disabled={!canMutateCurrentPeriod || contributor?.status === 0}
-                                aria-label={`Editar aporte de ${item.contributorName}`}
-                                className="px-2.5"
-                              />
-                              <Button
-                                size="sm"
-                                variant="danger"
-                                icon={Trash2}
-                                onClick={() => setPendingDelete(item)}
-                                disabled={!canMutateCurrentPeriod || contributor?.status === 0}
-                                aria-label={`Eliminar aporte de ${item.contributorName}`}
-                                className="px-2.5"
-                              />
+                            <div className="flex items-center justify-between gap-3 sm:min-w-[200px] sm:justify-end">
+                              <div className="text-sm font-extrabold text-slate-900">{formatCentsAsCurrency(item.amountCents)}</div>
+                              <div className="flex gap-2 sm:justify-end">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  icon={Edit2}
+                                  onClick={() => openEditModal(item)}
+                                  disabled={!canMutateCurrentPeriod || contributor?.status === 0}
+                                  aria-label={`Editar aporte de ${item.contributorName}`}
+                                  className="px-2.5"
+                                />
+                                <Button
+                                  size="sm"
+                                  variant="danger"
+                                  icon={Trash2}
+                                  onClick={() => setPendingDelete(item)}
+                                  disabled={!canMutateCurrentPeriod || contributor?.status === 0}
+                                  aria-label={`Eliminar aporte de ${item.contributorName}`}
+                                  className="px-2.5"
+                                />
+                              </div>
                             </div>
                           </article>
                         );

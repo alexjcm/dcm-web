@@ -6,12 +6,13 @@ import { ContributionModal, type ContributionPayload } from "../components/contr
 import { Card } from "../components/ui/card";
 import { SectionLoader } from "../components/ui/loaders";
 import { getContributionCellState } from "../components/ui/state-badge";
+import { YearSelect } from "../components/ui/year-select";
 import { useAppContext } from "../context/app-context";
 import { useApiClient } from "../hooks/use-api-client";
 import { useContributionsYearAll } from "../hooks/use-contributions-year-all";
 import { useInvalidateResources } from "../hooks/use-resource-invalidation";
 import { useSummary } from "../hooks/use-summary";
-import { getCurrentBusinessMonth, getCurrentBusinessYear } from "../lib/business-time";
+import { getCurrentBusinessMonth } from "../lib/business-time";
 import { getMonthLabel } from "../lib/date";
 import { formatCentsAsCurrency } from "../lib/money";
 import { RESOURCE_KEYS } from "../lib/resource-invalidation";
@@ -73,12 +74,12 @@ const getCellStyle = (state: ReturnType<typeof getContributionCellState>): strin
 };
 
 export const AnnualPage = () => {
-  const { activeYear, canMutateCurrentPeriod, contributionRestrictionMessage } = useAppContext();
+  const { activeYear, currentBusinessYear, setActiveYear, canMutateCurrentPeriod, contributionRestrictionMessage } =
+    useAppContext();
   const api = useApiClient();
   const invalidateResources = useInvalidateResources();
 
   const currentBusinessMonth = getCurrentBusinessMonth();
-  const currentBusinessYear = getCurrentBusinessYear();
   const isCurrentBusinessYear = activeYear === currentBusinessYear;
 
   const summary = useSummary(activeYear);
@@ -193,20 +194,32 @@ export const AnnualPage = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <header>
-        <div className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500">
-          Matriz de Seguimiento
-          <ChevronRight size={12} />
-          {summary.data.year}
-        </div>
-        <div className="flex items-baseline gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 text-primary-600 shadow-inner">
-            <CalendarDays size={24} />
-          </div>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Seguimiento Anual</h2>
-            <p className="text-sm text-slate-500">Control del año completo para detectar pendientes e incompletos y corregirlos rápido.</p>
-            <p className="mt-1 text-xs font-medium text-slate-400">La eliminación de aportes se realiza desde Registro.</p>
+            <div className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500">
+              Matriz de Seguimiento
+              <ChevronRight size={12} />
+              {summary.data.year}
+            </div>
+            <div className="flex items-baseline gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-50 text-primary-600 shadow-inner">
+                <CalendarDays size={24} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-extrabold tracking-tight text-slate-900">Seguimiento Anual</h2>
+                <p className="text-sm text-slate-500">
+                  Control del año completo para detectar pendientes e incompletos y corregirlos rápido.
+                </p>
+                <p className="mt-1 text-xs font-medium text-slate-400">La eliminación de aportes se realiza desde Registro.</p>
+              </div>
+            </div>
           </div>
+          <YearSelect
+            activeYear={activeYear}
+            currentBusinessYear={currentBusinessYear}
+            setActiveYear={setActiveYear}
+            compact
+          />
         </div>
       </header>
 

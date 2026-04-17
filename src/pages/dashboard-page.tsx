@@ -3,6 +3,7 @@ import { TrendingUp, Scale, ChevronRight } from "lucide-react";
 
 import { SectionLoader } from "../components/ui/loaders";
 import { ContributionStateBadge } from "../components/ui/state-badge";
+import { YearSelect } from "../components/ui/year-select";
 import { useAppContext } from "../context/app-context";
 import { formatCentsAsCurrency } from "../lib/money";
 import { useSummary } from "../hooks/use-summary";
@@ -25,7 +26,7 @@ const getStatePriority = (state: ContributionState): number => {
 };
 
 export const DashboardPage = () => {
-  const { activeYear } = useAppContext();
+  const { activeYear, currentBusinessYear, setActiveYear } = useAppContext();
   const summary = useSummary(activeYear);
 
   const contributors = useMemo(() => {
@@ -91,13 +92,23 @@ export const DashboardPage = () => {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <header>
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">
-          Resumen Ejecutivo
-          <ChevronRight size={12} />
-          {summary.data.year}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <div className="mb-1 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-500">
+              Resumen Ejecutivo
+              <ChevronRight size={12} />
+              {summary.data.year}
+            </div>
+            <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">Dashboard de Aportes</h2>
+            <p className="mt-1 text-sm text-slate-500">Resumen anual y prioridades operativas.</p>
+          </div>
+          <YearSelect
+            activeYear={activeYear}
+            currentBusinessYear={currentBusinessYear}
+            setActiveYear={setActiveYear}
+            compact
+          />
         </div>
-        <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">Dashboard de Aportes</h2>
-        <p className="mt-1 text-sm text-slate-500">Resumen anual y prioridades operativas.</p>
       </header>
 
       <Card className="relative overflow-hidden" bodyClassName="p-4 sm:p-6">

@@ -6,37 +6,16 @@ import {
   ReceiptText, 
   Settings2, 
   LogOut,
-  Calendar,
   UserCircle
 } from "lucide-react";
 
 import { APP_PERMISSIONS } from "../../config/permissions";
 import { useAppContext } from "../../context/app-context";
 import { Button } from "./button";
-import { Select } from "./fields";
-
-const MIN_YEAR_WITH_DATA = 2023;
-
-const getYearOptions = (currentYear: number): number[] => {
-  const years: number[] = [];
-  for (let year = currentYear; year >= MIN_YEAR_WITH_DATA; year -= 1) {
-    years.push(year);
-  }
-  return years;
-};
 
 export const AppNav = () => {
   const { logout } = useAuth0();
-  const {
-    activeYear,
-    setActiveYear,
-    currentBusinessYear,
-    userEmail,
-    hasPermission,
-    contributionRestrictionMessage
-  } = useAppContext();
-
-  const yearOptions = getYearOptions(currentBusinessYear);
+  const { userEmail, hasPermission, contributionRestrictionMessage } = useAppContext();
   const canManageSettings = hasPermission(APP_PERMISSIONS.settingsWrite);
 
   const navLinkClass = ({ isActive }: { isActive: boolean }): string => {
@@ -60,22 +39,6 @@ export const AppNav = () => {
           </div>
 
           <div className="hidden items-center gap-4 lg:flex">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-tighter">
-                <Calendar size={14} className="text-slate-400" />
-                Año
-              </div>
-              <Select
-                value={activeYear}
-                onChange={(e) => setActiveYear(Number(e.target.value))}
-                className="h-9 min-w-[100px] border-slate-200"
-              >
-                {yearOptions.map((year) => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </Select>
-            </div>
-
             <div className="flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-slate-600">
               <UserCircle size={16} className="text-slate-400" />
               <span className="max-w-[150px] truncate">{userEmail ?? "Usuario"}</span>
@@ -92,27 +55,15 @@ export const AppNav = () => {
           </div>
 
           <div className="flex lg:hidden">
-            <div className="flex items-center gap-2">
-              <Select
-                value={activeYear}
-                onChange={(e) => setActiveYear(Number(e.target.value))}
-                className="h-9 min-w-[80px]"
-                aria-label="Seleccionar año"
-              >
-                {yearOptions.map((year) => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </Select>
-              <Button
-                variant="outline"
-                size="sm"
-                icon={LogOut}
-                onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-                aria-label="Cerrar sesión"
-              >
-                Salir
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              icon={LogOut}
+              onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+              aria-label="Cerrar sesión"
+            >
+              Salir
+            </Button>
           </div>
         </div>
 

@@ -71,7 +71,7 @@ export const SignInPage = () => {
             <ShieldCheck size={32} />
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-            Plataforma <span className="text-primary-600 italic">DMC</span>
+            Plataforma <span className="text-primary-600 italic">DCM</span>
           </h1>
           <p className="mt-4 text-sm font-semibold tracking-widest text-slate-500 uppercase">
             Gestión de Aportes Familiares
@@ -116,7 +116,7 @@ export const SignInPage = () => {
         </div>
 
         <p className="mt-8 text-center text-xs font-bold text-slate-400 uppercase tracking-widest">
-          &copy; {new Date().getFullYear()} DMC
+          &copy; {new Date().getFullYear()} DCM
         </p>
       </div>
     </main>
