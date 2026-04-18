@@ -23,19 +23,27 @@ export const ContributionsFilters = ({
   return (
     <Card bodyClassName="p-4">
       <div className="flex min-w-0 flex-col gap-3 md:flex-row md:items-center md:justify-start">
-        <div className="shrink-0 text-sm font-medium text-slate-700 md:min-w-[110px]">Contribuyente</div>
-        <Select
-          value={contributorIdFilter ?? ""}
-          onChange={(event) => onChangeContributorFilter(event.target.value ? Number(event.target.value) : null)}
-          className="h-10 min-w-0 w-full md:w-[360px] lg:w-[420px]"
+        <label
+          htmlFor="contributor-filter"
+          className="shrink-0 text-sm font-medium text-slate-700 md:min-w-[110px]"
         >
-          <option value="">Todos los contribuyentes</option>
-          {contributorOptions.map((contributor) => (
-            <option key={contributor.id} value={contributor.id}>
-              {contributor.name}
-            </option>
-          ))}
-        </Select>
+          Contribuyente
+        </label>
+        <div className="w-full md:w-[360px] lg:w-[420px]">
+          <Select
+            id="contributor-filter"
+            value={contributorIdFilter ?? ""}
+            onChange={(event) => onChangeContributorFilter(event.target.value ? Number(event.target.value) : null)}
+            className="h-10 w-full"
+          >
+            <option value="">Todos los contribuyentes</option>
+            {contributorOptions.map((contributor) => (
+              <option key={contributor.id} value={contributor.id}>
+                {contributor.name}
+              </option>
+            ))}
+          </Select>
+        </div>
         {hasActiveFilters ? (
           <Button variant="ghost" size="sm" icon={X} onClick={onClearFilters} aria-label="Limpiar filtro" />
         ) : null}

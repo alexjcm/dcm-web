@@ -1,8 +1,8 @@
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { CalendarDays, ChevronRight, Info } from "lucide-react";
 
-import { ContributionModal, type ContributionPayload } from "../components/contributions/contribution-modal";
+import type { ContributionPayload } from "../components/contributions/contribution-modal";
 import { Card } from "../components/ui/card";
 import { SectionLoader } from "../components/ui/loaders";
 import { getContributionCellState } from "../components/ui/state-badge";
@@ -23,6 +23,11 @@ type SelectedCell = {
   month: number;
   existingContribution: Contribution | null;
 };
+
+const ContributionModal = lazy(async () => {
+  const module = await import("../components/contributions/contribution-modal");
+  return { default: module.ContributionModal };
+});
 
 const monthList = Array.from({ length: 12 }, (_, index) => index + 1);
 
@@ -61,7 +66,7 @@ const getStateLabel = (state: SummaryContributor["state"]): string => {
 const getCellStyle = (state: ReturnType<typeof getContributionCellState>): string => {
   switch (state) {
     case "pending":
-      return "border-slate-200 bg-slate-50 text-slate-400";
+      return "border-slate-300 bg-slate-50 text-slate-700";
     case "incomplete":
       return "border-amber-200 bg-amber-50 text-amber-700 shadow-inner shadow-amber-100/50";
     case "complete":
@@ -69,7 +74,7 @@ const getCellStyle = (state: ReturnType<typeof getContributionCellState>): strin
     case "overpaid":
       return "border-indigo-200 bg-indigo-50 text-indigo-700 shadow-inner shadow-indigo-100/50";
     default:
-      return "border-slate-200 bg-slate-50 text-slate-400";
+      return "border-slate-300 bg-slate-50 text-slate-700";
   }
 };
 
@@ -205,7 +210,7 @@ export const AnnualPage = () => {
                 <p className="text-sm text-slate-500">
                   Control del año completo para detectar pendientes e incompletos y corregirlos rápido.
                 </p>
-                <p className="mt-1 text-xs font-medium text-slate-400">La eliminación de aportes se realiza desde Registro.</p>
+                <p className="mt-1 text-xs font-medium text-slate-600">La eliminación de aportes se realiza desde Registro.</p>
               </div>
             </div>
           </div>
@@ -235,9 +240,9 @@ export const AnnualPage = () => {
                 <div className="min-w-0">
                   <div className="flex items-center gap-3">
                     <div className="min-w-0">
-                      <p className="truncate font-bold text-slate-900">{contributor.name}</p>
-                      <p className="mt-1 text-xs font-medium text-slate-500">{getStateLabel(contributor.state)}</p>
-                    </div>
+                              <p className="truncate font-bold text-slate-900">{contributor.name}</p>
+                              <p className="mt-1 text-xs font-medium text-slate-500">{getStateLabel(contributor.state)}</p>
+                            </div>
                   </div>
                 </div>
                 <div className="text-right">
@@ -266,7 +271,7 @@ export const AnnualPage = () => {
                       }`}
                       disabled={!canMutateCurrentPeriod || contributor.status === 0}
                     >
-                      <div className="text-[10px] font-bold uppercase tracking-wide">
+                      <div className="text-[10px] font-bold uppercase tracking-wide text-current">
                         {getMonthLabel(month)}
                         {isCurrentMonth ? " • hoy" : ""}
                       </div>
@@ -292,7 +297,7 @@ export const AnnualPage = () => {
                 Incompletos: {currentMonthIncompleteCount}
               </span>
               <div className="h-4 w-px bg-slate-200" />
-              <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+              <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-600">
                 <div className="flex items-center gap-2">
                   <span className="h-2.5 w-2.5 rounded border border-emerald-200 bg-emerald-50"></span>
                   Completo
@@ -427,39 +432,41 @@ export const AnnualPage = () => {
         </div>
       </div>
 
-      <ContributionModal
-        open={Boolean(selectedCell)}
-        contributors={summary.data.contributors
-          .filter((item) => item.status === 1)
-          .map((item) => ({
-            id: item.contributorId,
-            name: item.name,
-            email: item.email,
-            status: item.status,
-            createdAt: "",
-            createdBy: "",
-            updatedAt: "",
-            updatedBy: ""
-          }))}
-        monthlyAmountCents={monthlyAmountCents}
-        defaultYear={activeYear}
-        defaultMonth={selectedCell?.month ?? currentBusinessMonth}
-        initialContribution={selectedCell?.existingContribution}
-        fixedContributorId={selectedCell?.contributor.contributorId}
-        fixedMonth={selectedCell?.month}
-        lockedReason={
-          selectedCell
-            ? !canMutateCurrentPeriod
-              ? contributionRestrictionMessage
-              : selectedCell.contributor.status === 0
-                ? "Contribuyente inactivo: no editable."
-                : null
-            : null
-        }
-        submitting={submitting}
-        onClose={() => setSelectedCell(null)}
-        onSubmit={handleSave}
-      />
+      {selectedCell ? (
+        <Suspense fallback={null}>
+          <ContributionModal
+            open={Boolean(selectedCell)}
+            contributors={summary.data.contributors
+              .filter((item) => item.status === 1)
+              .map((item) => ({
+                id: item.contributorId,
+                name: item.name,
+                email: item.email,
+                status: item.status,
+                createdAt: "",
+                createdBy: "",
+                updatedAt: "",
+                updatedBy: ""
+              }))}
+            monthlyAmountCents={monthlyAmountCents}
+            defaultYear={activeYear}
+            defaultMonth={selectedCell.month}
+            initialContribution={selectedCell.existingContribution}
+            fixedContributorId={selectedCell.contributor.contributorId}
+            fixedMonth={selectedCell.month}
+            lockedReason={
+              !canMutateCurrentPeriod
+                ? contributionRestrictionMessage
+                : selectedCell.contributor.status === 0
+                  ? "Contribuyente inactivo: no editable."
+                  : null
+            }
+            submitting={submitting}
+            onClose={() => setSelectedCell(null)}
+            onSubmit={handleSave}
+          />
+        </Suspense>
+      ) : null}
     </div>
   );
 };

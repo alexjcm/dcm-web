@@ -33,8 +33,8 @@ export const YearSelect = ({
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-tighter text-slate-400">
-        <Calendar size={14} className="text-slate-400" />
+      <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-tighter text-slate-600">
+        <Calendar size={14} className="text-slate-500" />
         Año
       </div>
       <Select

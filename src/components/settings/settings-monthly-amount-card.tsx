@@ -22,7 +22,7 @@ export const SettingsMonthlyAmountCard = ({
 }: SettingsMonthlyAmountCardProps) => {
   return (
     <Card
-      className="mx-auto w-full max-w-md xl:mx-0 xl:max-w-none"
+      className="w-full"
       header={
         <div className="flex items-center gap-2">
           <Settings size={18} className="text-primary-600" />
