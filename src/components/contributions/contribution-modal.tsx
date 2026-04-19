@@ -204,7 +204,7 @@ export const ContributionModal = ({
                     ))}
                   </Select>
 
-                  <div className="sm:col-span-2 grid gap-4 sm:grid-cols-2">
+                  <div className="sm:col-span-2 grid gap-4 grid-cols-2">
                     <Input
                       label="Año"
                       type="number"
@@ -216,7 +216,7 @@ export const ContributionModal = ({
                     />
 
                     <Select
-                      label="Mes Correspondiente"
+                      label="Mes"
                       value={form.month}
                       onChange={(event) => setForm((previous) => ({ ...previous, month: event.target.value }))}
                       disabled={!canEditMonth || submitting}

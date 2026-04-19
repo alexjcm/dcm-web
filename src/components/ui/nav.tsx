@@ -9,12 +9,14 @@ import {
   UserCircle
 } from "lucide-react";
 
+import { Menu, MenuButton, MenuItem, MenuItems, Transition } from "@headlessui/react";
+import { Fragment } from "react";
+
 import { APP_PERMISSIONS } from "../../config/permissions";
 import { useAppContext } from "../../context/app-context";
-import { Button } from "./button";
 
 export const AppNav = () => {
-  const { logout } = useAuth0();
+  const { user, logout } = useAuth0();
   const { userEmail, hasPermission, contributionRestrictionMessage } = useAppContext();
   const canManageSettings = hasPermission(APP_PERMISSIONS.settingsWrite);
 
@@ -31,38 +33,62 @@ export const AppNav = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between gap-4">
           <div className="flex flex-col">
-            <h1 className="text-[1.75rem] font-bold leading-none text-neutral-900 sm:text-[2rem]">Aportes Familiares</h1>
-            <span className="mt-1 text-[10px] font-bold uppercase tracking-[0.24em] text-primary-600">
+            <h1 className="text-[16px] font-bold uppercase tracking-[0.24em] text-primary-600 sm:text-[18px]">
               Portal DCM
-            </span>
+            </h1>
           </div>
 
-          <div className="hidden items-center gap-4 lg:flex">
-            <div className="flex items-center gap-2 rounded-full border border-primary-100 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700">
-              <UserCircle size={16} className="text-primary-600" />
-              <span className="max-w-[150px] truncate">{userEmail ?? "Usuario"}</span>
-            </div>
+          <div className="flex items-center">
+            <Menu as="div" className="relative z-50">
+              <MenuButton className="flex items-center justify-center rounded-full border border-primary-200 bg-white p-0.5 shadow-sm transition hover:ring-4 hover:ring-primary-100 focus:outline-none">
+                {user?.picture ? (
+                  <img src={user.picture} alt={user?.name ?? "Usuario"} className="h-9 w-9 rounded-full object-cover" />
+                ) : (
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-50 text-primary-600">
+                    <UserCircle size={20} />
+                  </div>
+                )}
+              </MenuButton>
 
-            <Button 
-              variant="outline" 
-              size="sm" 
-              icon={LogOut} 
-              onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-            >
-              Salir
-            </Button>
-          </div>
-
-          <div className="flex lg:hidden">
-            <Button
-              variant="outline"
-              size="sm"
-              icon={LogOut}
-              onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
-              aria-label="Salir"
-            >
-              Salir
-            </Button>
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-100"
+                enterFrom="transform opacity-0 scale-95"
+                enterTo="transform opacity-100 scale-100"
+                leave="transition ease-in duration-75"
+                leaveFrom="transform opacity-100 scale-100"
+                leaveTo="transform opacity-0 scale-95"
+              >
+                <MenuItems className="absolute right-0 mt-2 w-64 origin-top-right divide-y divide-border rounded-[1.25rem] border border-border bg-white shadow-[0_10px_35px_rgba(0,0,0,0.08)] ring-1 ring-black/5 focus:outline-none">
+                  <div className="px-5 py-4">
+                    <p className="truncate text-sm font-extrabold text-neutral-900">
+                      {user?.name ?? "Usuario"}
+                    </p>
+                    <p className="mb-2 truncate text-xs font-semibold text-neutral-500">
+                      {userEmail ?? user?.email ?? "Cargando sesión..."}
+                    </p>
+                    <div className="inline-flex items-center gap-1.5 rounded-lg border border-warning-200 bg-warning-50 px-2 py-1 text-[10px] font-bold uppercase tracking-widest text-warning-800 shadow-sm">
+                      <span>{canManageSettings ? "🛡️ Administrador" : "👀 Modo Lectura"}</span>
+                    </div>
+                  </div>
+                  <div className="p-2">
+                    <MenuItem>
+                      {({ focus }) => (
+                        <button
+                          onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
+                          className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold transition-colors ${
+                            focus ? "bg-danger-50 text-danger-700" : "text-neutral-700"
+                          }`}
+                        >
+                          <LogOut size={16} className={focus ? "text-danger-600" : "text-neutral-400 group-hover:text-danger-600"} />
+                          Cerrar Sesión
+                        </button>
+                      )}
+                    </MenuItem>
+                  </div>
+                </MenuItems>
+              </Transition>
+            </Menu>
           </div>
         </div>
 

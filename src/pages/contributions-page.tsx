@@ -248,7 +248,7 @@ export const ContributionsPage = () => {
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-start lg:gap-8 w-full md:w-auto">
             <div className="flex items-center justify-between gap-4 w-full lg:w-auto">
-              <h2 className="text-2xl md:text-2xl font-extrabold tracking-tight text-neutral-900 line-clamp-1">Aportes</h2>
+              <h2 className="text-2xl md:text-2xl font-extrabold tracking-tight text-neutral-900 line-clamp-1">Aportes Familiares</h2>
               <YearSelect
                 activeYear={activeYear}
                 currentBusinessYear={currentBusinessYear}
@@ -473,7 +473,7 @@ export const ContributionsPage = () => {
         </div>
       </div>
 
-      {selectedCell ? (
+      {selectedCell || isGlobalModalOpen ? (
         <Suspense fallback={null}>
           <ContributionModal
             open={Boolean(selectedCell) || isGlobalModalOpen}

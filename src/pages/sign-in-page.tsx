@@ -77,8 +77,8 @@ export const SignInPage = () => {
               <ShieldCheck size={28} />
             </div>
             <div>
-              <p className="text-[13px] font-bold uppercase tracking-[0.22em] text-primary-600 sm:text-[15px]">Plataforma DCM</p>
-              <h1 className="mt-2 text-[1.95rem] leading-[0.96] text-neutral-900 sm:text-[2.5rem]">Aportes Familiares</h1>
+              <p className="text-base font-bold uppercase tracking-[0.22em] text-primary-600 sm:text-lg">Portal DCM</p>
+              <h1 className="mt-1.5 text-lg font-medium leading-relaxed text-neutral-700 sm:text-xl">Gestión de Aportes Familiares</h1>
             </div>
           </div>
 
