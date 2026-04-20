@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 
 import { APP_PERMISSIONS } from "../../config/permissions";
 import { useAppContext } from "../../context/app-context";
@@ -20,6 +20,8 @@ import { useTheme } from "../../hooks/use-theme";
 export const AppNav = () => {
   const { user, logout } = useAuth0();
   const { userEmail, hasPermission, contributionRestrictionMessage } = useAppContext();
+  const [imageError, setImageError] = useState(false);
+  const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : "U");
   const { theme, toggle } = useTheme();
   const canManageSettings = hasPermission(APP_PERMISSIONS.settingsWrite);
   const canEditContributions = hasPermission(APP_PERMISSIONS.contributionsWrite);
@@ -76,11 +78,19 @@ export const AppNav = () => {
 
             <Menu as="div" className="relative z-50">
               <MenuButton className="flex items-center justify-center rounded-full border border-primary-200 bg-white p-0.5 shadow-sm transition hover:ring-4 hover:ring-primary-100 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:hover:ring-primary-900/40">
-                {user?.picture ? (
-                  <img src={user.picture} alt={user?.name ?? "Usuario"} className="h-9 w-9 rounded-full object-cover" />
+                {user?.picture && !imageError ? (
+                  <img 
+                    src={user.picture} 
+                    alt={user?.name ?? "Usuario"} 
+                    className="h-9 w-9 rounded-full object-cover" 
+                    onError={() => {
+                      console.warn(`[Avatar] Failed to load image from external provider. Using fallback initals for: ${user?.name ?? user?.email ?? 'Unknown'}`);
+                      setImageError(true);
+                    }}
+                  />
                 ) : (
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-50 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400">
-                    <UserCircle size={20} />
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-100 text-sm font-bold text-primary-800 dark:bg-primary-800/40 dark:text-primary-200">
+                    {userInitial}
                   </div>
                 )}
               </MenuButton>
