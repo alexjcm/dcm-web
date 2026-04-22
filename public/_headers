@@ -4,7 +4,7 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.googleusercontent.com https://avatars.githubusercontent.com https://s.gravatar.com https://cdn.auth0.com https://*.wp.com; connect-src 'self' https://dev-mz3wmzwe2532icvg.us.auth0.com https://api.contributions https://contributions-api.alex-test-jcm.workers.dev http://localhost:8787 ws://localhost:*; frame-src 'self' https://dev-mz3wmzwe2532icvg.us.auth0.com; base-uri 'self'; object-src 'none'; form-action 'self' https://dev-mz3wmzwe2532icvg.us.auth0.com; frame-ancestors 'none';
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.googleusercontent.com https://avatars.githubusercontent.com https://s.gravatar.com https://cdn.auth0.com https://*.wp.com; connect-src 'self' https://dev-mz3wmzwe2532icvg.us.auth0.com https://api.contributions https://dcm-api.api-dcm.workers.dev http://localhost:8787 ws://localhost:*; frame-src 'self' https://dev-mz3wmzwe2532icvg.us.auth0.com; base-uri 'self'; object-src 'none'; form-action 'self' https://dev-mz3wmzwe2532icvg.us.auth0.com; frame-ancestors 'none';
 
 # Cache Control for static assets
 /assets/*

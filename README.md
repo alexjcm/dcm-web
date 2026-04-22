@@ -1,4 +1,4 @@
-# contributions-web
+# dcm-web
 
 Family Contributions Management Frontend (React + Vite + Tailwind + Auth0 SPA SDK).
 
