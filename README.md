@@ -52,7 +52,7 @@ npm run build
 ## PWA
 - The app can be installed as an internal PWA on supported browsers.
 - Installation is available from the authenticated app shell when the browser exposes an install prompt.
-- On iPhone/iPad, install manually from Safari using `Share > Add to Home Screen`.
+- On iPhone/iPad, install manually from Safari or Chrome using `Share > Add to Home Screen`.
 - Offline support is limited to the application shell/UI and previously downloaded static assets.
 - Authentication with Auth0, token renewal, API reads, and API writes still require network connectivity.
 - Updates are user-confirmed; the app does not auto-reload when a new version is detected.

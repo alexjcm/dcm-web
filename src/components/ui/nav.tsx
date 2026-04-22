@@ -112,7 +112,7 @@ export const AppNav = () => {
     }
 
     toast.message("Instalación en iPhone o iPad", {
-      description: "Abre esta app en Safari y usa Compartir > Añadir a pantalla de inicio."
+      description: "Abre esta app en Safari o Chrome y usa Compartir > Añadir a pantalla de inicio."
     });
   };
 
@@ -128,8 +128,8 @@ export const AppNav = () => {
 
           <div className="flex items-center gap-2">
             {!isOnline && (
-              <div className="hidden items-center gap-2 rounded-full border border-warning-300 bg-warning-50/90 px-3 py-1.5 text-xs font-bold text-warning-900 shadow-sm dark:border-warning-700 dark:bg-warning-950/70 dark:text-warning-200 md:flex">
-                <WifiOff size={14} />
+              <div className="hidden items-center gap-2 rounded-full border border-warning-300 bg-warning-50/90 px-3 py-1.5 text-xs font-bold text-warning-900 shadow-sm dark:border-warning-400/70 dark:bg-warning-400/16 dark:text-warning-50 md:flex">
+                <WifiOff size={14} className="dark:text-warning-200" />
                 Sin conexión
               </div>
             )}
@@ -252,8 +252,8 @@ export const AppNav = () => {
 
         {!isOnline && (
           <div className="mb-4">
-            <div className="flex items-center gap-2 rounded-xl border border-warning-300 bg-warning-50/90 px-3 py-2 text-xs font-medium text-warning-900 shadow-sm animate-in fade-in slide-in-from-top-1 dark:border-warning-700 dark:bg-warning-950/60 dark:text-warning-200">
-              <WifiOff size={14} className="shrink-0" />
+            <div className="flex items-center gap-2 rounded-xl border border-warning-300 bg-warning-50/90 px-3 py-2 text-xs font-medium text-warning-900 shadow-sm animate-in fade-in slide-in-from-top-1 dark:border-warning-400/70 dark:bg-warning-400/16 dark:text-warning-50 dark:shadow-[0_0_0_1px_rgba(251,191,36,0.08)]">
+              <WifiOff size={14} className="shrink-0 dark:text-warning-200" />
               Sin conexión: la interfaz sigue disponible, pero Auth0 y la API requieren red para renovar sesión, consultar datos y guardar cambios.
             </div>
           </div>
