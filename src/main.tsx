@@ -47,8 +47,8 @@ const ConfigErrorView = () => (
   }}>
     <h1 style={{ color: '#ef4444' }}>Configuración incompleta</h1>
     <p style={{ color: '#6b7280', maxWidth: '400px' }}>
-      La aplicación no puede iniciar porque faltan variables de entorno críticas. 
-      Por favor, verifica la configuración en el panel de administración de tu proveedor de hosting.
+      La aplicación web no puede iniciar porque faltan variables de entorno. 
+      Por favor, verifica configuración en el panel de administración de tu proveedor de hosting.
     </p>
   </div>
 );
