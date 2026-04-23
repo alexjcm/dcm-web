@@ -13,7 +13,7 @@ import {
 import { PageLoader } from "../components/ui/loaders";
 import { Button } from "../components/ui/button";
 import { useOnlineStatus } from "../hooks/use-online-status";
-import { isAuthNetworkError } from "../lib/auth-session";
+import { isAuthNetworkError, getFriendlyAuthErrorMessage } from "../lib/auth-session";
 
 export const SignInPage = () => {
   const { isLoading, isAuthenticated, error, loginWithRedirect } = useAuth0();
@@ -106,21 +106,23 @@ export const SignInPage = () => {
           ) : null}
 
           {autoRedirectError ? (
-            <div className="mb-6 flex items-start gap-3 rounded-[var(--radius-alert)] border border-danger-300 bg-danger-100/70 p-4 animate-in slide-in-from-top-2 dark:border-danger-800 dark:bg-danger-950/60">
+            <div className="mb-6 flex items-start gap-3 rounded-[var(--radius-alert)] border border-danger-400 bg-danger-100 p-4 animate-in slide-in-from-top-2 dark:border-danger-700 dark:bg-danger-950">
               <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-danger-600" />
-              <p className="text-sm font-semibold leading-relaxed text-danger-900 dark:text-danger-300">
+              <p className="text-sm font-bold leading-relaxed text-danger-950 dark:text-danger-200">
                 {autoRedirectError}
               </p>
             </div>
           ) : null}
 
           {error ? (
-            <div className="mb-6 flex items-start gap-3 rounded-[var(--radius-alert)] border border-danger-300 bg-danger-100/70 p-4 animate-in slide-in-from-top-2 dark:border-danger-800 dark:bg-danger-950/60">
+            <div className="mb-6 flex items-start gap-3 rounded-[var(--radius-alert)] border border-danger-300 bg-danger-100 p-4 animate-in slide-in-from-top-2 dark:border-danger-800 dark:bg-danger-900">
               <div className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-danger-600" />
-              <p className="text-sm font-semibold leading-relaxed text-danger-900 dark:text-danger-300">
-                {isAuthNetworkError(error)
-                  ? "No fue posible contactar Auth0. Verifica tu conexión e inténtalo de nuevo."
-                  : error.message}
+              <p className="text-sm font-bold leading-relaxed text-danger-900 dark:text-danger-50">
+                {(() => {
+                  console.error("Original error:", error);
+                  console.groupEnd();
+                  return getFriendlyAuthErrorMessage(error);
+                })()}
               </p>
             </div>
           ) : null}

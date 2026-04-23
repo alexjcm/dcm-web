@@ -27,14 +27,14 @@ export const SettingsPage = () => {
 
   if (!hasPermission(APP_PERMISSIONS.settingsWrite)) {
     return (
-      <Card className="border-danger-300 bg-danger-100/50 dark:border-danger-800 dark:bg-danger-950/50">
-        <div className="flex items-center gap-3 text-danger-900 dark:text-danger-300">
+      <Card className="border-danger-300 bg-danger-100 dark:border-danger-800 dark:bg-danger-900">
+        <div className="flex items-center gap-3 text-danger-900 dark:text-danger-50">
           <ShieldAlert size={20} />
           <p className="text-sm font-bold uppercase tracking-wider">Acceso Restringido</p>
         </div>
-        <p className="mt-2 text-sm leading-relaxed text-danger-800 dark:text-danger-400">
+        <p className="mt-2 text-sm leading-relaxed text-danger-900 dark:text-danger-200">
           Esta sección está reservada para administradores. Se requiere el permiso{" "}
-          <code className="rounded bg-danger-100 px-1.5 py-0.5 font-bold text-danger-900 dark:bg-danger-900/40 dark:text-danger-200">{APP_PERMISSIONS.settingsWrite}</code> para realizar cambios en la configuración global.
+          <code className="rounded bg-danger-200 px-1.5 py-0.5 font-bold text-danger-950 dark:bg-danger-800 dark:text-danger-100">{APP_PERMISSIONS.settingsWrite}</code> para realizar cambios en la configuración global.
         </p>
       </Card>
     );

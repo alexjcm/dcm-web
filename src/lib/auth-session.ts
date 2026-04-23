@@ -95,3 +95,23 @@ export const normalizeApiErrorDetail = (status: number, code: string, detail: st
 
   return detail;
 };
+
+export const getFriendlyAuthErrorMessage = (error: unknown): string | null => {
+  if (!error || !isRecord(error)) {
+    return null;
+  }
+
+  const message = (error.message as string) || "";
+  const code = getAuthErrorCode(error);
+
+  if (isAuthNetworkError(error)) {
+    return AUTH_NETWORK_ERROR_MESSAGE;
+  }
+
+  // Handle unauthorized client/audience mismatch
+  if (code === "unauthorized" || message.toLowerCase().includes("not authorized to access resource server")) {
+    return "No se pudo iniciar el acceso al sistema. Es posible que falte una configuración de permisos en el proveedor de identidad. Por favor, contacta al administrador.";
+  }
+
+  return message || "Ocurrió un problema inesperado durante la autenticación.";
+};

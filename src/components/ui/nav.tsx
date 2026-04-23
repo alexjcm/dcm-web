@@ -247,7 +247,7 @@ export const AppNav = () => {
 
         {contributionRestrictionMessage && (
           <div className="mb-4">
-            <div className="flex items-center gap-2 rounded-xl border border-primary-200 bg-primary-50/80 px-3 py-2 text-xs font-medium text-primary-900 shadow-sm animate-in fade-in slide-in-from-top-1 dark:border-primary-800 dark:bg-primary-950/50 dark:text-primary-200">
+            <div className="flex items-center gap-2 rounded-xl border border-primary-300 bg-primary-100 px-3 py-2 text-xs font-bold text-primary-900 shadow-sm animate-in fade-in slide-in-from-top-1 dark:border-primary-700 dark:bg-primary-900 dark:text-primary-50">
               <span className="flex h-1.5 w-1.5 rounded-full bg-primary-500"></span>
               {contributionRestrictionMessage}
             </div>

@@ -51,7 +51,7 @@ export const SummaryPage = () => {
 
   if (summary.error) {
     return (
-      <div className="rounded-[var(--radius-alert)] border border-danger-300 bg-danger-100/70 p-4 text-sm font-medium text-danger-900 animate-in fade-in slide-in-from-top-1 dark:border-danger-400/70 dark:bg-danger-400/16 dark:text-danger-50 dark:shadow-[0_0_0_1px_rgba(251,113,133,0.08)]">
+      <div className="rounded-[var(--radius-alert)] border border-danger-300 bg-danger-100 p-4 text-sm font-bold text-danger-900 animate-in fade-in slide-in-from-top-1 dark:border-danger-800 dark:bg-danger-900 dark:text-danger-50">
         No se pudo cargar el resumen: {summary.error}
       </div>
     );

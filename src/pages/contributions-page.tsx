@@ -116,7 +116,7 @@ export const ContributionsPage = () => {
 
   if (summary.error) {
     return (
-      <div className="rounded-[var(--radius-alert)] border border-rose-200 bg-rose-50 p-4 text-sm font-medium text-rose-800 animate-in fade-in dark:border-rose-900 dark:bg-rose-950/60 dark:text-rose-300">
+      <div className="rounded-[var(--radius-alert)] border border-danger-300 bg-danger-100 p-4 text-sm font-bold text-danger-900 animate-in fade-in dark:border-danger-800 dark:bg-danger-900 dark:text-danger-50">
         No se pudo cargar el resumen anual: {summary.error}
       </div>
     );
@@ -124,7 +124,7 @@ export const ContributionsPage = () => {
 
   if (allContributions.error) {
     return (
-      <div className="rounded-[var(--radius-alert)] border border-danger-200 bg-danger-50 p-4 text-sm font-medium text-danger-800 animate-in fade-in dark:border-danger-900 dark:bg-danger-950/60 dark:text-danger-300">
+      <div className="rounded-[var(--radius-alert)] border border-danger-300 bg-danger-100 p-4 text-sm font-bold text-danger-900 animate-in fade-in dark:border-danger-800 dark:bg-danger-900 dark:text-danger-50">
         No se pudo cargar el detalle mensual: {allContributions.error}
       </div>
     );
