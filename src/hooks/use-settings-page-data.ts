@@ -9,7 +9,7 @@ export const useSettingsPageData = () => {
   const settings = useSettings();
   const contributors = useContributors("all");
 
-  const [amountInput, setAmountInput] = useState<string>("32.00");
+  const [amountInput, setAmountInput] = useState<string>("32,00");
   const [pendingAmountCents, setPendingAmountCents] = useState<number | null>(null);
 
   useEffect(() => {

@@ -27,7 +27,7 @@ export const SettingsMonthlyAmountCard = ({
       header={
         <div className="flex items-center gap-2 text-neutral-900 dark:text-neutral-100">
           <Coins size={18} className="text-primary-700 dark:text-primary-400" />
-          Monto Base Mensual (USD)
+          Monto Base Mensual
         </div>
       }
     >
@@ -39,15 +39,25 @@ export const SettingsMonthlyAmountCard = ({
             <p className="text-sm leading-6 text-neutral-600 dark:text-neutral-400">
               Establece el aporte mensual sugerido para los contribuyentes.
             </p>
-            <Input
-              type="text"
-              inputMode="decimal"
-              value={amountInput}
-              onChange={(event) => onAmountChange(event.target.value)}
-            />
-            <Button icon={Save} onClick={onRequestUpdate} isLoading={saving} className="w-full">
-              Actualizar Monto
-            </Button>
+            <div className="flex items-end gap-2">
+              <div className="min-w-0 flex-1">
+                <Input
+                  type="text"
+                  inputMode="decimal"
+                  prefix="$"
+                  value={amountInput}
+                  onChange={(event) => onAmountChange(event.target.value)}
+                />
+              </div>
+              <Button
+                icon={Save}
+                onClick={onRequestUpdate}
+                isLoading={saving}
+                className="h-[42px] shrink-0 whitespace-nowrap px-3.5"
+              >
+                Actualizar Monto
+              </Button>
+            </div>
           </>
         )}
       </div>

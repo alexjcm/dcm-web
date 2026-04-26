@@ -25,7 +25,7 @@ VITE_API_BASE_URL=http://localhost:8787
 - Login/logout with Auth0 Login.
 - The frontend requests an access token with `audience`.
 - Detailed Documentation:
-  - **[RBAC Architecture](./docs/RBAC.md)**: Permissions and roles model.
+  - **[RBAC Architecture](../dcm-api/docs/RBAC.md)**: Permissions and roles model.
   - **[Auth0 Configuration](./docs/auth0-setup.md)**: Session flows and identity security.
   - **[Theme System](./docs/THEME.md)**: Dark/light mode documentation and visual tokens.
 

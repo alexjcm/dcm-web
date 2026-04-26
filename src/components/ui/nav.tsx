@@ -34,7 +34,6 @@ export const AppNav = () => {
   const canManageSettings = hasPermission(APP_PERMISSIONS.settingsWrite);
   const canEditContributions = hasPermission(APP_PERMISSIONS.contributionsWrite);
   const showIosInstallHint = useMemo(() => isAppleMobileDevice() && !isStandalone, [isStandalone]);
-  const appVersionLabel = `Versión ${__APP_VERSION__}`;
 
   const getRoleInfo = () => {
     if (canManageSettings) {
@@ -180,9 +179,6 @@ export const AppNav = () => {
                     </p>
                     <p className="mb-2 truncate text-xs font-semibold text-neutral-500 dark:text-neutral-400">
                       {userEmail ?? user?.email ?? "Cargando sesión..."}
-                    </p>
-                    <p className="mb-3 text-[11px] font-medium tracking-[0.02em] text-neutral-500 dark:text-neutral-400">
-                      {appVersionLabel}
                     </p>
                     <div className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[10px] font-bold uppercase tracking-widest shadow-sm ${role.styles}`}>
                       <span>{role.label}</span>

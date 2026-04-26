@@ -1,4 +1,4 @@
-import { Check, Edit2, Mail, Plus, Trash2, Users } from "lucide-react";
+import { Check, Edit2, Plus, Trash2, Users } from "lucide-react";
 
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
@@ -38,7 +38,7 @@ export const SettingsContributorsCard = ({
             <span className="hidden rounded-full border border-primary-200 bg-[rgba(255,255,255,0.92)] px-2.5 py-1 text-[11px] font-bold text-neutral-600 dark:border-primary-500/20 dark:bg-primary-500/10 dark:text-primary-300 sm:inline-block">
               {contributors.length} registros
             </span>
-            <Button size="sm" icon={Plus} onClick={onCreateContributor} className="w-full sm:w-auto">
+            <Button size="sm" icon={Plus} onClick={onCreateContributor} className="w-full text-sm sm:w-auto">
               Nuevo contribuyente
             </Button>
           </div>
@@ -50,28 +50,32 @@ export const SettingsContributorsCard = ({
         <table className="w-full text-sm">
           <thead className="border-b border-border bg-primary-50/60 dark:bg-primary-900/20">
             <tr>
-              <th className="px-6 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Nombres</th>
-              <th className="px-6 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Estado</th>
-              <th className="px-6 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400">Acciones</th>
+              <th className="px-2 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 sm:px-4 md:px-6">Nombres</th>
+              <th className="hidden px-2 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 sm:px-4 md:table-cell md:px-6">Estado</th>
+              <th className="pl-6 pr-2 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 sm:pl-7 sm:pr-4 md:px-6">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border dark:divide-white/5">
             {contributors.map((contributor) => (
               <tr key={contributor.id} className="group transition-colors hover:bg-primary-50/50 dark:hover:bg-primary-900/10">
-                <td className="px-6 py-3.5">
+                <td className="px-2 py-3.5 sm:px-4 md:px-6">
                   <div>
                     <div className="font-bold leading-tight text-neutral-900 dark:text-neutral-100">{contributor.name}</div>
-                    <div className="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-neutral-600 dark:text-neutral-400">
-                      <Mail size={10} />
-                      {contributor.email ?? "Sin correo"}
+                    <div className="mt-1 md:hidden">
+                      <ContributorStatusBadge status={contributor.status} />
                     </div>
+                    {contributor.email?.trim() ? (
+                      <div className="mt-0.5 text-[11px] font-medium text-neutral-600 dark:text-neutral-400">
+                        {contributor.email}
+                      </div>
+                    ) : null}
                   </div>
                 </td>
-                <td className="px-6 py-3.5">
+                <td className="hidden px-2 py-3.5 sm:px-4 md:table-cell md:px-6">
                   <ContributorStatusBadge status={contributor.status} />
                 </td>
-                <td className="px-6 py-3.5">
-                  <div className="flex flex-wrap justify-start gap-2">
+                <td className="align-top pl-6 pr-2 py-3.5 sm:pl-7 sm:pr-4 md:px-6">
+                  <div className="flex flex-nowrap items-start justify-start gap-2">
                     <Button
                       variant="outline"
                       size="sm"
@@ -81,9 +85,10 @@ export const SettingsContributorsCard = ({
                     />
                     <Button
                       size="sm"
-                      variant={contributor.status === 1 ? "danger" : "secondary"}
+                      variant={contributor.status === 1 ? "outline" : "secondary"}
                       icon={contributor.status === 1 ? Trash2 : Check}
                       onClick={() => onToggleContributorStatus(contributor)}
+                      className={`whitespace-nowrap ${contributor.status === 1 ? "!px-2.5 !border-danger-300 !bg-danger-50/80 !text-danger-700 hover:!border-danger-400 hover:!bg-danger-100 dark:!border-danger-700/70 dark:!bg-danger-900/25 dark:!text-danger-300 dark:hover:!bg-danger-900/40" : ""}`}
                       aria-label={contributor.status === 1 ? "Desactivar contribuyente" : "Activar contribuyente"}
                     >
                       {contributor.status === 1 ? "Desactivar" : "Activar"}

@@ -5,10 +5,11 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
   icon?: LucideIcon;
+  prefix?: string;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, icon: Icon, className = "", ...props }, ref) => {
+  ({ label, error, icon: Icon, prefix, className = "", ...props }, ref) => {
     const generatedId = useId();
     const inputId = props.id ?? generatedId;
 
@@ -25,6 +26,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               <Icon size={18} />
             </div>
           )}
+          {prefix && !Icon && (
+            <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-neutral-500 dark:text-neutral-400">
+              {prefix}
+            </div>
+          )}
           <input
             ref={ref}
             id={inputId}
@@ -34,7 +40,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-400
               disabled:cursor-not-allowed disabled:opacity-50
               dark:bg-neutral-800 dark:text-neutral-100 dark:placeholder:text-neutral-500
-              ${Icon ? "pl-10 pr-3" : "px-3"}
+              ${Icon ? "pl-10 pr-3" : prefix ? "pl-8 pr-3" : "px-3"}
               ${error ? "border-danger-500 focus:border-danger-500 focus:ring-danger-500" : ""}
               ${className}
             `}

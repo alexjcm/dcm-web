@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, useNavigate } from "react-router";
 
 import { App } from "./App";
+import { AppVersionFooter } from "./components/ui/app-version-footer";
 import { AUTH0_AUDIENCE, AUTH0_CLIENT_ID, AUTH0_DOMAIN, IS_AUTH_CONFIG_VALID } from "./config/auth";
 import { AppContextProvider } from "./context/app-context";
 import { clearSessionRecoveryAttempt, normalizeReturnTo } from "./lib/auth-navigation";
@@ -35,21 +36,15 @@ if (!rootElement) {
 }
 
 const ConfigErrorView = () => (
-  <div style={{ 
-    display: 'flex', 
-    flexDirection: 'column',
-    alignItems: 'center', 
-    justifyContent: 'center', 
-    height: '100vh',
-    fontFamily: 'sans-serif',
-    textAlign: 'center',
-    padding: '20px'
-  }}>
-    <h1 style={{ color: '#ef4444' }}>Configuración incompleta</h1>
-    <p style={{ color: '#6b7280', maxWidth: '400px' }}>
-      La aplicación web no puede iniciar porque faltan variables de entorno. 
-      Por favor, verifica configuración en el panel de administración de tu proveedor de hosting.
-    </p>
+  <div className="flex min-h-screen flex-col bg-background">
+    <main className="flex flex-1 flex-col items-center justify-center p-5 text-center">
+      <h1 className="text-2xl font-extrabold tracking-tight text-danger-600">Configuración incompleta</h1>
+      <p className="mt-3 max-w-[400px] text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
+        La aplicación web no puede iniciar porque faltan variables de entorno.
+        Por favor, verifica configuración en el panel de administración de tu proveedor de hosting.
+      </p>
+    </main>
+    <AppVersionFooter />
   </div>
 );
 

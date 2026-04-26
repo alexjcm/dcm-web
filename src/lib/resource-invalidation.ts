@@ -10,7 +10,7 @@ export type ResourceKey = (typeof RESOURCE_KEYS)[keyof typeof RESOURCE_KEYS];
 type Snapshot = Record<ResourceKey, number>;
 type Listener = () => void;
 
-const snapshot: Snapshot = {
+let snapshot: Snapshot = {
   [RESOURCE_KEYS.summary]: 0,
   [RESOURCE_KEYS.contributors]: 0,
   [RESOURCE_KEYS.settings]: 0,
@@ -34,9 +34,13 @@ export const invalidateResources = (...keys: ReadonlyArray<ResourceKey>): void =
     return;
   }
 
+  const nextSnapshot: Snapshot = { ...snapshot };
+
   for (const key of keys) {
-    snapshot[key] += 1;
+    nextSnapshot[key] += 1;
   }
+
+  snapshot = nextSnapshot;
 
   for (const listener of listeners) {
     listener();

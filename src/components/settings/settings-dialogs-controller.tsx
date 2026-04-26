@@ -3,7 +3,7 @@ import { toast } from "sonner";
 
 import { useApiClient } from "../../hooks/use-api-client";
 import { useInvalidateResources } from "../../hooks/use-resource-invalidation";
-import { formatCentsAsInputValue } from "../../lib/money";
+import { formatCentsAsCurrency } from "../../lib/money";
 import { RESOURCE_KEYS } from "../../lib/resource-invalidation";
 import type { Contributor } from "../../types/domain";
 import type { ContributorDraft } from "../../types/settings";
@@ -232,8 +232,9 @@ export const SettingsDialogsController = ({
           <ConfirmModal
             open
             title="Confirmar actualización de monto"
-            description={`Se actualizará el monto base mensual a ${formatCentsAsInputValue(pendingAmountCents)} USD. Este cambio impactará los cálculos y resúmenes del sistema.`}
+            description={`Se actualizará el monto base mensual del sistema a: ${formatCentsAsCurrency(pendingAmountCents)}.`}
             confirmLabel="Actualizar monto"
+            compact
             loading={savingAmount}
             onCancel={() => setPendingAmountCents(null)}
             onConfirm={() => {
@@ -253,6 +254,7 @@ export const SettingsDialogsController = ({
             }
             confirmLabel={pendingStatusChange.status === 1 ? "Desactivar" : "Activar"}
             danger={pendingStatusChange.status === 1}
+            compact
             loading={changingStatus}
             onCancel={() => setPendingStatusChange(null)}
             onConfirm={() => {

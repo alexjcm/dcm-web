@@ -1,6 +1,6 @@
 import { lazy, Suspense, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Info } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 import type { ContributionPayload } from "../components/contributions/contribution-modal";
 import { Card } from "../components/ui/card";
@@ -8,6 +8,7 @@ import { ConfirmModal } from "../components/ui/confirm-modal";
 import { Input } from "../components/ui/fields";
 import { Button } from "../components/ui/button";
 import { SectionLoader } from "../components/ui/loaders";
+import { ScreenHelpButton } from "../components/ui/screen-help-button";
 import { getContributionCellState } from "../components/ui/state-badge";
 import { YearSelect } from "../components/ui/year-select";
 import { useAppContext } from "../context/app-context";
@@ -25,6 +26,11 @@ type SelectedCell = {
   contributor: SummaryContributor;
   month: number;
   existingContribution: Contribution | null;
+};
+
+type PendingDelete = {
+  contribution: Contribution;
+  contributorName: string;
 };
 
 const ContributionModal = lazy(async () => {
@@ -81,6 +87,9 @@ const getMutedCellStyle = (state: ReturnType<typeof getContributionCellState>): 
   }
 };
 
+const getFutureCellStyle = (): string =>
+  "border-dashed border-neutral-300 bg-neutral-100/70 text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900/40 dark:text-neutral-500";
+
 export const ContributionsPage = () => {
   const { activeYear, currentBusinessYear, setActiveYear, canMutateCurrentPeriod, contributionRestrictionMessage } =
     useAppContext();
@@ -96,9 +105,10 @@ export const ContributionsPage = () => {
   const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
   const [isGlobalModalOpen, setIsGlobalModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [pendingDelete, setPendingDelete] = useState<Contribution | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedContributorId, setExpandedContributorId] = useState<number | null>(null);
 
   const contributionMap = useMemo(() => {
     const map = new Map<string, Contribution>();
@@ -213,7 +223,7 @@ export const ContributionsPage = () => {
     }
 
     setDeleting(true);
-    const response = await api.delete<Contribution>(`/api/contributions/${pendingDelete.id}`);
+    const response = await api.delete<Contribution>(`/api/contributions/${pendingDelete.contribution.id}`);
     setDeleting(false);
 
     if (!response.ok) {
@@ -221,7 +231,7 @@ export const ContributionsPage = () => {
       return;
     }
 
-    toast.success("Aporte eliminado.");
+    toast.success("Aporte eliminado.", { duration: 5000 });
     setPendingDelete(null);
     setSelectedCell(null);
     invalidateResources(RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
@@ -229,17 +239,43 @@ export const ContributionsPage = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-20 md:pb-6">
-      <header>
+      <header className="-mt-2">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-start lg:gap-8 w-full md:w-auto">
-            <div className="flex items-center justify-between gap-4 w-full lg:w-auto">
-              <h2 className="text-2xl md:text-2xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-100 line-clamp-1">Aportes Familiares</h2>
-              <YearSelect
-                activeYear={activeYear}
-                currentBusinessYear={currentBusinessYear}
-                setActiveYear={setActiveYear}
-                compact
-              />
+            <div className="flex items-center justify-between gap-3 w-full lg:w-auto">
+              <h2 className="text-2xl md:text-2xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-100 line-clamp-1">Aportes</h2>
+              <div className="flex items-center gap-1.5">
+                <YearSelect
+                  activeYear={activeYear}
+                  currentBusinessYear={currentBusinessYear}
+                  setActiveYear={setActiveYear}
+                  compact
+                />
+                <ScreenHelpButton
+                  title="Aportes"
+                  description={
+                    <div className="space-y-2">
+                      <p className="text-sm leading-relaxed">
+                        Selecciona un contribuyente, despliega su panel y toca un mes para registrar o corregir el aporte.
+                      </p>
+                      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-neutral-500 dark:text-neutral-400">
+                        Significado de colores
+                      </p>
+                      <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold uppercase tracking-wide">
+                        <span className="inline-flex items-center rounded-full border border-success-300 bg-success-100/70 px-2.5 py-0.5 text-success-800 dark:border-success-800 dark:bg-success-900/40 dark:text-success-300">
+                          Alcanzada
+                        </span>
+                        <span className="inline-flex items-center rounded-full border border-primary-300 bg-primary-100/70 px-2.5 py-0.5 text-primary-800 dark:border-primary-800 dark:bg-primary-900/40 dark:text-primary-300">
+                          Colaborando
+                        </span>
+                        <span className="inline-flex items-center rounded-full border border-success-400 bg-success-200/50 px-2.5 py-0.5 text-success-900 dark:border-success-700 dark:bg-success-900/60 dark:text-success-300">
+                          Colaborador destacado
+                        </span>
+                      </div>
+                    </div>
+                  }
+                />
+              </div>
             </div>
             <div className="flex w-full sm:w-auto">
               <Input
@@ -259,205 +295,227 @@ export const ContributionsPage = () => {
         </div>
       </header>
 
-      <div className="rounded-[var(--radius-dialog)] border border-primary-200 bg-[var(--gradient-loader)] p-4 shadow-[var(--shadow-info)] md:hidden dark:border-primary-900">
-        <div className="flex items-start gap-3">
-          <Info size={18} className="mt-0.5 text-primary-700 dark:text-primary-400" />
-          <p className="text-xs font-medium leading-relaxed text-primary-900 dark:text-primary-200">
-           Pulsa cualquier mes para registrar o corregir el aporte de esa celda.
+      {visibleContributors.length === 0 ? (
+        <Card className="border-primary-200 bg-[var(--gradient-surface)] dark:border-primary-900">
+          <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+            {searchQuery.trim()
+              ? `No se encontraron contribuyentes para "${searchQuery.trim()}".`
+              : "No hay contribuyentes para mostrar en este año."}
           </p>
-        </div>
-      </div>
+        </Card>
+      ) : (
+        <>
+          <div className="flex flex-col gap-2.5 md:hidden">
+            {visibleContributors.map((contributor) => {
+              const isExpanded = expandedContributorId === contributor.contributorId;
 
-      <div className="flex flex-col gap-5 md:hidden">
-        {visibleContributors.map((contributor) => (
-          <Card
-            key={contributor.contributorId}
-            className="overflow-hidden shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-shadow border-primary-100 bg-white dark:bg-neutral-800 dark:border-neutral-700"
-            bodyClassName="p-5"
-          >
-            <div className="flex items-center justify-between gap-3 border-b border-primary-50 pb-3 mb-4 dark:border-neutral-700">
-              <p className="truncate text-[17px] font-extrabold text-neutral-900 dark:text-neutral-100">{contributor.name}</p>
-              <div className="flex flex-col items-end">
-                 <p className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">Total Pagado</p>
-                 <p className="text-sm font-extrabold text-primary-700 dark:text-primary-400">{formatCentsAsCurrency(contributor.totalPaidCents)}</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-2.5">
-              {monthList.map((month) => {
-                const contribution = contributionMap.get(byCellKey(contributor.contributorId, month)) ?? null;
-                const amountCents = contribution?.amountCents ?? 0;
-                const state = getContributionCellState(amountCents, monthlyAmountCents);
-                const isCurrentMonth = isCurrentBusinessYear && month === currentBusinessMonth;
-                const isFutureMonth = isCurrentBusinessYear && month > currentBusinessMonth;
-                const isInteractive = canMutateCurrentPeriod && contributor.status === 1;
-                const baseCellStyle =
-                  isFutureMonth || !isInteractive ? getMutedCellStyle(state) : getCellStyle(state);
-
-                return (
+              return (
+                <Card
+                  key={contributor.contributorId}
+                  className="overflow-hidden border-primary-100 bg-white shadow-sm transition-shadow hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:border-neutral-700 dark:bg-neutral-800"
+                  bodyClassName="p-0"
+                >
                   <button
-                    key={month}
                     type="button"
-                    onClick={() => openModalForCell(contributor, month)}
-                    className={`flex min-h-[50px] flex-col items-center justify-center rounded-[var(--radius-pill)] border px-1 py-1.5 shadow-sm transition-all ${baseCellStyle} ${
-                      isCurrentMonth ? "border-primary-400 ring-2 ring-primary-100/50 dark:border-primary-500 dark:ring-primary-900/40" : ""
-                    } ${
-                      isInteractive ? "cursor-pointer hover:border-primary-300 hover:ring-2 hover:ring-primary-100 dark:hover:border-primary-700 dark:hover:ring-primary-900/50" : "cursor-not-allowed"
-                    }`}
-                    disabled={!isInteractive}
+                    onClick={() =>
+                      setExpandedContributorId((previous) =>
+                        previous === contributor.contributorId ? null : contributor.contributorId
+                      )
+                    }
+                    className="flex min-h-[40px] w-full items-center justify-between gap-3 px-4 py-2 text-left"
+                    aria-expanded={isExpanded}
+                    aria-controls={`contributor-month-grid-${contributor.contributorId}`}
                   >
-                    <div className="flex items-center justify-center gap-1.5">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-current">{getMonthLabel(month)}</span>
-                      {isCurrentMonth && <span className="h-1.5 w-1.5 rounded-full bg-primary-500"></span>}
+                    <div className="min-w-0">
+                      <p className="truncate text-base font-extrabold text-neutral-900 dark:text-neutral-100">{contributor.name}</p>
                     </div>
-                    <div className="text-[11px] font-black leading-tight">
-                      {amountCents > 0 ? formatCentsAsCurrency(amountCents) : "-"}
-                    </div>
+                    <ChevronDown
+                      size={16}
+                      className={`shrink-0 text-neutral-500 transition-transform duration-200 dark:text-neutral-400 ${
+                        isExpanded ? "rotate-180" : ""
+                      }`}
+                    />
                   </button>
-                );
-              })}
-            </div>
-          </Card>
-        ))}
-      </div>
 
-      <Card
-        className="hidden md:block overflow-hidden border-primary-200 bg-[var(--gradient-surface)] dark:border-primary-900"
-        bodyClassName="p-0"
-      >
-        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-[rgba(66,90,111,0.28)]">
-          <div className="flex items-center justify-between border-b border-border bg-[var(--gradient-table-bar)] px-5 py-3">
-            <div className="flex flex-wrap items-center gap-2.5">
-              <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-600 dark:text-neutral-400">
-                <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded border border-success-300 bg-success-200/90 dark:border-success-400 dark:bg-success-400 dark:shadow-[0_0_8px_rgba(34,197,94,0.4)]"></span>
-                  Meta alcanzada
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded border border-primary-300 bg-primary-200/90 dark:border-primary-400 dark:bg-primary-400 dark:shadow-[0_0_8px_rgba(37,99,235,0.4)]"></span>
-                  Colaborando
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="h-2.5 w-2.5 rounded border border-success-400 bg-success-400 dark:border-success-400 dark:bg-success-400/90 dark:shadow-[0_0_8px_rgba(34,197,94,0.3)]"></span>
-                  Colaborador destacado
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <table className="w-full min-w-[1000px] border-collapse text-sm">
-            <thead>
-              <tr className="bg-primary-50/50 dark:bg-primary-900/10">
-                <th className="sticky left-0 z-20 border-b border-r border-border bg-white px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-neutral-600 shadow-sm dark:bg-neutral-900 dark:text-neutral-400">
-                  Contribuyente
-                </th>
-                {monthList.map((month) => {
-                  const isCurrentMonth = isCurrentBusinessYear && month === currentBusinessMonth;
-                  const isFutureMonth = isCurrentBusinessYear && month > currentBusinessMonth;
-
-                  return (
-                    <th
-                      key={month}
-                      className={`border-b border-border px-2 py-3 text-center text-[11px] font-bold uppercase tracking-wider ${
-                        isCurrentMonth 
-                          ? "bg-primary-100/70 text-primary-800 shadow-[inset_0_2px_0_0_#2563eb] dark:bg-primary-900/40 dark:text-primary-300 dark:shadow-[inset_0_2px_0_0_#3b82f6]" 
-                          : "text-neutral-600 dark:text-neutral-400"
-                      } ${isFutureMonth ? "bg-primary-50/40 text-neutral-500 dark:bg-neutral-950/40 dark:text-neutral-500" : ""}`}
+                  {isExpanded ? (
+                    <div
+                      id={`contributor-month-grid-${contributor.contributorId}`}
+                      className="border-t border-primary-50 px-4 pb-4 pt-3.5 dark:border-neutral-700"
                     >
-                      <span>{getMonthLabel(month).charAt(0).toUpperCase() + getMonthLabel(month).slice(1)}</span>
-                    </th>
-                  );
-                })}
-                 <th className="border-b border-border bg-primary-50/80 px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-neutral-700 shadow-sm dark:bg-neutral-900 dark:text-neutral-400">
-                  Total
-                </th>
-              </tr>
-            </thead>
+                      <div className="mb-2.5 flex items-center justify-end gap-2">
+                        <p className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">Total anual aportado</p>
+                        <p className="text-right text-sm font-extrabold text-primary-700 dark:text-primary-400">
+                          {formatCentsAsCurrency(contributor.totalPaidCents)}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-3 gap-2.5">
+                        {monthList.map((month) => {
+                          const contribution = contributionMap.get(byCellKey(contributor.contributorId, month)) ?? null;
+                          const amountCents = contribution?.amountCents ?? 0;
+                          const state = getContributionCellState(amountCents, monthlyAmountCents);
+                          const isCurrentMonth = isCurrentBusinessYear && month === currentBusinessMonth;
+                          const isFutureMonth = isCurrentBusinessYear && month > currentBusinessMonth;
+                          const isInteractive = canMutateCurrentPeriod && contributor.status === 1;
+                          const baseCellStyle = isFutureMonth
+                            ? getFutureCellStyle()
+                            : !isInteractive
+                              ? getMutedCellStyle(state)
+                              : getCellStyle(state);
 
-            <tbody className="divide-y divide-border">
-              {visibleContributors.map((contributor) => (
-                <tr key={contributor.contributorId} className="group transition-colors hover:bg-primary-50/30 dark:hover:bg-primary-900/15">
-                  <td className="sticky left-0 z-10 border-r border-border bg-white px-5 py-3 shadow-sm transition-colors group-hover:bg-primary-50/10 dark:bg-neutral-900 dark:group-hover:bg-neutral-800/60">
-                    <div className="flex items-center gap-3">
-                      <div className="min-w-0">
-                        <div className="truncate font-bold text-neutral-900 dark:text-neutral-100">{contributor.name}</div>
+                          return (
+                            <button
+                              key={month}
+                              type="button"
+                              onClick={() => openModalForCell(contributor, month)}
+                              className={`flex min-h-[50px] flex-col items-center justify-center gap-0.5 rounded-[var(--radius-pill)] border px-1 py-1.5 shadow-sm transition-all ${baseCellStyle} ${
+                                isCurrentMonth ? "border-primary-400 ring-2 ring-primary-100/50 dark:border-primary-500 dark:ring-primary-900/40" : ""
+                              } ${
+                                isInteractive ? "cursor-pointer hover:border-primary-300 hover:ring-2 hover:ring-primary-100 dark:hover:border-primary-700 dark:hover:ring-primary-900/50" : "cursor-not-allowed"
+                              }`}
+                              disabled={!isInteractive}
+                            >
+                              <div className="flex items-center justify-center gap-1.5">
+                                <span className="text-[11px] font-bold uppercase tracking-[0.09em] text-current opacity-80">{getMonthLabel(month)}</span>
+                                {isCurrentMonth && <span className="h-1.5 w-1.5 rounded-full bg-primary-500"></span>}
+                              </div>
+                              <div className={`text-[14px] font-black leading-tight ${amountCents === 0 ? "opacity-85" : ""}`}>
+                                {amountCents > 0 ? formatCentsAsCurrency(amountCents) : "-"}
+                              </div>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
-                  </td>
+                  ) : null}
+                </Card>
+              );
+            })}
+          </div>
 
-                  {monthList.map((month) => {
-                    const contribution = contributionMap.get(byCellKey(contributor.contributorId, month)) ?? null;
-                    const amountCents = contribution?.amountCents ?? 0;
-                    const state = getContributionCellState(amountCents, monthlyAmountCents);
-                    const isCurrentMonth = isCurrentBusinessYear && month === currentBusinessMonth;
-                    const isFutureMonth = isCurrentBusinessYear && month > currentBusinessMonth;
-                    const isInteractive = canMutateCurrentPeriod && contributor.status === 1;
-                    const baseCellStyle =
-                      isFutureMonth || !isInteractive ? getMutedCellStyle(state) : getCellStyle(state);
+          <Card
+            className="hidden md:block overflow-hidden border-primary-200 bg-[var(--gradient-surface)] dark:border-primary-900"
+            bodyClassName="p-0"
+          >
+            <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-[rgba(66,90,111,0.28)]">
+              <div className="flex items-center justify-between border-b border-border bg-[var(--gradient-table-bar)] px-5 py-3">
+                <div className="flex flex-wrap items-center gap-2.5">
+                  <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-600 dark:text-neutral-400">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded border border-success-300 bg-success-200/90 dark:border-success-400 dark:bg-success-400 dark:shadow-[0_0_8px_rgba(34,197,94,0.4)]"></span>
+                      Alcanzada
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded border border-primary-300 bg-primary-200/90 dark:border-primary-400 dark:bg-primary-400 dark:shadow-[0_0_8px_rgba(37,99,235,0.4)]"></span>
+                      Colaborando
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded border border-success-400 bg-success-400 dark:border-success-400 dark:bg-success-400/90 dark:shadow-[0_0_8px_rgba(34,197,94,0.3)]"></span>
+                      Colaborador destacado
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-                    return (
-                      <td
-                        key={month}
-                        className={`px-1.5 py-2.5 ${isCurrentMonth ? "bg-primary-50/40 dark:bg-primary-900/10" : ""} ${isFutureMonth ? "bg-primary-50/30 dark:bg-transparent" : ""}`}
+              <table className="w-full min-w-[1000px] border-collapse text-sm">
+                <thead>
+                  <tr className="bg-primary-50/50 dark:bg-primary-900/10">
+                    <th className="sticky left-0 z-20 border-b border-r border-border bg-white px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-neutral-600 shadow-sm dark:bg-neutral-900 dark:text-neutral-400">
+                      Contribuyente
+                    </th>
+                    {monthList.map((month) => {
+                      const isCurrentMonth = isCurrentBusinessYear && month === currentBusinessMonth;
+                      const isFutureMonth = isCurrentBusinessYear && month > currentBusinessMonth;
 
-                      >
-                        <button
-                          type="button"
-                          onClick={() => openModalForCell(contributor, month)}
-                          className={`w-full min-h-[44px] rounded-xl border px-2 py-2 text-[11px] font-extrabold shadow-sm transition-all ${baseCellStyle} ${
-                            isCurrentMonth ? "border-primary-300 ring-2 ring-primary-100 dark:border-primary-700 dark:ring-primary-900/40" : ""
-                          } ${
-                            isInteractive
-                              ? "cursor-pointer hover:border-primary-300 hover:ring-2 hover:ring-primary-100 dark:hover:border-primary-700 dark:hover:ring-primary-900/50"
-                              : "cursor-not-allowed"
-                          }`}
-                          disabled={!isInteractive}
-                          aria-label={
-                            canMutateCurrentPeriod
-                              ? contributor.status === 0
-                                ? "Contribuyente inactivo"
-                                : "Registrar o corregir aporte"
-                              : contributionRestrictionMessage ?? "No editable"
-                          }
-                          title={
-                            canMutateCurrentPeriod
-                              ? contributor.status === 0
-                                ? "Contribuyente inactivo"
-                                : isCurrentMonth
-                                  ? "Registrar o corregir aporte del mes actual"
-                                  : "Registrar o corregir aporte"
-                              : contributionRestrictionMessage ?? "No editable"
-                          }
+                      return (
+                        <th
+                          key={month}
+                          className={`border-b border-border px-2 py-3 text-center text-[11px] font-bold uppercase tracking-wider ${
+                            isCurrentMonth
+                              ? "bg-primary-100/70 text-primary-800 shadow-[inset_0_2px_0_0_#2563eb] dark:bg-primary-900/40 dark:text-primary-300 dark:shadow-[inset_0_2px_0_0_#3b82f6]"
+                              : "text-neutral-600 dark:text-neutral-400"
+                          } ${isFutureMonth ? "bg-primary-50/40 text-neutral-500 dark:bg-neutral-950/40 dark:text-neutral-500" : ""}`}
                         >
-                          {amountCents > 0 ? formatCentsAsCurrency(amountCents) : "-"}
-                        </button>
-                      </td>
-                    );
-                  })}
-                  <td className="bg-primary-50/20 px-4 py-3 text-right font-extrabold text-neutral-900 group-hover:bg-primary-50/40 dark:bg-primary-900/20 dark:text-neutral-100 dark:group-hover:bg-primary-900/30">
-                    {formatCentsAsCurrency(contributor.totalPaidCents)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Card>
+                          <span>{getMonthLabel(month).charAt(0).toUpperCase() + getMonthLabel(month).slice(1)}</span>
+                        </th>
+                      );
+                    })}
+                     <th className="border-b border-border bg-primary-50/80 px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-neutral-700 shadow-sm dark:bg-neutral-900 dark:text-neutral-400">
+                      Total
+                    </th>
+                  </tr>
+                </thead>
 
-      <div className="md:hidden flex items-center gap-6 overflow-x-auto whitespace-nowrap rounded-[var(--radius-pill)] border border-border bg-white p-4 text-[11px] font-bold uppercase tracking-widest text-neutral-500 shadow-sm scrollbar-hide dark:bg-neutral-800 dark:text-neutral-400">
-        <div className="flex items-center gap-2">
-          <span className="h-3 w-3 rounded border border-success-300 bg-success-100/70 dark:border-success-800 dark:bg-success-900/40"></span>
-          Alcanzada
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="h-3 w-3 rounded border border-primary-300 bg-primary-100/70 dark:border-primary-800 dark:bg-primary-900/40"></span>
-          Colaborando
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="h-3 w-3 rounded border border-success-400 bg-success-200/50 dark:border-success-700 dark:bg-success-900/60"></span>
-          Colaborador destacado
-        </div>
-      </div>
+                <tbody className="divide-y divide-border">
+                  {visibleContributors.map((contributor) => (
+                    <tr key={contributor.contributorId} className="group transition-colors hover:bg-primary-50/30 dark:hover:bg-primary-900/15">
+                      <td className="sticky left-0 z-10 border-r border-border bg-white px-5 py-3 shadow-sm transition-colors group-hover:bg-primary-50/10 dark:bg-neutral-900 dark:group-hover:bg-neutral-800/60">
+                        <div className="flex items-center gap-3">
+                          <div className="min-w-0">
+                            <div className="truncate font-bold text-neutral-900 dark:text-neutral-100">{contributor.name}</div>
+                          </div>
+                        </div>
+                      </td>
+
+                      {monthList.map((month) => {
+                        const contribution = contributionMap.get(byCellKey(contributor.contributorId, month)) ?? null;
+                        const amountCents = contribution?.amountCents ?? 0;
+                        const state = getContributionCellState(amountCents, monthlyAmountCents);
+                        const isCurrentMonth = isCurrentBusinessYear && month === currentBusinessMonth;
+                        const isFutureMonth = isCurrentBusinessYear && month > currentBusinessMonth;
+                        const isInteractive = canMutateCurrentPeriod && contributor.status === 1;
+                        const baseCellStyle =
+                          isFutureMonth || !isInteractive ? getMutedCellStyle(state) : getCellStyle(state);
+
+                        return (
+                          <td
+                            key={month}
+                            className={`px-1.5 py-2.5 ${isCurrentMonth ? "bg-primary-50/40 dark:bg-primary-900/10" : ""} ${isFutureMonth ? "bg-primary-50/30 dark:bg-transparent" : ""}`}
+
+                          >
+                            <button
+                              type="button"
+                              onClick={() => openModalForCell(contributor, month)}
+                              className={`w-full min-h-[44px] rounded-xl border px-2 py-2 text-[12px] font-extrabold shadow-sm transition-all ${baseCellStyle} ${
+                                isCurrentMonth ? "border-primary-300 ring-2 ring-primary-100 dark:border-primary-700 dark:ring-primary-900/40" : ""
+                              } ${
+                                isInteractive
+                                  ? "cursor-pointer hover:border-primary-300 hover:ring-2 hover:ring-primary-100 dark:hover:border-primary-700 dark:hover:ring-primary-900/50"
+                                  : "cursor-not-allowed"
+                              }`}
+                              disabled={!isInteractive}
+                              aria-label={
+                                canMutateCurrentPeriod
+                                  ? contributor.status === 0
+                                    ? "Contribuyente inactivo"
+                                    : "Registrar o corregir aporte"
+                                  : contributionRestrictionMessage ?? "No editable"
+                              }
+                              title={
+                                canMutateCurrentPeriod
+                                  ? contributor.status === 0
+                                    ? "Contribuyente inactivo"
+                                    : isCurrentMonth
+                                      ? "Registrar o corregir aporte del mes actual"
+                                      : "Registrar o corregir aporte"
+                                  : contributionRestrictionMessage ?? "No editable"
+                              }
+                            >
+                              {amountCents > 0 ? formatCentsAsCurrency(amountCents) : "-"}
+                            </button>
+                          </td>
+                        );
+                      })}
+                      <td className="bg-primary-50/20 px-4 py-3 text-right font-extrabold text-neutral-900 group-hover:bg-primary-50/40 dark:bg-primary-900/20 dark:text-neutral-100 dark:group-hover:bg-primary-900/30">
+                        {formatCentsAsCurrency(contributor.totalPaidCents)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </>
+      )}
 
       {selectedCell || isGlobalModalOpen ? (
         <Suspense fallback={null}>
@@ -495,7 +553,15 @@ export const ContributionsPage = () => {
               setIsGlobalModalOpen(false);
             }}
             onSubmit={handleSave}
-            onDelete={selectedCell?.existingContribution ? () => setPendingDelete(selectedCell.existingContribution!) : undefined}
+            onDelete={
+              selectedCell?.existingContribution
+                ? () =>
+                    setPendingDelete({
+                      contribution: selectedCell.existingContribution!,
+                      contributorName: selectedCell.contributor.name
+                    })
+                : undefined
+            }
           />
         </Suspense>
       ) : null}
@@ -505,11 +571,18 @@ export const ContributionsPage = () => {
         title="Eliminar aporte"
         description={
           pendingDelete
-            ? `¿Estás seguro que deseas eliminar el aporte correspondiente a ${getMonthLabel(pendingDelete.month)}/${pendingDelete.year}? Esta acción borrará el registro de la base de datos de este mes.`
+            ? (
+              <span>
+                ¿Estás seguro que deseas eliminar el aporte de{" "}
+                <strong>{pendingDelete.contributorName}</strong>{" "}
+                correspondiente a {getMonthLabel(pendingDelete.contribution.month)}/{pendingDelete.contribution.year}? Esta acción borrará el registro de la base de datos de este mes.
+              </span>
+            )
             : ""
         }
         confirmLabel="Eliminar"
         danger
+        compact
         loading={deleting}
         onCancel={() => setPendingDelete(null)}
         onConfirm={() => {

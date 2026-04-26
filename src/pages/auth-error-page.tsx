@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router";
 import { LogIn, ArrowLeft, Mail, AlertCircle } from "lucide-react";
 import { Button } from "../components/ui/button";
+import { AppVersionFooter } from "../components/ui/app-version-footer";
 
 export const AuthErrorPage = () => {
   const [searchParams] = useSearchParams();
@@ -83,6 +84,7 @@ export const AuthErrorPage = () => {
           </div>
         </div>
       </main>
+      <AppVersionFooter />
     </div>
   );
 };

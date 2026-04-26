@@ -1,6 +1,6 @@
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import { Fragment, useEffect, useMemo, useState } from "react";
-import { ReceiptText, AlertCircle } from "lucide-react";
+import { ReceiptText, AlertCircle, Trash2 } from "lucide-react";
 
 import type { Contribution, Contributor } from "../../types/domain";
 import { getMonthLongLabel } from "../../lib/date";
@@ -105,6 +105,7 @@ export const ContributionModal = ({
   const canEditContributor = fixedContributorId === undefined;
   const canEditYear = fixedYear === undefined;
   const canEditMonth = fixedMonth === undefined;
+  const lockedFieldClassName = "bg-neutral-100 text-neutral-500 dark:bg-neutral-900 dark:text-neutral-400";
 
   const sortedContributors = useMemo(() => {
     return [...contributors].sort((a, b) => a.name.localeCompare(b.name, "es"));
@@ -166,7 +167,7 @@ export const ContributionModal = ({
           <div className="fixed inset-0 bg-neutral-900/32 backdrop-blur-sm" />
         </TransitionChild>
 
-        <div className="fixed inset-0 overflow-y-auto p-4 md:p-8">
+        <div className="fixed inset-0 overflow-y-auto p-3 sm:p-5 md:p-8">
           <div className="flex min-h-full items-center justify-center">
             <TransitionChild
               as={Fragment}
@@ -178,9 +179,9 @@ export const ContributionModal = ({
               leaveTo="opacity-0 translate-y-4 scale-95"
             >
               <DialogPanel className="w-full max-w-xl overflow-hidden rounded-[var(--radius-dialog)] border border-border bg-white shadow-dialog transition-all dark:bg-neutral-800">
-                <div className="flex items-center gap-4 border-b border-border bg-[var(--gradient-modal-header)] px-8 py-6">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-primary-200 bg-primary-50/80 text-primary-700 shadow-sm dark:border-primary-800 dark:bg-primary-900/30">
-                    <ReceiptText size={20} />
+                <div className="flex items-center gap-3 border-b border-border bg-[var(--gradient-modal-header)] px-5 py-4 sm:gap-4 sm:px-8 sm:py-6">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary-200 bg-primary-50/80 text-primary-700 shadow-sm dark:border-primary-800 dark:bg-primary-900/30 sm:h-10 sm:w-10">
+                    <ReceiptText size={18} />
                   </div>
                   <div>
                     <DialogTitle className="text-lg font-extrabold text-neutral-900 dark:text-neutral-100">
@@ -189,12 +190,13 @@ export const ContributionModal = ({
                   </div>
                 </div>
 
-                <div className="grid gap-6 p-8 sm:grid-cols-2">
+                <div className="grid gap-4 p-5 sm:grid-cols-2 sm:gap-6 sm:p-8">
                   <Select
                     label="Contribuyente"
                     value={form.contributorId}
                     onChange={(event) => setForm((previous) => ({ ...previous, contributorId: event.target.value }))}
                     disabled={!canEditContributor || submitting}
+                    className={!canEditContributor ? lockedFieldClassName : ""}
                   >
                     <option value="">Seleccionar...</option>
                     {sortedContributors.map((contributor) => (
@@ -204,7 +206,7 @@ export const ContributionModal = ({
                     ))}
                   </Select>
 
-                  <div className="sm:col-span-2 grid gap-4 grid-cols-2">
+                  <div className="sm:col-span-2 grid grid-cols-2 gap-3 sm:gap-4">
                     <Input
                       label="Año"
                       type="number"
@@ -213,6 +215,7 @@ export const ContributionModal = ({
                       value={form.year}
                       onChange={(event) => setForm((previous) => ({ ...previous, year: event.target.value }))}
                       disabled={!canEditYear || submitting}
+                      className={!canEditYear ? lockedFieldClassName : ""}
                     />
 
                     <Select
@@ -220,6 +223,7 @@ export const ContributionModal = ({
                       value={form.month}
                       onChange={(event) => setForm((previous) => ({ ...previous, month: event.target.value }))}
                       disabled={!canEditMonth || submitting}
+                      className={!canEditMonth ? lockedFieldClassName : ""}
                     >
                       {monthOptions.map((month) => (
                         <option key={month} value={month}>
@@ -230,9 +234,10 @@ export const ContributionModal = ({
                   </div>
 
                   <Input
-                    label="Monto a aportar (USD)"
+                    label={initialContribution ? "Monto aportado" : "Monto a aportar"}
                     type="text"
                     inputMode="decimal"
+                    prefix="$"
                     value={form.amount}
                     onChange={(event) =>
                       setForm((previous) => ({ ...previous, amount: sanitizeMoneyInput(event.target.value) }))
@@ -241,7 +246,7 @@ export const ContributionModal = ({
                   />
                   
                   {(formError || lockedReason) && (
-                    <div className="mb-6 flex items-start gap-4 rounded-[var(--radius-alert)] border border-warning-200 bg-warning-100/60 p-4 transition-all duration-300 animate-in slide-in-from-top-2 dark:border-warning-700/50 dark:bg-warning-950/40">
+                    <div className="mb-4 flex items-start gap-3 rounded-[var(--radius-alert)] border border-warning-200 bg-warning-100/60 p-3.5 transition-all duration-300 animate-in slide-in-from-top-2 dark:border-warning-700/50 dark:bg-warning-950/40 sm:mb-6 sm:gap-4 sm:p-4">
                        <AlertCircle size={18} className="mt-0.5 shrink-0 text-warning-700" />
                        <p className="text-xs font-semibold uppercase leading-relaxed tracking-tighter text-warning-950 dark:text-warning-300">
                           {formError || lockedReason}
@@ -250,8 +255,8 @@ export const ContributionModal = ({
                   )}
                 </div>
 
-                <div className="flex flex-col gap-3 border-t border-border bg-[var(--gradient-modal-footer)] px-8 py-6 sm:flex-row-reverse sm:justify-between">
-                  <div className="flex flex-col gap-3 sm:flex-row-reverse">
+                <div className="flex flex-col gap-2.5 border-t border-border bg-[var(--gradient-modal-footer)] px-5 py-4 sm:flex-row-reverse sm:justify-between sm:gap-3 sm:px-8 sm:py-6">
+                  <div className="flex flex-col gap-2.5 sm:flex-row-reverse sm:gap-3">
                     <Button
                       onClick={handleSubmit}
                       isLoading={submitting}
@@ -271,12 +276,13 @@ export const ContributionModal = ({
                   {initialContribution && onDelete && (
                     <div className="flex items-center justify-center sm:justify-start">
                       <Button
-                        variant="ghost"
+                        variant="danger"
+                        icon={Trash2}
                         onClick={onDelete}
+                        className="border-danger-600 bg-danger-600 text-white hover:border-danger-700 hover:bg-danger-700 dark:border-danger-700 dark:bg-danger-800 dark:text-danger-100 dark:hover:bg-danger-700"
                         disabled={submitting || Boolean(lockedReason)}
-                        className="text-danger-600 hover:bg-danger-50 hover:text-danger-700"
                       >
-                        Eliminar pago
+                        Eliminar aporte
                       </Button>
                     </div>
                   )}

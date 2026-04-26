@@ -74,9 +74,6 @@
   
   --color-card: #ffffff;
   --color-border: #e2e8f0; /* neutral-200 */
-  --color-surface-muted: #f1f5f9; /* neutral-100 */
-  --color-accent: #8fa8d8;
-  --color-accent-soft: #dbe7fb;
 
   /* Typography */
   --font-sans: "Aptos", "Segoe UI Variable Text", "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
@@ -92,7 +89,6 @@
   --shadow-primary: 0 12px 24px -4px rgba(37, 99, 235, 0.24);
   --shadow-card: 0 12px 30px -4px rgba(37, 99, 235, 0.08);
   --shadow-dropdown: 0 10px 35px rgba(0, 0, 0, 0.08);
-  --shadow-info: 0 14px 30px rgba(37, 99, 235, 0.06);
 
   /* Border Radius Tokens */
   --radius-card:   1.25rem;
@@ -118,7 +114,6 @@
   --gradient-card-footer:  linear-gradient(180deg, rgba(255,255,255,0.66), rgba(239,246,255,0.34));
   --gradient-modal-header: linear-gradient(180deg, rgba(255,255,255,0.90), rgba(239,246,255,0.60));
   --gradient-modal-footer: linear-gradient(180deg, rgba(255,255,255,0.70), rgba(239,246,255,0.50));
-  --gradient-dialog:       linear-gradient(180deg, rgba(255,255,255,0.99), rgba(247,250,255,0.97));
   --gradient-surface:      linear-gradient(180deg, rgba(255,255,255,0.99), rgba(239,246,255,0.76));
   --gradient-loader:       linear-gradient(180deg, rgba(255,255,255,0.94), rgba(239,246,255,0.72));
   --gradient-table-bar:    linear-gradient(180deg, rgba(255,255,255,0.84), rgba(239,246,255,0.62));
@@ -138,9 +133,6 @@
   --color-foreground:    #f1f5f9; /* slate-100 */
   --color-card:          #1e293b; /* slate-800 */
   --color-border:        #334155; /* slate-700 */
-  --color-surface-muted: #1e293b; /* slate-800 */
-  --color-accent:        #60a5fa; /* blue-400  */
-  --color-accent-soft:   #1e3a8a; /* blue-900  */
 
   /* Gradient tokens — dark overrides */
   --gradient-nav-header:   linear-gradient(180deg, rgba(15,23,42,0.94),  rgba(15,23,42,0.90));
@@ -148,7 +140,6 @@
   --gradient-card-footer:  linear-gradient(180deg, rgba(30,41,59,0.90),  rgba(30,58,138,0.08));
   --gradient-modal-header: linear-gradient(180deg, rgba(30,41,59,0.90),  rgba(30,58,138,0.10));
   --gradient-modal-footer: linear-gradient(180deg, rgba(15,23,42,0.70),  rgba(30,58,138,0.08));
-  --gradient-dialog:       #1e293b; /* flat slate-800 */
   --gradient-surface:      #1e293b; /* flat slate-800 */
   --gradient-loader:       linear-gradient(180deg, rgba(30,41,59,0.94),  rgba(30,58,138,0.10));
   --gradient-table-bar:    linear-gradient(180deg, rgba(30,41,59,0.84),  rgba(30,58,138,0.10));

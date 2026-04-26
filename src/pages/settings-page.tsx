@@ -5,6 +5,7 @@ import { SettingsContributorsCard } from "../components/settings/settings-contri
 import { SettingsMonthlyAmountCard } from "../components/settings/settings-monthly-amount-card";
 import { Card } from "../components/ui/card";
 import { SectionLoader } from "../components/ui/loaders";
+import { ScreenHelpButton } from "../components/ui/screen-help-button";
 import { APP_PERMISSIONS } from "../config/permissions";
 import { useAppContext } from "../context/app-context";
 import { useSettingsPageData } from "../hooks/use-settings-page-data";
@@ -42,11 +43,16 @@ export const SettingsPage = () => {
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <header>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="text-2xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-100">Panel de Administración</h2>
-          </div>
+      <header className="-mt-2">
+        <div className="flex items-start justify-between gap-2.5">
+          <h2 className="min-w-0 flex-1 text-2xl font-extrabold leading-tight tracking-tight text-neutral-900 dark:text-neutral-100">
+            Panel de Administración
+          </h2>
+          <ScreenHelpButton
+            title="Ajustes"
+            description="Actualiza el monto base mensual y administra contribuyentes: crear, editar, activar o desactivar."
+            className="shrink-0"
+          />
         </div>
       </header>
 
