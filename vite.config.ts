@@ -75,9 +75,9 @@ export default defineConfig(({ mode }) => {
         ],
         manifest: {
           id: "/",
-          name: "DCM • Gestion de Aportes Familiares",
-          short_name: "Portal DCM",
-          description: "Aplicacion interna para gestionar aportes familiares con autenticacion Auth0.",
+          name: "DCM • Gestion de Aportes",
+          short_name: "DCM",
+          description: "Aplicacion interna para gestionar aportes económicos con autenticacion Auth0.",
           start_url: "/contributions",
           scope: "/",
           display: "standalone",

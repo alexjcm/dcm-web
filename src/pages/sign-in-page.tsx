@@ -91,8 +91,8 @@ export const SignInPage = () => {
                 <ShieldCheck size={28} />
               </div>
               <div>
-                <p className="text-base font-bold uppercase tracking-[0.22em] text-primary-600 sm:text-lg">Portal DCM</p>
-                <h1 className="mt-1.5 text-lg font-medium leading-relaxed text-neutral-700 sm:text-xl dark:text-neutral-300">Gestión de Aportes Familiares</h1>
+                <p className="text-base font-bold uppercase tracking-[0.22em] text-primary-600 sm:text-lg">DCM</p>
+                <h1 className="mt-1.5 text-lg font-medium leading-relaxed text-neutral-700 sm:text-xl dark:text-neutral-300">Gestión de Aportes</h1>
               </div>
             </div>
 
@@ -160,8 +160,8 @@ export const SignInPage = () => {
                 {!isOnline
                   ? "Sin conexión para ingresar"
                   : isSessionRecovery
-                    ? "Volver a iniciar sesión"
-                    : "Entrar al Sistema"}
+                    ? "Volver a ingresar"
+                    : "Iniciar sesión"}
               </Button>
             </div>
           </div>

@@ -89,6 +89,7 @@ export const SummaryPage = () => {
             <YearSelect
               activeYear={activeYear}
               currentBusinessYear={currentBusinessYear}
+              minYear={summary.data.minYear}
               setActiveYear={setActiveYear}
               compact
             />

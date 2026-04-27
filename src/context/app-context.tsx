@@ -53,7 +53,7 @@ const getContributionRestrictionMessage = ({
   }
 
   if (!hasContributionWritePermission) {
-    return "No tienes permiso para crear, editar ni desactivar aportes.";
+    return "No tienes permiso para crear, editar ni eliminar aportes.";
   }
 
   if (activeYear !== currentBusinessYear) {

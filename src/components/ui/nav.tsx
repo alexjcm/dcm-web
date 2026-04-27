@@ -23,7 +23,7 @@ import { BeforeInstallPromptEvent, isAppleMobileDevice, isStandaloneDisplayMode 
 
 export const AppNav = () => {
   const { user, logout } = useAuth0();
-  const { userEmail, hasPermission, contributionRestrictionMessage } = useAppContext();
+  const { userEmail, hasPermission } = useAppContext();
   const [imageError, setImageError] = useState(false);
   const [installPromptEvent, setInstallPromptEvent] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallPromptOpen, setIsInstallPromptOpen] = useState(false);
@@ -38,18 +38,18 @@ export const AppNav = () => {
   const getRoleInfo = () => {
     if (canManageSettings) {
       return {
-        label: "🛡️ Administrador",
-        styles: "border-warning-200 bg-warning-50 text-warning-800 dark:border-warning-500/30 dark:bg-warning-500/10 dark:text-warning-300"
+        label: "🛡️ Superadmin",
+        styles: "border-danger-200 bg-danger-50 text-danger-800 dark:border-danger-500/30 dark:bg-danger-500/10 dark:text-danger-300"
       };
     }
     if (canEditContributions) {
       return {
-        label: "✍️ Editor",
+        label: "✍️ Admin",
         styles: "border-primary-200 bg-primary-50 text-primary-800 dark:border-primary-500/30 dark:bg-primary-500/10 dark:text-primary-300"
       };
     }
     return {
-      label: "👀 Modo Lectura",
+      label: "👁️ Viewer",
       styles: "border-neutral-200 bg-neutral-50 text-neutral-800 dark:border-neutral-500/30 dark:bg-neutral-500/10 dark:text-neutral-400"
     };
   };
@@ -122,7 +122,7 @@ export const AppNav = () => {
         <div className="flex h-20 items-center justify-between gap-4">
           <div className="flex flex-col">
             <h1 className="text-[16px] font-bold uppercase tracking-[0.24em] text-primary-600 sm:text-[18px]">
-              Portal DCM
+              DCM
             </h1>
           </div>
 
@@ -229,10 +229,12 @@ export const AppNav = () => {
             <CalendarDays size={16} className="shrink-0" />
             <span>Aportes</span>
           </NavLink>
-          <NavLink to="/summary" className={navLinkClass}>
-            <PieChart size={16} className="shrink-0" />
-            <span>Resumen</span>
-          </NavLink>
+          {hasPermission(APP_PERMISSIONS.summaryRead) && (
+            <NavLink to="/summary" className={navLinkClass}>
+              <PieChart size={16} className="shrink-0" />
+              <span>Resumen</span>
+            </NavLink>
+          )}
           {canManageSettings && (
             <NavLink to="/settings" className={navLinkClass}>
               <Settings2 size={16} className="shrink-0" />
@@ -241,14 +243,7 @@ export const AppNav = () => {
           )}
         </nav>
 
-        {contributionRestrictionMessage && (
-          <div className="mb-4">
-            <div className="flex items-center gap-2 rounded-xl border border-primary-300 bg-primary-100 px-3 py-2 text-xs font-bold text-primary-900 shadow-sm animate-in fade-in slide-in-from-top-1 dark:border-primary-700 dark:bg-primary-900 dark:text-primary-50">
-              <span className="flex h-1.5 w-1.5 rounded-full bg-primary-500"></span>
-              {contributionRestrictionMessage}
-            </div>
-          </div>
-        )}
+
 
         {!isOnline && (
           <div className="mb-4">

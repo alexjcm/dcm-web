@@ -15,15 +15,15 @@ import { useAppContext } from "../context/app-context";
 import { useApiClient } from "../hooks/use-api-client";
 import { useContributionsYearAll } from "../hooks/use-contributions-year-all";
 import { useInvalidateResources } from "../hooks/use-resource-invalidation";
-import { useSummary } from "../hooks/use-summary";
+import { useContributionsMeta } from "../hooks/use-contributions-meta";
 import { getCurrentBusinessMonth } from "../lib/business-time";
 import { getMonthLabel } from "../lib/date";
 import { formatCentsAsCurrency } from "../lib/money";
 import { RESOURCE_KEYS } from "../lib/resource-invalidation";
-import type { Contribution, SummaryContributor } from "../types/domain";
+import type { Contribution, ContributorMeta } from "../types/domain";
 
 type SelectedCell = {
-  contributor: SummaryContributor;
+  contributor: ContributorMeta;
   month: number;
   existingContribution: Contribution | null;
 };
@@ -99,7 +99,7 @@ export const ContributionsPage = () => {
   const currentBusinessMonth = getCurrentBusinessMonth();
   const isCurrentBusinessYear = activeYear === currentBusinessYear;
 
-  const summary = useSummary(activeYear);
+  const meta = useContributionsMeta(activeYear);
   const allContributions = useContributionsYearAll(activeYear);
 
   const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
@@ -120,14 +120,14 @@ export const ContributionsPage = () => {
     return map;
   }, [allContributions.data]);
 
-  if ((summary.loading && !summary.data) || (allContributions.loading && !allContributions.data)) {
+  if ((meta.loading && !meta.data) || (allContributions.loading && !allContributions.data)) {
     return <SectionLoader label="Cargando vista anual..." />;
   }
 
-  if (summary.error) {
+  if (meta.error) {
     return (
       <div className="rounded-[var(--radius-alert)] border border-danger-300 bg-danger-100 p-4 text-sm font-bold text-danger-900 animate-in fade-in dark:border-danger-800 dark:bg-danger-900 dark:text-danger-50">
-        No se pudo cargar el resumen anual: {summary.error}
+        No se pudo cargar la configuración de aportes: {meta.error}
       </div>
     );
   }
@@ -140,12 +140,12 @@ export const ContributionsPage = () => {
     );
   }
 
-  if (!summary.data) {
+  if (!meta.data) {
     return null;
   }
 
-  const monthlyAmountCents = summary.data.monthlyAmountCents;
-  const contributors = [...summary.data.contributors].sort((left, right) => {
+  const monthlyAmountCents = meta.data.monthlyAmountCents;
+  const contributors = [...meta.data.contributors].sort((left, right) => {
     const leftCurrentAmount = contributionMap.get(byCellKey(left.contributorId, currentBusinessMonth))?.amountCents ?? 0;
     const rightCurrentAmount = contributionMap.get(byCellKey(right.contributorId, currentBusinessMonth))?.amountCents ?? 0;
 
@@ -180,7 +180,7 @@ export const ContributionsPage = () => {
     setIsGlobalModalOpen(true);
   };
 
-  const openModalForCell = (contributor: SummaryContributor, month: number) => {
+  const openModalForCell = (contributor: ContributorMeta, month: number) => {
     const existingContribution = contributionMap.get(byCellKey(contributor.contributorId, month)) ?? null;
 
     if (!canMutateCurrentPeriod) {
@@ -248,29 +248,33 @@ export const ContributionsPage = () => {
                 <YearSelect
                   activeYear={activeYear}
                   currentBusinessYear={currentBusinessYear}
+                  minYear={meta.data.minYear}
                   setActiveYear={setActiveYear}
                   compact
                 />
                 <ScreenHelpButton
                   title="Aportes"
                   description={
-                    <div className="space-y-2">
-                      <p className="text-sm leading-relaxed">
-                        Selecciona un contribuyente, despliega su panel y toca un mes para registrar o corregir el aporte.
+                    <div className="space-y-4">
+                      <p className="text-[13px] leading-relaxed text-neutral-600 dark:text-neutral-400">
+                        Selecciona un contribuyente, despliega su panel y toca un mes para registrar o corregir el aporte de forma individual.
                       </p>
-                      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-neutral-500 dark:text-neutral-400">
-                        Significado de colores
-                      </p>
-                      <div className="flex flex-wrap items-center gap-2 text-[11px] font-bold uppercase tracking-wide">
-                        <span className="inline-flex items-center rounded-full border border-success-300 bg-success-100/70 px-2.5 py-0.5 text-success-800 dark:border-success-800 dark:bg-success-900/40 dark:text-success-300">
-                          Alcanzada
-                        </span>
-                        <span className="inline-flex items-center rounded-full border border-primary-300 bg-primary-100/70 px-2.5 py-0.5 text-primary-800 dark:border-primary-800 dark:bg-primary-900/40 dark:text-primary-300">
-                          Colaborando
-                        </span>
-                        <span className="inline-flex items-center rounded-full border border-success-400 bg-success-200/50 px-2.5 py-0.5 text-success-900 dark:border-success-700 dark:bg-success-900/60 dark:text-success-300">
-                          Colaborador destacado
-                        </span>
+                      
+                      <div className="space-y-2.5 pt-1">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500 dark:text-neutral-400">
+                          Significado de colores
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="inline-flex items-center rounded-full border border-success-300 bg-success-100/70 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success-800 dark:border-success-500/30 dark:bg-success-500/10 dark:text-success-400">
+                            Meta alcanzada
+                          </span>
+                          <span className="inline-flex items-center rounded-full border border-primary-300 bg-primary-100/70 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-800 dark:border-primary-500/30 dark:bg-primary-500/10 dark:text-primary-400">
+                            Colaborando
+                          </span>
+                          <span className="inline-flex items-center rounded-full border border-success-400 bg-success-200/50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success-900 ring-1 ring-success-200/50 dark:border-success-500/40 dark:bg-success-500/20 dark:text-success-300">
+                            Colaborador destacado
+                          </span>
+                        </div>
                       </div>
                     </div>
                   }
@@ -294,6 +298,15 @@ export const ContributionsPage = () => {
           </div>
         </div>
       </header>
+
+      {contributionRestrictionMessage && (
+        <div className="animate-in fade-in slide-in-from-top-1 duration-500">
+          <div className="flex items-center gap-2 rounded-xl border border-primary-300 bg-primary-100 px-3 py-2 text-xs font-bold text-primary-900 shadow-sm dark:border-primary-700 dark:bg-primary-900 dark:text-primary-50">
+            <span className="flex h-1.5 w-1.5 rounded-full bg-primary-500"></span>
+            {contributionRestrictionMessage}
+          </div>
+        </div>
+      )}
 
       {visibleContributors.length === 0 ? (
         <Card className="border-primary-200 bg-[var(--gradient-surface)] dark:border-primary-900">
@@ -521,7 +534,7 @@ export const ContributionsPage = () => {
         <Suspense fallback={null}>
           <ContributionModal
             open={Boolean(selectedCell) || isGlobalModalOpen}
-            contributors={summary.data.contributors
+            contributors={meta.data.contributors
               .filter((item) => item.status === 1)
               .map((item) => ({
                 id: item.contributorId,

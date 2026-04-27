@@ -1,11 +1,10 @@
 import { Select } from "./fields";
 
-const MIN_YEAR_WITH_DATA = 2023;
-
-const getYearOptions = (currentYear: number): number[] => {
+const getYearOptions = (currentYear: number, minYear: number): number[] => {
   const years: number[] = [];
+  const end = minYear;
 
-  for (let year = currentYear; year >= MIN_YEAR_WITH_DATA; year -= 1) {
+  for (let year = currentYear; year >= end; year -= 1) {
     years.push(year);
   }
 
@@ -15,6 +14,7 @@ const getYearOptions = (currentYear: number): number[] => {
 type YearSelectProps = {
   activeYear: number;
   currentBusinessYear: number;
+  minYear?: number;
   setActiveYear: (year: number) => void;
   compact?: boolean;
   className?: string;
@@ -23,11 +23,12 @@ type YearSelectProps = {
 export const YearSelect = ({
   activeYear,
   currentBusinessYear,
+  minYear,
   setActiveYear,
   compact = false,
   className = ""
 }: YearSelectProps) => {
-  const yearOptions = getYearOptions(currentBusinessYear);
+  const yearOptions = getYearOptions(currentBusinessYear, minYear ?? currentBusinessYear);
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>

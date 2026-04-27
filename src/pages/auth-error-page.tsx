@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router";
-import { LogIn, ArrowLeft, Mail, AlertCircle } from "lucide-react";
+import { LogIn, ArrowLeft, AlertCircle } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { AppVersionFooter } from "../components/ui/app-version-footer";
 
@@ -49,10 +49,6 @@ export const AuthErrorPage = () => {
             No pudimos completar el inicio de sesión
           </h1>
           
-          <p className="text-sm leading-relaxed text-neutral-500 mb-8">
-            Hubo un problema al procesar tu acceso a <span className="text-neutral-900 font-bold">DCM • Gestión de Aportes Familiares.</span>
-          </p>
-
           <div className="space-y-6">
             <div className="flex flex-col items-center gap-4">
               <Button 
@@ -63,24 +59,11 @@ export const AuthErrorPage = () => {
                 Ir a iniciar sesión
               </Button>
               
-              <p className="text-xs font-medium text-neutral-400 max-w-[240px] leading-relaxed">
+              <p className="text-xs font-medium text-neutral-500 max-w-[240px] leading-relaxed">
                 Contáctese con el administrador si el problema persiste.
               </p>
             </div>
 
-            {/* Support Info */}
-            <div className="pt-6 border-t border-neutral-50 flex flex-col items-center gap-2">
-              <div className="flex items-center gap-2 text-neutral-400">
-                <Mail size={14} />
-                <span className="text-[10px] font-bold uppercase tracking-wider">Email de Soporte</span>
-              </div>
-              <a 
-                href="mailto:alex.test.jcm@gmail.com" 
-                className="text-sm font-bold text-primary-600 hover:underline"
-              >
-                alex.test.jcm@gmail.com
-              </a>
-            </div>
           </div>
         </div>
       </main>

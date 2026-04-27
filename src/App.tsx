@@ -59,7 +59,14 @@ export const App = () => {
       >
         <Route path="contributions" element={withSuspense(<ContributionsPage />)} />
         <Route index element={<Navigate to="/contributions" replace />} />
-        <Route path="summary" element={withSuspense(<SummaryPage />)} />
+        <Route
+          path="summary"
+          element={
+            <PermissionRoute required={APP_PERMISSIONS.summaryRead}>
+              {withSuspense(<SummaryPage />)}
+            </PermissionRoute>
+          }
+        />
         <Route
           path="settings"
           element={

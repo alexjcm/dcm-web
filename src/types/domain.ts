@@ -59,6 +59,7 @@ export type SummaryContributor = {
 
 export type SummaryData = {
   year: number;
+  minYear: number;
   monthlyAmountCents: number;
   totals: {
     collectedCents: number;
@@ -68,6 +69,21 @@ export type SummaryData = {
     inactiveContributorsCount: number;
   };
   contributors: SummaryContributor[];
+};
+
+export type ContributorMeta = {
+  contributorId: number;
+  name: string;
+  email: string | null;
+  status: ContributorStatus;
+  totalPaidCents: number;
+};
+
+export type ContributionsMetaData = {
+  year: number;
+  minYear: number;
+  monthlyAmountCents: number;
+  contributors: ContributorMeta[];
 };
 
 export type SettingItem = {

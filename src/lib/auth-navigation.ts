@@ -30,13 +30,17 @@ export const getCurrentReturnTo = (): string => {
 
 export const buildSignInPath = (returnTo: string, reason?: string): string => {
   const params = new URLSearchParams();
-  params.set("returnTo", returnTo);
+
+  if (returnTo && returnTo !== "/") {
+    params.set("returnTo", returnTo);
+  }
 
   if (reason) {
     params.set("reason", reason);
   }
 
-  return `/sign-in?${params.toString()}`;
+  const query = params.toString();
+  return query ? `/sign-in?${query}` : "/sign-in";
 };
 
 const readSessionRecoveryAttempt = (): SessionRecoveryAttempt | null => {
