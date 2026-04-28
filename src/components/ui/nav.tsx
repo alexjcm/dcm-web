@@ -8,7 +8,10 @@ import {
   Download,
   Sun,
   Moon,
-  WifiOff
+  WifiOff,
+  Shield,
+  Pencil,
+  User
 } from "lucide-react";
 
 import { Menu, MenuButton, MenuItem, MenuItems, Transition } from "@headlessui/react";
@@ -38,18 +41,21 @@ export const AppNav = () => {
   const getRoleInfo = () => {
     if (canManageSettings) {
       return {
-        label: "🛡️ Superadmin",
+        label: "Superadmin",
+        icon: <Shield size={12} className="shrink-0" />,
         styles: "border-danger-200 bg-danger-50 text-danger-800 dark:border-danger-500/30 dark:bg-danger-500/10 dark:text-danger-300"
       };
     }
     if (canEditContributions) {
       return {
-        label: "✍️ Admin",
+        label: "Admin",
+        icon: <Pencil size={12} className="shrink-0" />,
         styles: "border-primary-200 bg-primary-50 text-primary-800 dark:border-primary-500/30 dark:bg-primary-500/10 dark:text-primary-300"
       };
     }
     return {
-      label: "👁️ Viewer",
+      label: "Viewer",
+      icon: <User size={12} className="shrink-0" />,
       styles: "border-neutral-200 bg-neutral-50 text-neutral-800 dark:border-neutral-500/30 dark:bg-neutral-500/10 dark:text-neutral-400"
     };
   };
@@ -181,6 +187,7 @@ export const AppNav = () => {
                       {userEmail ?? user?.email ?? "Cargando sesión..."}
                     </p>
                     <div className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[10px] font-bold uppercase tracking-widest shadow-sm ${role.styles}`}>
+                      {role.icon}
                       <span>{role.label}</span>
                     </div>
                   </div>

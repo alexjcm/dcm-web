@@ -295,9 +295,11 @@ export const ContributionsPage = () => {
             </div>
           </div>
           <div className="hidden shrink-0 md:block">
-            <Button onClick={openGlobalModal} disabled={!canMutateCurrentPeriod}>
-              Nuevo Aporte
-            </Button>
+            {canEditContributions && (
+              <Button onClick={openGlobalModal} disabled={!canMutateCurrentPeriod}>
+                Nuevo Aporte
+              </Button>
+            )}
           </div>
         </div>
       </header>
