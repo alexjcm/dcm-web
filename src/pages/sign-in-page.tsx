@@ -91,7 +91,7 @@ export const SignInPage = () => {
                 <ShieldCheck size={28} />
               </div>
               <div>
-                <p className="text-base font-bold uppercase tracking-[0.22em] text-primary-600 sm:text-lg">DCM</p>
+                <p className="text-xl font-bold uppercase tracking-[0.22em] text-primary-600 sm:text-2xl">DCM</p>
                 <h1 className="mt-1.5 text-lg font-medium leading-relaxed text-neutral-700 sm:text-xl dark:text-neutral-300">Gestión de Aportes</h1>
               </div>
             </div>

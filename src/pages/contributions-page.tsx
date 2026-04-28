@@ -20,6 +20,7 @@ import { getCurrentBusinessMonth } from "../lib/business-time";
 import { getMonthLabel } from "../lib/date";
 import { formatCentsAsCurrency } from "../lib/money";
 import { RESOURCE_KEYS } from "../lib/resource-invalidation";
+import { APP_PERMISSIONS } from "../config/permissions";
 import type { Contribution, ContributorMeta } from "../types/domain";
 
 type SelectedCell = {
@@ -91,7 +92,7 @@ const getFutureCellStyle = (): string =>
   "border-dashed border-neutral-300 bg-neutral-100/70 text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900/40 dark:text-neutral-500";
 
 export const ContributionsPage = () => {
-  const { activeYear, currentBusinessYear, setActiveYear, canMutateCurrentPeriod, contributionRestrictionMessage } =
+  const { activeYear, currentBusinessYear, setActiveYear, canMutateCurrentPeriod, contributionRestrictionMessage, hasPermission } =
     useAppContext();
   const api = useApiClient();
   const invalidateResources = useInvalidateResources();
@@ -108,6 +109,8 @@ export const ContributionsPage = () => {
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+ 
+  const canEditContributions = hasPermission(APP_PERMISSIONS.contributionsWrite);
   const [expandedContributorId, setExpandedContributorId] = useState<number | null>(null);
 
   const contributionMap = useMemo(() => {
@@ -475,7 +478,7 @@ export const ContributionsPage = () => {
                         const state = getContributionCellState(amountCents, monthlyAmountCents);
                         const isCurrentMonth = isCurrentBusinessYear && month === currentBusinessMonth;
                         const isFutureMonth = isCurrentBusinessYear && month > currentBusinessMonth;
-                        const isInteractive = canMutateCurrentPeriod && contributor.status === 1;
+                        const isInteractive = canMutateCurrentPeriod && contributor.status === 1 && canEditContributions;
                         const baseCellStyle =
                           isFutureMonth || !isInteractive ? getMutedCellStyle(state) : getCellStyle(state);
 
@@ -603,14 +606,16 @@ export const ContributionsPage = () => {
         }}
       />
 
-      <Button
-        className="fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full shadow-[0_8px_30px_rgb(37,99,235,0.24)] hover:shadow-[0_8px_30px_rgb(37,99,235,0.4)] md:hidden flex items-center justify-center p-0"
-        onClick={openGlobalModal}
-        disabled={!canMutateCurrentPeriod}
-        aria-label="Nuevo Aporte"
-      >
-        <span className="text-3xl leading-none -mt-1">+</span>
-      </Button>
+      {canEditContributions && (
+        <Button
+          className="fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full shadow-[0_8px_30px_rgb(37,99,235,0.24)] hover:shadow-[0_8px_30px_rgb(37,99,235,0.4)] md:hidden flex items-center justify-center p-0"
+          onClick={openGlobalModal}
+          disabled={!canMutateCurrentPeriod}
+          aria-label="Nuevo Aporte"
+        >
+          <span className="text-3xl leading-none -mt-1">+</span>
+        </Button>
+      )}
 
  
     </div>
