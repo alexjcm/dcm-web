@@ -13,7 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@auth0/auth0-react": "^2.16.2",
+    "@auth0/auth0-react": "^2.16.200",
     "@headlessui/react": "^2.2.10",
     "@tailwindcss/vite": "^4.2.4",
     "lucide-react": "1.12.0",
