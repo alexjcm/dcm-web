@@ -49,5 +49,5 @@ jobs:
             -d '{
               "chat_id": "${{ secrets.TELEGRAM_CHAT_ID }}",
               "parse_mode": "HTML",
-              "text": "❌ <b>Pages Build Failed</b>\n\n<b>Project:</b> ${{ secrets.CF_PAGES_PROJECT_NAME }}\n<b>Branch:</b> ${{ github.ref_name }}\n<b>Commit:</b> <code>${{ github.sha }}</code>\n<b>Author:</b> ${{ github.actor }}\n<b>Message:</b> ${{ github.event.head_commit.message }}\n\n🔗 <a href=\"${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\">View logs</a>"
+              "text": "❌ <b>Cloudflare Pages Build Failed</b>\n\n<b>Project:</b> ${{ secrets.CF_PAGES_PROJECT_NAME }}\n<b>Branch:</b> ${{ github.ref_name }}\n<b>Message:</b> ${{ github.event.head_commit.message }}"
             }'
