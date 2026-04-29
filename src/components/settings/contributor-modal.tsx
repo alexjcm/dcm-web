@@ -1,5 +1,5 @@
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { User } from "lucide-react";
 
 import { Button } from "../ui/button";
@@ -27,6 +27,24 @@ export const ContributorModal = ({
   onChange,
   onSubmit
 }: ContributorModalProps) => {
+  const [showErrors, setShowErrors] = useState(false);
+
+  const isValidEmail = (email: string) => {
+    if (!email) return true;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const isEmailError = draft.email.length > 0 && !isValidEmail(draft.email);
+  const isNameError = !draft.name.trim();
+
+  const handleSubmit = () => {
+    if (isEmailError || isNameError) {
+      setShowErrors(true);
+      return;
+    }
+    onSubmit();
+  };
+
   return (
     <Transition appear show={open} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={submitting ? () => undefined : onClose}>
@@ -64,26 +82,46 @@ export const ContributorModal = ({
                 </div>
 
                 <div className="grid gap-4 p-5 sm:gap-5 sm:p-8">
-                  <Input
-                    label="Nombres"
-                    value={draft.name}
-                    onChange={(event) => onChange({ ...draft, name: event.target.value })}
-                    placeholder="Ej. Juan Pérez"
-                    disabled={submitting}
-                  />
-                  <Input
-                    label="Correo"
-                    type="email"
-                    value={draft.email}
-                    onChange={(event) => onChange({ ...draft, email: event.target.value })}
-                    placeholder="juan@ejemplo.com"
-                    disabled={submitting}
-                  />
+                  <div className="grid gap-1">
+                    <Input
+                      label="Nombres"
+                      value={draft.name}
+                      onChange={(event) => onChange({ ...draft, name: event.target.value })}
+                      placeholder="Ej. Juan Pérez"
+                      disabled={submitting}
+                      className={showErrors && isNameError ? "border-danger-500 focus:border-danger-500 focus:ring-danger-500/20" : ""}
+                    />
+                    {showErrors && isNameError && (
+                      <p className="px-1 text-xs font-medium text-danger-600 dark:text-danger-400 animate-in fade-in slide-in-from-top-1">
+                        El nombre es obligatorio
+                      </p>
+                    )}
+                  </div>
+                  <div className="grid gap-1">
+                    <Input
+                      label="Correo"
+                      type="email"
+                      value={draft.email}
+                      onChange={(event) => onChange({ ...draft, email: event.target.value.trim() })}
+                      placeholder="juan@ejemplo.com"
+                      disabled={submitting}
+                      className={showErrors && isEmailError ? "border-danger-500 focus:border-danger-500 focus:ring-danger-500/20" : ""}
+                    />
+                    {showErrors && isEmailError && (
+                      <p className="px-1 text-xs font-medium text-danger-600 dark:text-danger-400 animate-in fade-in slide-in-from-top-1">
+                        Por favor ingresa un correo válido (ej: nombre@ejemplo.com)
+                      </p>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex flex-col gap-2.5 border-t border-border bg-card px-5 py-4 sm:flex-row-reverse sm:gap-3 sm:px-8 sm:py-6">
 
-                  <Button onClick={onSubmit} isLoading={submitting} className="sm:min-w-[170px]">
+                  <Button 
+                    onClick={handleSubmit} 
+                    isLoading={submitting} 
+                    className="sm:min-w-[170px]"
+                  >
                     {submitLabel}
                   </Button>
                   <Button variant="ghost" onClick={onClose} disabled={submitting}>

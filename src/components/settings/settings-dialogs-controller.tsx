@@ -79,7 +79,7 @@ export const SettingsDialogsController = ({
 
     setSavingContributor(true);
 
-    const response = await api.post<Contributor>("/api/contributors", {
+    const response = await api.post<{ contribuyente: Contributor; auth0?: { email_sent?: boolean; existing?: boolean } }>("/api/contributors", {
       name: newContributor.name.trim(),
       email: newContributor.email.trim() ? newContributor.email.trim() : null
     });
@@ -91,7 +91,14 @@ export const SettingsDialogsController = ({
       return;
     }
 
-    toast.success("Contribuyente creado.");
+    if (response.data?.auth0?.email_sent) {
+      toast.success("Contribuyente creado. Se le ha enviado un correo al contribuyente para establecer su contraseña.");
+    } else if (response.data?.auth0?.existing) {
+      toast.success("Contribuyente creado y vinculado a cuenta de Auth0 existente.");
+    } else {
+      toast.success("Contribuyente creado.");
+    }
+
     closeCreateContributorModal();
     invalidateResources(RESOURCE_KEYS.contributors, RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
   };
@@ -121,7 +128,7 @@ export const SettingsDialogsController = ({
 
     setSavingContributor(true);
 
-    const response = await api.put<Contributor>(`/api/contributors/${editingContributor.id}`, {
+    const response = await api.put<{ contribuyente: Contributor; auth0?: { email_sent?: boolean; existing?: boolean } }>(`/api/contributors/${editingContributor.id}`, {
       name: editDraft.name.trim(),
       email: editDraft.email.trim() ? editDraft.email.trim() : null
     });
@@ -133,7 +140,14 @@ export const SettingsDialogsController = ({
       return;
     }
 
-    toast.success("Contribuyente actualizado.");
+    if (response.data?.auth0?.email_sent) {
+      toast.success("Contribuyente actualizado. Se le envió un nuevo correo de acceso.");
+    } else if (response.data?.auth0?.existing) {
+      toast.success("Contribuyente actualizado y sincronizado con Auth0.");
+    } else {
+      toast.success("Contribuyente actualizado.");
+    }
+
     closeEditContributorModal();
     invalidateResources(RESOURCE_KEYS.contributors, RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
   };

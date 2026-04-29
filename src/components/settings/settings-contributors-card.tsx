@@ -76,13 +76,15 @@ export const SettingsContributorsCard = ({
                 </td>
                 <td className="align-top pl-6 pr-2 py-3.5 sm:pl-7 sm:pr-4 md:px-6">
                   <div className="flex flex-nowrap items-start justify-start gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      icon={Edit2}
-                      onClick={() => onEditContributor(contributor)}
-                      aria-label="Editar contribuyente"
-                    />
+                    {contributor.status === 1 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        icon={Edit2}
+                        onClick={() => onEditContributor(contributor)}
+                        aria-label="Editar contribuyente"
+                      />
+                    )}
                     <Button
                       size="sm"
                       variant={contributor.status === 1 ? "outline" : "secondary"}
