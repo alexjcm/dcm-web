@@ -1,4 +1,5 @@
 const SESSION_RECOVERY_ATTEMPT_KEY = "auth:session-recovery-attempt";
+const DEFAULT_LOGIN_ATTEMPT_KEY = "auth:default-login-attempt";
 const SESSION_RECOVERY_REASON = "session-expired";
 const SESSION_RECOVERY_WINDOW_MS = 60_000;
 
@@ -86,6 +87,34 @@ export const markSessionRecoveryAttempt = (returnTo: string): void => {
 
 export const clearSessionRecoveryAttempt = (): void => {
   sessionStorage.removeItem(SESSION_RECOVERY_ATTEMPT_KEY);
+};
+
+const readDefaultLoginAttemptAt = (): number | null => {
+  const raw = sessionStorage.getItem(DEFAULT_LOGIN_ATTEMPT_KEY);
+  if (!raw) {
+    return null;
+  }
+
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) ? parsed : null;
+};
+
+export const canAttemptDefaultLogin = (): boolean => {
+  const at = readDefaultLoginAttemptAt();
+
+  if (at === null) {
+    return true;
+  }
+
+  return Date.now() - at > SESSION_RECOVERY_WINDOW_MS;
+};
+
+export const markDefaultLoginAttempt = (): void => {
+  sessionStorage.setItem(DEFAULT_LOGIN_ATTEMPT_KEY, String(Date.now()));
+};
+
+export const clearDefaultLoginAttempt = (): void => {
+  sessionStorage.removeItem(DEFAULT_LOGIN_ATTEMPT_KEY);
 };
 
 export const getSessionRecoveryReason = (value: string | null | undefined): string | null => {

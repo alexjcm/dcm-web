@@ -7,7 +7,7 @@ import { App } from "./App";
 import { AppVersionFooter } from "./components/ui/app-version-footer";
 import { AUTH0_AUDIENCE, AUTH0_CLIENT_ID, AUTH0_DOMAIN, IS_AUTH_CONFIG_VALID } from "./config/auth";
 import { AppContextProvider } from "./context/app-context";
-import { clearSessionRecoveryAttempt, normalizeReturnTo } from "./lib/auth-navigation";
+import { clearDefaultLoginAttempt, clearSessionRecoveryAttempt, normalizeReturnTo } from "./lib/auth-navigation";
 import "./pwa";
 import "./styles.css";
 
@@ -66,6 +66,7 @@ const Auth0ProviderWithNavigation = () => {
         redirect_uri: window.location.origin
       }}
       onRedirectCallback={(appState) => {
+        clearDefaultLoginAttempt();
         clearSessionRecoveryAttempt();
         const returnTo = normalizeReturnTo(appState?.returnTo);
         

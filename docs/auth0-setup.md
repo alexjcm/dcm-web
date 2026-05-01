@@ -16,6 +16,7 @@
 - Allowed Callback URLs: `https://contrib-dcm.pages.dev`
 - Allowed Logout URLs: `https://contrib-dcm.pages.dev`
 - Allowed Web Origins: `https://contrib-dcm.pages.dev`
+- Application Login URI: `https://contrib-dcm.pages.dev/auth/login`
 
 ## SPA Configuration
 - Application Type: `Single Page Application`
@@ -81,6 +82,13 @@ When an administrator creates a database user directly from the Auth0 dashboard:
 - `Sin permisos`: Auth0 account exists, but it currently has no roles and DCM respected that administrative state.
 - `Error`: resolution, provisioning, or role assignment failed.
 
+## Password reset return flow
+- Production DB-user password setup and password reset flows rely on Auth0 Universal Login returning to the SPA through the configured Application Login URI.
+- The technical return route is `/auth/login`.
+- `/auth/login` must auto-start `loginWithRedirect()` and always return to `/contributions` after successful authentication.
+- `/sign-in` remains the manual human-facing login page.
+- This improved return UX applies to the production SPA only. Auth0 does not support `localhost` as an Application Login URI, so local development does not mirror the same post-reset return flow.
+
 ### Social-first behavior
 - If a valid social account already exists in Auth0 and DCM accepts it as the canonical account, the UI should end with `Con cuenta` on that same identity.
 - The system must not create a parallel DB account just to send a password reset email.
@@ -115,7 +123,7 @@ Dashboard → Applications → Create Application → Machine to Machine → sel
 **STEP 2 — Obtain viewer role ID**
 Dashboard → User Management → Roles → viewer → copy `rol_xxxxxxxxxxxxxxxx`.
 
-**STEP 3 — Create Action: DCM Control Access**
+**STEP 3 — Create Action: dcm-access-and-account-linking**
 Dashboard → Actions → Library → Create Action
 - Trigger: `Post Login`
 
@@ -127,4 +135,4 @@ Dashboard → Actions → Library → Create Action
 - `DCM_PWA_URL`
 
 **STEP 5 — Activate Action in the trigger**
-Dashboard → Actions → Flows → Login → drag **DCM Control Access** between Start and Complete → **Apply**.
+Dashboard → Actions → Flows → Login → drag **dcm-access-and-account-linking** between Start and Complete → **Apply**.

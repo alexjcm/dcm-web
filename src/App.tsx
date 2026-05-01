@@ -44,6 +44,11 @@ const LinkAccountPage = lazy(async () => {
   return { default: module.LinkAccountPage };
 });
 
+const AuthLoginPage = lazy(async () => {
+  const module = await import("./pages/auth-login-page");
+  return { default: module.AuthLoginPage };
+});
+
 const withSuspense = (node: ReactNode) => {
   return <Suspense fallback={<PageLoader />}>{node}</Suspense>;
 };
@@ -52,6 +57,7 @@ export const App = () => {
   return (
     <Routes>
       <Route path="/sign-in" element={withSuspense(<SignInPage />)} />
+      <Route path="/auth/login" element={withSuspense(<AuthLoginPage />)} />
       <Route path="/auth/error" element={withSuspense(<AuthErrorPage />)} />
       <Route path="/link-account" element={withSuspense(<LinkAccountPage />)} />
 
