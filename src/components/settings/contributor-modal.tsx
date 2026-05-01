@@ -10,6 +10,7 @@ type ContributorModalProps = {
   open: boolean;
   title: string;
   submitLabel: string;
+  auth0AutoSyncEnabled: boolean;
   draft: ContributorDraft;
   submitting: boolean;
   onClose: () => void;
@@ -21,6 +22,7 @@ export const ContributorModal = ({
   open,
   title,
   submitLabel,
+  auth0AutoSyncEnabled,
   draft,
   submitting,
   onClose,
@@ -112,6 +114,25 @@ export const ContributorModal = ({
                         Por favor ingresa un correo válido (ej: nombre@ejemplo.com)
                       </p>
                     )}
+                  </div>
+                  <div className="rounded-lg border border-border bg-neutral-50/80 p-3 dark:bg-neutral-900/30">
+                    <label className="flex items-start gap-2.5">
+                      <input
+                        type="checkbox"
+                        checked={auth0AutoSyncEnabled}
+                        readOnly
+                        disabled
+                        className="mt-0.5 h-4 w-4 rounded border-border"
+                      />
+                      <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                        Reconciliar acceso con Auth0 al guardar
+                      </span>
+                    </label>
+                    <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-400">
+                      {auth0AutoSyncEnabled
+                        ? "Si existe una cuenta válida en Auth0 se reutilizará; si no existe, DCM podrá crear una cuenta DB según el caso."
+                        : "Disponible cuando el superadmin active la sincronización automática con Auth0."}
+                    </p>
                   </div>
                 </div>
 

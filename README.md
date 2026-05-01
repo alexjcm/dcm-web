@@ -15,9 +15,9 @@ Family Contributions Management Frontend (React + Vite + Tailwind + Auth0 SPA SD
 Create `.env.local` with:
 
 ```bash
-VITE_AUTH0_DOMAIN=dev-mz3wmzwe2532icvg.us.auth0.com
+VITE_AUTH0_DOMAIN=dcm-platform.us.auth0.com
 VITE_AUTH0_CLIENT_ID=kuzGkPKhYz56NDS4783Yy1b388XjMzYd
-VITE_AUTH0_AUDIENCE=https://api.contributions
+VITE_AUTH0_AUDIENCE=https://api.dcm
 VITE_API_BASE_URL=http://localhost:8787
 ```
 

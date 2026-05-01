@@ -1,6 +1,7 @@
 import { ShieldAlert } from "lucide-react";
 
 import { SettingsDialogsController } from "../components/settings/settings-dialogs-controller";
+import { SettingsAuth0IntegrationCard } from "../components/settings/settings-auth0-integration-card";
 import { SettingsContributorsCard } from "../components/settings/settings-contributors-card";
 import { SettingsMonthlyAmountCard } from "../components/settings/settings-monthly-amount-card";
 import { Card } from "../components/ui/card";
@@ -15,6 +16,7 @@ export const SettingsPage = () => {
   const {
     settings,
     sortedContributors,
+    auth0AutoSyncEnabled,
     amountInput,
     pendingAmountCents,
     setPendingAmountCents,
@@ -50,7 +52,7 @@ export const SettingsPage = () => {
           </h2>
           <ScreenHelpButton
             title="Ajustes"
-            description="Actualiza el monto base mensual y administra contribuyentes: crear, editar, activar o desactivar."
+            description="Actualiza el monto base mensual, administra contribuyentes y controla la sincronización con Auth0."
             className="shrink-0"
           />
         </div>
@@ -58,6 +60,7 @@ export const SettingsPage = () => {
 
 
       <SettingsDialogsController
+        auth0AutoSyncEnabled={auth0AutoSyncEnabled}
         pendingAmountCents={pendingAmountCents}
         setPendingAmountCents={setPendingAmountCents}
         onSavingAmountChange={() => undefined}
@@ -65,7 +68,14 @@ export const SettingsPage = () => {
         onToggleContributorStatus={() => undefined}
         onOpenCreateContributor={() => undefined}
       >
-        {({ openCreateContributorModal, requestContributorStatusChange, savingAmount, startEditingContributor }) => (
+        {({
+          openCreateContributorModal,
+          requestContributorStatusChange,
+          requestAuth0AutoSyncChange,
+          savingAuth0AutoSync,
+          savingAmount,
+          startEditingContributor
+        }) => (
           <div className="grid gap-6 xl:grid-cols-[minmax(300px,380px)_minmax(0,1fr)]">
             <div className="min-w-0 space-y-6 xl:max-w-[380px]">
               <SettingsMonthlyAmountCard
@@ -74,6 +84,11 @@ export const SettingsPage = () => {
                 saving={savingAmount}
                 onAmountChange={handleAmountInputChange}
                 onRequestUpdate={requestMonthlyAmountUpdate}
+              />
+              <SettingsAuth0IntegrationCard
+                enabled={auth0AutoSyncEnabled}
+                saving={savingAuth0AutoSync}
+                onRequestToggle={requestAuth0AutoSyncChange}
               />
             </div>
 

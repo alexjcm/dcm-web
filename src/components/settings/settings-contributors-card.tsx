@@ -1,8 +1,15 @@
-import { Check, Edit2, Plus, Trash2, Users } from "lucide-react";
+import {
+  Check,
+  Edit2,
+  Plus,
+  ShieldCheck,
+  Trash2,
+  Users
+} from "lucide-react";
 
 import { Button } from "../ui/button";
 import { Card } from "../ui/card";
-import { ContributorStatusBadge } from "../ui/state-badge";
+import { ContributorAuth0StatusBadge, ContributorStatusBadge } from "../ui/state-badge";
 import type { Contributor } from "../../types/domain";
 
 type SettingsContributorsCardProps = {
@@ -52,6 +59,7 @@ export const SettingsContributorsCard = ({
             <tr>
               <th className="px-2 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 sm:px-4 md:px-6">Nombres</th>
               <th className="hidden px-2 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 sm:px-4 md:table-cell md:px-6">Estado</th>
+              <th className="hidden px-2 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 sm:px-4 lg:table-cell lg:px-6">Acceso</th>
               <th className="pl-6 pr-2 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 sm:pl-7 sm:pr-4 md:px-6">Acciones</th>
             </tr>
           </thead>
@@ -64,6 +72,21 @@ export const SettingsContributorsCard = ({
                     <div className="mt-1 md:hidden">
                       <ContributorStatusBadge status={contributor.status} />
                     </div>
+                    {contributor.auth0SyncStatus !== "unknown_legacy" ? (
+                      <div className="mt-1 lg:hidden">
+                        {contributor.auth0SyncStatus === "linked" ? (
+                          <span title="Con cuenta">
+                            <ShieldCheck
+                              size={16}
+                              className="text-success-700 dark:text-success-400"
+                              aria-label="Con cuenta"
+                            />
+                          </span>
+                        ) : (
+                          <ContributorAuth0StatusBadge status={contributor.auth0SyncStatus} />
+                        )}
+                      </div>
+                    ) : null}
                     {contributor.email?.trim() ? (
                       <div className="mt-0.5 text-[11px] font-medium text-neutral-600 dark:text-neutral-400">
                         {contributor.email}
@@ -74,8 +97,30 @@ export const SettingsContributorsCard = ({
                 <td className="hidden px-2 py-3.5 sm:px-4 md:table-cell md:px-6">
                   <ContributorStatusBadge status={contributor.status} />
                 </td>
+                <td className="hidden px-2 py-3.5 sm:px-4 lg:table-cell lg:px-6">
+                  <div className="space-y-1">
+                    {contributor.auth0SyncStatus !== "unknown_legacy" ? (
+                      contributor.auth0SyncStatus === "linked" ? (
+                        <span title="Con cuenta">
+                          <ShieldCheck
+                            size={16}
+                            className="text-success-700 dark:text-success-400"
+                            aria-label="Con cuenta"
+                          />
+                        </span>
+                      ) : (
+                        <ContributorAuth0StatusBadge status={contributor.auth0SyncStatus} />
+                      )
+                    ) : null}
+                    {contributor.auth0SyncStatus === "error" && contributor.auth0LastError?.trim() ? (
+                      <p className="max-w-[240px] truncate text-[10px] font-medium text-danger-700 dark:text-danger-400" title={contributor.auth0LastError}>
+                        {contributor.auth0LastError}
+                      </p>
+                    ) : null}
+                  </div>
+                </td>
                 <td className="align-top pl-6 pr-2 py-3.5 sm:pl-7 sm:pr-4 md:px-6">
-                  <div className="flex flex-nowrap items-start justify-start gap-2">
+                  <div className="flex items-start justify-start gap-2">
                     {contributor.status === 1 && (
                       <Button
                         variant="outline"
@@ -83,6 +128,7 @@ export const SettingsContributorsCard = ({
                         icon={Edit2}
                         onClick={() => onEditContributor(contributor)}
                         aria-label="Editar contribuyente"
+                        title="Editar contribuyente"
                       />
                     )}
                     <Button
@@ -92,8 +138,9 @@ export const SettingsContributorsCard = ({
                       onClick={() => onToggleContributorStatus(contributor)}
                       className={`whitespace-nowrap ${contributor.status === 1 ? "!px-2.5 !border-danger-300 !bg-danger-50/80 !text-danger-700 hover:!border-danger-400 hover:!bg-danger-100 dark:!border-danger-700/70 dark:!bg-danger-900/25 dark:!text-danger-300 dark:hover:!bg-danger-900/40" : ""}`}
                       aria-label={contributor.status === 1 ? "Desactivar contribuyente" : "Activar contribuyente"}
+                      title={contributor.status === 1 ? "Desactivar contribuyente" : "Activar contribuyente"}
                     >
-                      {contributor.status === 1 ? "Desactivar" : "Activar"}
+                      {contributor.status === 1 ? null : "Activar"}
                     </Button>
                   </div>
                 </td>

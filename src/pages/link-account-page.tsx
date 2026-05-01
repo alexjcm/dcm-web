@@ -48,7 +48,6 @@ export const LinkAccountPage = () => {
     }
   }, [sessionToken])
 
-  const expectedEmail = payload?.email
   const baseContinueUrl = payload?.continue_url
   const candidates: CandidateIdentity[] = payload?.candidate_identities ?? []
 
@@ -106,7 +105,7 @@ export const LinkAccountPage = () => {
       const msg = err instanceof Error ? err.message : 'Error desconocido'
       setError(msg)
       setLinking(false)
-      // Mantenemos linkingRef.current = true para evitar el bucle infinito tras un error
+      linkingRef.current = false
     }
   }
 
@@ -124,7 +123,6 @@ export const LinkAccountPage = () => {
       appState: { returnTo: returnToUrl },
       authorizationParams: {
         connection: candidate.connection,
-        login_hint: expectedEmail,
         prompt: 'login',
       },
     })
@@ -153,9 +151,8 @@ export const LinkAccountPage = () => {
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-neutral-900">Enlazar Cuentas</h1>
           <p className="text-neutral-500 text-sm">
-            Ya tienes una cuenta como{' '}
-            <span className="font-bold text-neutral-800">{expectedEmail}</span>.
-            Confirma tu contraseña para habilitar el acceso con Google.
+            Ya existe una cuenta de DCM compatible con este acceso social.
+            Confirma tu contraseña para completar el enlace seguro.
           </p>
         </div>
         
@@ -179,11 +176,24 @@ export const LinkAccountPage = () => {
           </button>
         )}
 
-        {isAuthenticated && !linking && (
+        {isAuthenticated && !linking && !error && (
           <div className="flex flex-col items-center justify-center py-4 space-y-4">
             <PageLoader label="Finalizando enlace..." />
             <p className="text-xs text-neutral-400">Si tardas mucho, pulsa F5</p>
           </div>
+        )}
+
+        {isAuthenticated && error && (
+          <button
+            onClick={() => {
+              setError(null)
+              void executeCompleteLink()
+            }}
+            disabled={linking || !selectedCandidate}
+            className="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-3 rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-primary-500/20"
+          >
+            Reintentar enlace
+          </button>
         )}
 
         {/* Botón de emergencia si el SDK está lento */}

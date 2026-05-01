@@ -1,11 +1,16 @@
 export type ContributorStatus = 0 | 1;
 export type ContributionState = "pending" | "incomplete" | "complete" | "overpaid";
+export type Auth0SyncStatus = "unknown_legacy" | "not_linked" | "pending_password" | "linked" | "no_access" | "error";
 
 export type Contributor = {
   id: number;
   name: string;
   email: string | null;
   status: ContributorStatus;
+  auth0SyncStatus: Auth0SyncStatus;
+  auth0UserId: string | null;
+  auth0LastSyncAt: string | null;
+  auth0LastError: string | null;
   createdAt: string;
   createdBy: string;
   updatedAt: string;

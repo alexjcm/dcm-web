@@ -16,9 +16,7 @@ export const useSettingsPageData = () => {
     setAmountInput(formatCentsAsInputValue(settings.monthlyAmountCents));
   }, [settings.monthlyAmountCents]);
 
-  const sortedContributors = useMemo(() => {
-    return [...(contributors.data?.items ?? [])].sort((left, right) => left.name.localeCompare(right.name, "es"));
-  }, [contributors.data]);
+  const sortedContributors = useMemo(() => contributors.data?.items ?? [], [contributors.data]);
 
   const handleAmountInputChange = (value: string) => {
     setAmountInput(sanitizeMoneyInput(value));
@@ -38,6 +36,7 @@ export const useSettingsPageData = () => {
   return {
     settings,
     sortedContributors,
+    auth0AutoSyncEnabled: settings.auth0AutoSyncEnabled,
     amountInput,
     pendingAmountCents,
     setPendingAmountCents,

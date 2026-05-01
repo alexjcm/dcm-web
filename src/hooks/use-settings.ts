@@ -25,8 +25,14 @@ export const useSettings = (enabled: boolean = true) => {
     return Math.trunc(parsed);
   }, [resource.data]);
 
+  const auth0AutoSyncEnabled = useMemo(() => {
+    const raw = resource.data?.items.find((item) => item.key === "auth0_auto_sync_enabled")?.value;
+    return raw === "true";
+  }, [resource.data]);
+
   return {
     ...resource,
-    monthlyAmountCents
+    monthlyAmountCents,
+    auth0AutoSyncEnabled
   };
 };
