@@ -5,6 +5,11 @@ import type { ResourceKey } from "../lib/resource-invalidation";
 import { useResourceVersion } from "./use-resource-invalidation";
 
 type Loader<T> = (signal: AbortSignal) => Promise<ApiResponse<T>>;
+const UNEXPECTED_RESOURCE_ERROR = "No fue posible cargar el recurso.";
+
+const isAbortError = (error: unknown): boolean => {
+  return error instanceof DOMException && error.name === "AbortError";
+};
 
 type ResourceState<T> = {
   data: T | null;
@@ -43,25 +48,40 @@ export const useApiResource = <T>(
       setLoading(true);
       setError(null);
 
-      const response = await loader(controller.signal);
+      try {
+        const response = await loader(controller.signal);
 
-      if (!active) {
-        return;
-      }
+        if (!active) {
+          return;
+        }
 
-      if (response.ok) {
-        setData(response.data);
+        if (response.ok) {
+          setData(response.data);
+          setLoading(false);
+          return;
+        }
+
+        if (response.error.code === "REQUEST_ABORTED") {
+          setLoading(false);
+          return;
+        }
+
+        setError(response.error.detail);
         setLoading(false);
-        return;
-      }
+      } catch (error) {
+        if (!active) {
+          return;
+        }
 
-      if (response.error.code === "REQUEST_ABORTED") {
+        if (controller.signal.aborted || isAbortError(error)) {
+          setLoading(false);
+          return;
+        }
+
+        console.error("Unexpected resource loader failure.", error);
+        setError(UNEXPECTED_RESOURCE_ERROR);
         setLoading(false);
-        return;
       }
-
-      setError(response.error.detail);
-      setLoading(false);
     };
 
     void run();

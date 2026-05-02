@@ -81,6 +81,7 @@ export const ContributionModal = ({
     })
   );
   const [formError, setFormError] = useState<string | null>(null);
+  const formErrorId = "contribution-form-error";
 
   useEffect(() => {
     if (!open) {
@@ -196,6 +197,8 @@ export const ContributionModal = ({
                     value={form.contributorId}
                     onChange={(event) => setForm((previous) => ({ ...previous, contributorId: event.target.value }))}
                     disabled={!canEditContributor || submitting}
+                    aria-invalid={formError ? true : undefined}
+                    aria-describedby={formError ? formErrorId : undefined}
                     className={!canEditContributor ? lockedFieldClassName : ""}
                   >
                     <option value="">Seleccionar...</option>
@@ -210,11 +213,14 @@ export const ContributionModal = ({
                     <Input
                       label="Año"
                       type="number"
+                      inputMode="numeric"
                       min={2000}
                       max={2100}
                       value={form.year}
                       onChange={(event) => setForm((previous) => ({ ...previous, year: event.target.value }))}
                       disabled={!canEditYear || submitting}
+                      aria-invalid={formError ? true : undefined}
+                      aria-describedby={formError ? formErrorId : undefined}
                       className={!canEditYear ? lockedFieldClassName : ""}
                     />
 
@@ -223,6 +229,8 @@ export const ContributionModal = ({
                       value={form.month}
                       onChange={(event) => setForm((previous) => ({ ...previous, month: event.target.value }))}
                       disabled={!canEditMonth || submitting}
+                      aria-invalid={formError ? true : undefined}
+                      aria-describedby={formError ? formErrorId : undefined}
                       className={!canEditMonth ? lockedFieldClassName : ""}
                     >
                       {monthOptions.map((month) => (
@@ -243,12 +251,17 @@ export const ContributionModal = ({
                       setForm((previous) => ({ ...previous, amount: sanitizeMoneyInput(event.target.value) }))
                     }
                     disabled={submitting}
+                    aria-invalid={formError ? true : undefined}
+                    aria-describedby={formError ? formErrorId : undefined}
                   />
                   
                   {(formError || lockedReason) && (
                     <div className="mb-4 flex items-start gap-3 rounded-[var(--radius-alert)] border border-warning-200 bg-warning-100/60 p-3.5 transition-all duration-300 animate-in slide-in-from-top-2 dark:border-warning-700/50 dark:bg-warning-950/40 sm:mb-6 sm:gap-4 sm:p-4">
                        <AlertCircle size={18} className="mt-0.5 shrink-0 text-warning-700" />
-                       <p className="text-xs font-semibold uppercase leading-relaxed tracking-tighter text-warning-950 dark:text-warning-300">
+                       <p
+                         id={formError ? formErrorId : undefined}
+                         className="text-xs font-semibold uppercase leading-relaxed tracking-tighter text-warning-950 dark:text-warning-300"
+                       >
                           {formError || lockedReason}
                        </p>
                     </div>

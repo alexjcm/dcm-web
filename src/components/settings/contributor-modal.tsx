@@ -30,6 +30,8 @@ export const ContributorModal = ({
   onSubmit
 }: ContributorModalProps) => {
   const [showErrors, setShowErrors] = useState(false);
+  const nameErrorId = "contributor-name-error";
+  const emailErrorId = "contributor-email-error";
 
   const isValidEmail = (email: string) => {
     if (!email) return true;
@@ -90,11 +92,17 @@ export const ContributorModal = ({
                       value={draft.name}
                       onChange={(event) => onChange({ ...draft, name: event.target.value })}
                       placeholder="Ej. Juan Pérez"
+                      autoComplete="name"
                       disabled={submitting}
+                      aria-invalid={showErrors && isNameError ? true : undefined}
+                      aria-describedby={showErrors && isNameError ? nameErrorId : undefined}
                       className={showErrors && isNameError ? "border-danger-500 focus:border-danger-500 focus:ring-danger-500/20" : ""}
                     />
                     {showErrors && isNameError && (
-                      <p className="px-1 text-xs font-medium text-danger-600 dark:text-danger-400 animate-in fade-in slide-in-from-top-1">
+                      <p
+                        id={nameErrorId}
+                        className="px-1 text-xs font-medium text-danger-600 dark:text-danger-400 animate-in fade-in slide-in-from-top-1"
+                      >
                         El nombre es obligatorio
                       </p>
                     )}
@@ -106,11 +114,17 @@ export const ContributorModal = ({
                       value={draft.email}
                       onChange={(event) => onChange({ ...draft, email: event.target.value.trim() })}
                       placeholder="juan@ejemplo.com"
+                      autoComplete="email"
                       disabled={submitting}
+                      aria-invalid={showErrors && isEmailError ? true : undefined}
+                      aria-describedby={showErrors && isEmailError ? emailErrorId : undefined}
                       className={showErrors && isEmailError ? "border-danger-500 focus:border-danger-500 focus:ring-danger-500/20" : ""}
                     />
                     {showErrors && isEmailError && (
-                      <p className="px-1 text-xs font-medium text-danger-600 dark:text-danger-400 animate-in fade-in slide-in-from-top-1">
+                      <p
+                        id={emailErrorId}
+                        className="px-1 text-xs font-medium text-danger-600 dark:text-danger-400 animate-in fade-in slide-in-from-top-1"
+                      >
                         Por favor ingresa un correo válido (ej: nombre@ejemplo.com)
                       </p>
                     )}

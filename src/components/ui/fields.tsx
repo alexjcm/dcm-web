@@ -1,6 +1,16 @@
 import { type InputHTMLAttributes, type SelectHTMLAttributes, forwardRef, useId } from "react";
 import { LucideIcon } from "lucide-react";
 
+const buildDescribedBy = (currentValue: string | undefined, errorId: string | undefined): string | undefined => {
+  const values = [currentValue, errorId].filter(Boolean);
+
+  if (values.length === 0) {
+    return undefined;
+  }
+
+  return values.join(" ");
+};
+
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
@@ -12,6 +22,9 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
   ({ label, error, icon: Icon, prefix, className = "", ...props }, ref) => {
     const generatedId = useId();
     const inputId = props.id ?? generatedId;
+    const errorId = error ? `${inputId}-error` : undefined;
+    const describedBy = buildDescribedBy(props["aria-describedby"], errorId);
+    const ariaInvalid = props["aria-invalid"] ?? (error ? true : undefined);
 
     return (
       <div className="flex flex-col gap-1.5 w-full">
@@ -34,6 +47,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           <input
             ref={ref}
             id={inputId}
+            aria-describedby={describedBy}
+            aria-invalid={ariaInvalid}
             className={`
               w-full rounded-xl border border-border bg-white py-2.5 text-sm text-neutral-900 shadow-sm transition-colors
               placeholder:text-neutral-400
@@ -47,7 +62,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             {...props}
           />
         </div>
-        {error && <p className="text-xs font-medium text-danger-600">{error}</p>}
+        {error && (
+          <p id={errorId} className="text-xs font-medium text-danger-600">
+            {error}
+          </p>
+        )}
       </div>
     );
   }
@@ -65,6 +84,9 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   ({ label, error, icon: Icon, className = "", children, ...props }, ref) => {
     const generatedId = useId();
     const selectId = props.id ?? generatedId;
+    const errorId = error ? `${selectId}-error` : undefined;
+    const describedBy = buildDescribedBy(props["aria-describedby"], errorId);
+    const ariaInvalid = props["aria-invalid"] ?? (error ? true : undefined);
 
     return (
       <div className="flex flex-col gap-1.5 w-full">
@@ -82,6 +104,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           <select
             ref={ref}
             id={selectId}
+            aria-describedby={describedBy}
+            aria-invalid={ariaInvalid}
             className={`
               w-full appearance-none rounded-xl border border-border bg-white py-2.5 text-sm text-neutral-900 shadow-sm transition-colors
               focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-400
@@ -101,7 +125,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             </svg>
           </div>
         </div>
-        {error && <p className="text-xs font-medium text-danger-600">{error}</p>}
+        {error && (
+          <p id={errorId} className="text-xs font-medium text-danger-600">
+            {error}
+          </p>
+        )}
 
       </div>
     );

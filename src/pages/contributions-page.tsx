@@ -1,8 +1,6 @@
-import { lazy, Suspense, useMemo, useState } from "react";
-import { toast } from "sonner";
+import { lazy, Suspense, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-import type { ContributionPayload } from "../components/contributions/contribution-modal";
 import { Card } from "../components/ui/card";
 import { ConfirmModal } from "../components/ui/confirm-modal";
 import { Input } from "../components/ui/fields";
@@ -12,27 +10,14 @@ import { ScreenHelpButton } from "../components/ui/screen-help-button";
 import { getContributionCellState } from "../components/ui/state-badge";
 import { YearSelect } from "../components/ui/year-select";
 import { useAppContext } from "../context/app-context";
-import { useApiClient } from "../hooks/use-api-client";
+import { useContributionsPageActions } from "../hooks/use-contributions-page-actions";
 import { useContributionsYearAll } from "../hooks/use-contributions-year-all";
-import { useInvalidateResources } from "../hooks/use-resource-invalidation";
+import { byContributionCellKey, useContributionsPageDerived } from "../hooks/use-contributions-page-derived";
 import { useContributionsMeta } from "../hooks/use-contributions-meta";
 import { getCurrentBusinessMonth } from "../lib/business-time";
 import { getMonthLabel } from "../lib/date";
 import { formatCentsAsCurrency } from "../lib/money";
-import { RESOURCE_KEYS } from "../lib/resource-invalidation";
 import { APP_PERMISSIONS } from "../config/permissions";
-import type { Contribution, ContributorMeta } from "../types/domain";
-
-type SelectedCell = {
-  contributor: ContributorMeta;
-  month: number;
-  existingContribution: Contribution | null;
-};
-
-type PendingDelete = {
-  contribution: Contribution;
-  contributorName: string;
-};
 
 const ContributionModal = lazy(async () => {
   const module = await import("../components/contributions/contribution-modal");
@@ -40,23 +25,6 @@ const ContributionModal = lazy(async () => {
 });
 
 const monthList = Array.from({ length: 12 }, (_, index) => index + 1);
-
-const byCellKey = (contributorId: number, month: number): string => `${contributorId}:${month}`;
-
-const getStatePriority = (state: ReturnType<typeof getContributionCellState>): number => {
-  switch (state) {
-    case "pending":
-      return 0;
-    case "incomplete":
-      return 1;
-    case "overpaid":
-      return 2;
-    case "complete":
-      return 3;
-    default:
-      return 4;
-  }
-};
 
 const getCellStyle = (state: ReturnType<typeof getContributionCellState>): string => {
   switch (state) {
@@ -94,8 +62,6 @@ const getFutureCellStyle = (): string =>
 export const ContributionsPage = () => {
   const { activeYear, currentBusinessYear, setActiveYear, canMutateCurrentPeriod, contributionRestrictionMessage, hasPermission } =
     useAppContext();
-  const api = useApiClient();
-  const invalidateResources = useInvalidateResources();
 
   const currentBusinessMonth = getCurrentBusinessMonth();
   const isCurrentBusinessYear = activeYear === currentBusinessYear;
@@ -103,25 +69,38 @@ export const ContributionsPage = () => {
   const meta = useContributionsMeta(activeYear);
   const allContributions = useContributionsYearAll(activeYear);
 
-  const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null);
-  const [isGlobalModalOpen, setIsGlobalModalOpen] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
-  const [deleting, setDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
  
   const canEditContributions = hasPermission(APP_PERMISSIONS.contributionsWrite);
   const [expandedContributorId, setExpandedContributorId] = useState<number | null>(null);
-
-  const contributionMap = useMemo(() => {
-    const map = new Map<string, Contribution>();
-
-    for (const item of allContributions.data?.items ?? []) {
-      map.set(byCellKey(item.contributorId, item.month), item);
-    }
-
-    return map;
-  }, [allContributions.data]);
+  const contributorItems = meta.data?.contributors ?? [];
+  const monthlyAmountCents = meta.data?.monthlyAmountCents ?? 0;
+  const { contributionMap, visibleContributors, modalContributors } = useContributionsPageDerived({
+    contributions: allContributions.data?.items,
+    contributors: contributorItems,
+    currentBusinessMonth,
+    monthlyAmountCents,
+    searchQuery
+  });
+  const {
+    selectedCell,
+    isGlobalModalOpen,
+    submitting,
+    pendingDelete,
+    deleting,
+    openGlobalModal,
+    openModalForCell,
+    closeContributionModal,
+    requestDeleteSelectedContribution,
+    cancelDelete,
+    handleSave,
+    handleDelete
+  } = useContributionsPageActions({
+    canMutateCurrentPeriod,
+    contributionRestrictionMessage,
+    contributionMap,
+    getCellKey: byContributionCellKey
+  });
 
   if ((meta.loading && !meta.data) || (allContributions.loading && !allContributions.data)) {
     return <SectionLoader label="Cargando vista anual..." />;
@@ -146,99 +125,6 @@ export const ContributionsPage = () => {
   if (!meta.data) {
     return null;
   }
-
-  const monthlyAmountCents = meta.data.monthlyAmountCents;
-  const contributors = [...meta.data.contributors].sort((left, right) => {
-    const leftCurrentAmount = contributionMap.get(byCellKey(left.contributorId, currentBusinessMonth))?.amountCents ?? 0;
-    const rightCurrentAmount = contributionMap.get(byCellKey(right.contributorId, currentBusinessMonth))?.amountCents ?? 0;
-
-    const leftCurrentState = getContributionCellState(leftCurrentAmount, monthlyAmountCents);
-    const rightCurrentState = getContributionCellState(rightCurrentAmount, monthlyAmountCents);
-
-    const stateDiff = getStatePriority(leftCurrentState) - getStatePriority(rightCurrentState);
-    if (stateDiff !== 0) {
-      return stateDiff;
-    }
-
-    if (left.status !== right.status) {
-      return right.status - left.status;
-    }
-
-    return left.name.localeCompare(right.name, "es");
-  });
-
-  const visibleContributors = (() => {
-    if (!searchQuery.trim()) {
-      return contributors;
-    }
-    const lowerQuery = searchQuery.toLowerCase();
-    return contributors.filter((c) => c.name.toLowerCase().includes(lowerQuery));
-  })();
-
-  const openGlobalModal = () => {
-    if (!canMutateCurrentPeriod) {
-      toast.info(contributionRestrictionMessage ?? "No tienes permisos para editar este período.");
-      return;
-    }
-    setIsGlobalModalOpen(true);
-  };
-
-  const openModalForCell = (contributor: ContributorMeta, month: number) => {
-    const existingContribution = contributionMap.get(byCellKey(contributor.contributorId, month)) ?? null;
-
-    if (!canMutateCurrentPeriod) {
-      toast.info(contributionRestrictionMessage ?? "No tienes permisos para editar este período.");
-      return;
-    }
-
-    if (contributor.status === 0) {
-      toast.info("Contribuyente inactivo: no se pueden registrar ni editar aportes.");
-      return;
-    }
-
-    setSelectedCell({ contributor, month, existingContribution });
-  };
-
-  const handleSave = async (payload: ContributionPayload) => {
-    setSubmitting(true);
-
-    const isEdit = selectedCell?.existingContribution;
-    const response = isEdit
-      ? await api.put<Contribution>(`/api/contributions/${selectedCell.existingContribution!.id}`, payload)
-      : await api.post<Contribution>("/api/contributions", payload);
-
-    setSubmitting(false);
-
-    if (!response.ok) {
-      toast.error(response.error.detail);
-      return;
-    }
-
-    toast.success(isEdit ? "Aporte actualizado." : "Aporte registrado.");
-    setSelectedCell(null);
-    setIsGlobalModalOpen(false);
-    invalidateResources(RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
-  };
-
-  const handleDelete = async () => {
-    if (!pendingDelete) {
-      return;
-    }
-
-    setDeleting(true);
-    const response = await api.delete<Contribution>(`/api/contributions/${pendingDelete.contribution.id}`);
-    setDeleting(false);
-
-    if (!response.ok) {
-      toast.error(response.error.detail);
-      return;
-    }
-
-    toast.success("Aporte eliminado.", { duration: 5000 });
-    setPendingDelete(null);
-    setSelectedCell(null);
-    invalidateResources(RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);
-  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 pb-20 md:pb-6">
@@ -368,7 +254,7 @@ export const ContributionsPage = () => {
                       </div>
                       <div className="grid grid-cols-3 gap-2.5">
                         {monthList.map((month) => {
-                          const contribution = contributionMap.get(byCellKey(contributor.contributorId, month)) ?? null;
+                          const contribution = contributionMap.get(byContributionCellKey(contributor.contributorId, month)) ?? null;
                           const amountCents = contribution?.amountCents ?? 0;
                           const state = getContributionCellState(amountCents, monthlyAmountCents);
                           const isCurrentMonth = isCurrentBusinessYear && month === currentBusinessMonth;
@@ -475,7 +361,7 @@ export const ContributionsPage = () => {
                       </td>
 
                       {monthList.map((month) => {
-                        const contribution = contributionMap.get(byCellKey(contributor.contributorId, month)) ?? null;
+                        const contribution = contributionMap.get(byContributionCellKey(contributor.contributorId, month)) ?? null;
                         const amountCents = contribution?.amountCents ?? 0;
                         const state = getContributionCellState(amountCents, monthlyAmountCents);
                         const isCurrentMonth = isCurrentBusinessYear && month === currentBusinessMonth;
@@ -539,22 +425,7 @@ export const ContributionsPage = () => {
         <Suspense fallback={null}>
           <ContributionModal
             open={Boolean(selectedCell) || isGlobalModalOpen}
-            contributors={meta.data.contributors
-              .filter((item) => item.status === 1)
-              .map((item) => ({
-                id: item.contributorId,
-                name: item.name,
-                email: item.email,
-                status: item.status,
-                auth0SyncStatus: "unknown_legacy" as const,
-                auth0UserId: null,
-                auth0LastSyncAt: null,
-                auth0LastError: null,
-                createdAt: "",
-                createdBy: "",
-                updatedAt: "",
-                updatedBy: ""
-              }))}
+            contributors={modalContributors}
             monthlyAmountCents={monthlyAmountCents}
             defaultYear={activeYear}
             defaultMonth={selectedCell ? selectedCell.month : currentBusinessMonth}
@@ -570,18 +441,11 @@ export const ContributionsPage = () => {
                   : null
             }
             submitting={submitting}
-            onClose={() => {
-              setSelectedCell(null);
-              setIsGlobalModalOpen(false);
-            }}
+            onClose={closeContributionModal}
             onSubmit={handleSave}
             onDelete={
               selectedCell?.existingContribution
-                ? () =>
-                    setPendingDelete({
-                      contribution: selectedCell.existingContribution!,
-                      contributorName: selectedCell.contributor.name
-                    })
+                ? requestDeleteSelectedContribution
                 : undefined
             }
           />
@@ -606,7 +470,7 @@ export const ContributionsPage = () => {
         danger
         compact
         loading={deleting}
-        onCancel={() => setPendingDelete(null)}
+        onCancel={cancelDelete}
         onConfirm={() => {
           void handleDelete();
         }}

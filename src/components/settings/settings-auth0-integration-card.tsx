@@ -27,19 +27,19 @@ export const SettingsAuth0IntegrationCard = ({
       header={
         <div className="flex items-center gap-2 text-neutral-900 dark:text-neutral-100">
           <ShieldCheck size={18} className="text-primary-700 dark:text-primary-400" />
-          Integración Auth0
+          Sistema de autenticación
         </div>
       }
     >
       <div className="space-y-4">
         <p className="text-sm leading-6 text-neutral-600 dark:text-neutral-400">
-          Controla si el sistema sincroniza automáticamente cuentas de contribuyentes con Auth0 al crear, editar o activar.
+          Controla si el sistema sincroniza automáticamente el acceso de los contribuyentes con el sistema de autenticación
         </p>
 
         <div className="rounded-xl border border-border bg-white/80 p-3.5 dark:bg-neutral-900/30">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">Sincronización automática con Auth0</p>
+              <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">Sincronizar con sistema de autenticación</p>
               {!canEdit ? (
                 <p className="mt-1 text-xs font-medium text-neutral-600 dark:text-neutral-400">
                   Solo un superadmin puede modificar esta configuración.
