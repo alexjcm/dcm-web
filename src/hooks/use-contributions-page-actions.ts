@@ -96,7 +96,7 @@ export const useContributionsPageActions = ({
     setSubmitting(false);
 
     if (!response.ok) {
-      toast.error(response.error.detail);
+      toast.error(response.error.detail, { duration: 8000 });
       return;
     }
 
@@ -115,11 +115,11 @@ export const useContributionsPageActions = ({
     setDeleting(false);
 
     if (!response.ok) {
-      toast.error(response.error.detail);
+      toast.error(response.error.detail, { duration: 8000 });
       return;
     }
 
-    toast.success("Aporte eliminado.", { duration: 5000 });
+    toast.success("Aporte eliminado.", { duration: 6500 });
     setPendingDelete(null);
     setSelectedCell(null);
     invalidateResources(RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary);

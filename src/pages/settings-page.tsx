@@ -57,7 +57,7 @@ export const SettingsPage = () => {
           </h2>
           <ScreenHelpButton
             title="Ajustes"
-            description="Actualiza el monto base mensual, administra contribuyentes y controla la sincronización con Auth0."
+            description="Actualiza el monto base mensual, administra contribuyentes y controla la sincronización con el sistema de autenticación Auth0."
             className="shrink-0"
           />
         </div>

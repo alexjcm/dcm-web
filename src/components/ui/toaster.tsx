@@ -11,6 +11,7 @@ export const AppToaster = () => {
       position="top-right"
       closeButton
       toastOptions={{
+        duration: 6500,
         style: {
           fontSize: "0.9rem"
         }

@@ -40,6 +40,13 @@ const mobileStateLabels: Record<ContributionState, string> = {
   overpaid: "Colaborador destacado"
 };
 
+const progressValueStyles: Record<ContributionState, string> = {
+  pending: "text-neutral-500 dark:text-neutral-400",
+  incomplete: "text-primary-600 dark:text-primary-300",
+  complete: "text-success-700 dark:text-success-300",
+  overpaid: "text-success-800 dark:text-success-200"
+};
+
 export const SummaryPage = () => {
   const { activeYear, currentBusinessYear, setActiveYear } = useAppContext();
   const summary = useSummary(activeYear);
@@ -103,7 +110,7 @@ export const SummaryPage = () => {
 
       <Card
         className="relative overflow-hidden border-primary-300 bg-[var(--gradient-surface)] dark:border-primary-900"
-        bodyClassName="px-4 py-4 sm:px-6 sm:py-5"
+        bodyClassName="px-4 py-3 sm:px-6 sm:py-5"
       >
         <div className="absolute inset-y-0 right-0 hidden w-[34%] bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.22),transparent_58%)] sm:block dark:bg-[radial-gradient(circle_at_top,rgba(30,58,138,0.15),transparent_58%)]" />
         <div className="absolute right-5 top-5 hidden opacity-80 sm:block">
@@ -119,12 +126,14 @@ export const SummaryPage = () => {
 
         <div className="relative">
           <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary-600">Total Recaudado</p>
-          <p className="mt-2 text-3xl font-black leading-none text-primary-900 sm:text-5xl dark:text-primary-200">
-            {formatCentsAsCurrency(totals.collectedCents)}
-          </p>
-          <p className="mt-3 max-w-xl text-xs leading-5 text-neutral-600 sm:mt-4 sm:text-sm sm:leading-6 dark:text-neutral-400">
-            Acumulado total de aportes efectivamente recibidos durante el año seleccionado.
-          </p>
+          <div className="mt-2 flex items-start gap-4 sm:mt-4 sm:items-start sm:gap-6">
+            <p className="shrink-0 text-3xl font-black leading-none text-primary-900 sm:text-5xl dark:text-primary-200">
+              {formatCentsAsCurrency(totals.collectedCents)}
+            </p>
+            <p className="max-w-xs text-xs leading-5 text-neutral-600 sm:max-w-xl sm:text-sm sm:leading-6 dark:text-neutral-400">
+              Acumulado total de aportes efectivamente recibidos durante el año seleccionado.
+            </p>
+          </div>
         </div>
       </Card>
 
@@ -135,7 +144,7 @@ export const SummaryPage = () => {
               <tr>
                 <th className="pl-0 pr-2 py-3 text-left font-bold uppercase tracking-wider text-neutral-600 text-[11px] dark:text-neutral-400 sm:pr-3">Contribuyente</th>
                 <th className="hidden px-4 py-3 text-left font-bold uppercase tracking-wider text-neutral-600 text-[11px] dark:text-neutral-400 md:table-cell md:px-6">Estado</th>
-                <th className="px-2 py-3 text-right font-bold uppercase tracking-wider text-neutral-600 text-[11px] dark:text-neutral-400 sm:px-4 md:px-6">Pagado</th>
+                <th className="px-2 py-3 text-right font-bold uppercase tracking-wider text-neutral-600 text-[11px] dark:text-neutral-400 sm:px-4 md:px-6">Aportado</th>
                 <th className="px-2 py-3 text-right font-bold uppercase tracking-wider text-neutral-600 text-[11px] dark:text-neutral-400 sm:px-4 md:px-6">
                   <span className="inline-flex flex-col leading-tight text-right">
                     <span>Progreso</span>
@@ -174,18 +183,20 @@ export const SummaryPage = () => {
                     </td>
                     <td className="px-2 py-3.5 text-right font-extrabold text-neutral-900 dark:text-neutral-100 sm:px-4 md:px-6">{formatCentsAsCurrency(item.totalPaidCents)}</td>
                     <td className="px-2 py-3.5 text-right sm:px-4 md:px-6">
-                      <div className="flex items-center justify-end gap-2">
-                         <span className="text-xs font-bold text-neutral-700 dark:text-neutral-300">{Math.floor(item.monthsComplete)}/12</span>
-                         <div className="h-1.5 w-16 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800 ring-1 ring-neutral-300/10 dark:ring-neutral-700/50">
+                      <div className="flex flex-col items-end gap-1.5 sm:flex-row sm:items-center sm:justify-end sm:gap-2">
+                         <div className="order-1 h-2 w-24 overflow-hidden rounded-full bg-neutral-300/70 dark:bg-neutral-700/90 ring-1 ring-neutral-300/30 dark:ring-neutral-600/60 sm:order-2 sm:w-16">
                             <div
                               className={`h-full rounded-full transition-all duration-500 ${
                                 item.monthsComplete >= 12
-                                  ? "bg-success-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]"
-                                  : "bg-primary-600 shadow-[0_0_8px_rgba(37,99,235,0.4)]"
+                                  ? "bg-success-500 shadow-[0_0_4px_rgba(34,197,94,0.22)]"
+                                  : "bg-primary-500 shadow-[0_0_4px_rgba(59,130,246,0.2)]"
                               }`}
                               style={{ width: `${(item.monthsComplete / 12) * 100}%` }}
                             />
                          </div>
+                         <span className={`order-2 text-[11px] font-bold sm:order-1 sm:text-xs ${progressValueStyles[item.state]}`}>
+                           {Math.floor(item.monthsComplete)}/12
+                         </span>
                       </div>
                     </td>
                   </tr>

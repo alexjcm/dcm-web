@@ -86,10 +86,10 @@ export const AppNav = () => {
   }, []);
 
   const navLinkClass = ({ isActive }: { isActive: boolean }): string => {
-    return `flex min-w-0 shrink items-center justify-center gap-1 px-2 py-2 text-[12px] font-bold transition-all rounded-lg sm:justify-start sm:gap-2 sm:px-3 sm:text-sm md:px-4 ${
+    return `flex min-w-0 shrink items-center justify-center gap-1 px-2 py-2 text-[14px] font-bold transition-all rounded-lg sm:justify-start sm:gap-2 sm:px-3 sm:text-sm md:px-4 ${
       isActive 
-        ? "border border-primary-700 bg-primary-600 !text-white shadow-primary [&_svg]:!text-white" 
-        : "text-primary-900/84 hover:bg-primary-50 hover:text-primary-900 [&_svg]:text-primary-500 dark:text-primary-300 dark:hover:bg-neutral-800 dark:hover:text-primary-200 dark:[&_svg]:text-primary-400"
+        ? "border border-black/5 bg-black/[0.055] text-primary-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] [&_svg]:text-primary-400 dark:border-white/7 dark:bg-white/[0.095] dark:text-white dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.045)] dark:[&_svg]:text-primary-300" 
+        : "text-primary-900/72 hover:bg-primary-50 hover:text-primary-900 [&_svg]:text-neutral-400 hover:[&_svg]:text-neutral-500 dark:text-primary-300/78 dark:hover:bg-neutral-800 dark:hover:text-primary-200 dark:[&_svg]:text-neutral-500 dark:hover:[&_svg]:text-neutral-400"
     }`;
   };
 
@@ -125,11 +125,11 @@ export const AppNav = () => {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-[var(--gradient-nav-header)] backdrop-blur-md">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between gap-4">
+        <div className="flex h-[4.5rem] items-center justify-between gap-4 sm:h-20">
           <div className="flex flex-col">
-            <h1 className="text-[17px] font-bold uppercase tracking-[0.24em] text-primary-600 sm:text-[20px]">
+            <span className="[font-family:var(--font-display)] text-[24px] leading-none font-semibold uppercase tracking-[0.24em] text-primary-600 sm:text-[26px]">
               DCM
-            </h1>
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -145,9 +145,11 @@ export const AppNav = () => {
               onClick={toggle}
               aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
               title={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
-              className="flex h-9 w-9 items-center justify-center rounded-lg text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-neutral-700 dark:text-neutral-400 dark:hover:bg-neutral-800 dark:hover:text-neutral-200"
+              className="group flex h-10 w-10 items-center justify-center rounded-xl text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
             >
-              {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+              <span className="transition-transform duration-300 ease-out group-active:scale-95">
+                {theme === "dark" ? <Sun size={18} className="animate-in fade-in duration-200" /> : <Moon size={18} className="animate-in fade-in duration-200" />}
+              </span>
             </button>
 
             <Menu as="div" className="relative z-50">
@@ -231,24 +233,26 @@ export const AppNav = () => {
           </div>
         </div>
 
-        <nav className="grid grid-cols-3 gap-1.5 pb-4 sm:flex sm:items-center sm:gap-2 sm:pb-0">
-          <NavLink to="/contributions" className={navLinkClass}>
-            <CalendarDays size={16} className="shrink-0" />
-            <span>Aportes</span>
-          </NavLink>
-          {hasPermission(APP_PERMISSIONS.summaryRead) && (
-            <NavLink to="/summary" className={navLinkClass}>
-              <PieChart size={16} className="shrink-0" />
-              <span>Resumen</span>
+        <div className="mb-1 rounded-[16px] border border-white/5 bg-white/[0.02] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] sm:mb-0 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
+          <nav className="grid grid-cols-3 gap-1.5 sm:flex sm:items-center sm:gap-2">
+            <NavLink to="/contributions" className={navLinkClass}>
+              <CalendarDays size={16} className="shrink-0" />
+              <span>Aportes</span>
             </NavLink>
-          )}
-          {canManageSettings && (
-            <NavLink to="/settings" className={navLinkClass}>
-              <Settings2 size={16} className="shrink-0" />
-              <span>Ajustes</span>
-            </NavLink>
-          )}
-        </nav>
+            {hasPermission(APP_PERMISSIONS.summaryRead) && (
+              <NavLink to="/summary" className={navLinkClass}>
+                <PieChart size={16} className="shrink-0" />
+                <span>Resumen</span>
+              </NavLink>
+            )}
+            {canManageSettings && (
+              <NavLink to="/settings" className={navLinkClass}>
+                <Settings2 size={16} className="shrink-0" />
+                <span>Ajustes</span>
+              </NavLink>
+            )}
+          </nav>
+        </div>
 
 
 

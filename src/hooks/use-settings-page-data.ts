@@ -26,7 +26,7 @@ export const useSettingsPageData = () => {
     const amountCents = parseMoneyInputToCents(amountInput);
 
     if (!amountCents || amountCents < 1) {
-      toast.error("El monto mensual debe ser mayor a 0.");
+      toast.error("El monto mensual debe ser mayor a 0.", { duration: 8000 });
       return;
     }
 

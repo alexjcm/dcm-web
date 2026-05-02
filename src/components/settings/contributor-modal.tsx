@@ -10,8 +10,6 @@ type ContributorModalProps = {
   open: boolean;
   title: string;
   submitLabel: string;
-  auth0AutoSyncEnabled: boolean;
-  canViewAuth0Sync: boolean;
   draft: ContributorDraft;
   submitting: boolean;
   onClose: () => void;
@@ -23,8 +21,6 @@ export const ContributorModal = ({
   open,
   title,
   submitLabel,
-  auth0AutoSyncEnabled,
-  canViewAuth0Sync,
   draft,
   submitting,
   onClose,
@@ -42,14 +38,6 @@ export const ContributorModal = ({
 
   const isEmailError = draft.email.length > 0 && !isValidEmail(draft.email);
   const isNameError = !draft.name.trim();
-  const auth0SyncLabel = canViewAuth0Sync
-    ? "Reconciliar acceso con Auth0 al guardar"
-    : "Sincronización de acceso con Auth0";
-  const auth0SyncDescription = canViewAuth0Sync
-    ? auth0AutoSyncEnabled
-      ? "Si existe una cuenta válida en Auth0 se reutilizará; si no existe, DCM podrá crear una cuenta DB según el caso."
-      : "Disponible cuando el superadmin active la sincronización automática con Auth0."
-    : "La reconciliación con Auth0 se aplicará según la configuración definida por el superadmin.";
 
   const handleSubmit = () => {
     if (isEmailError || isNameError) {
@@ -134,27 +122,10 @@ export const ContributorModal = ({
                       <p
                         id={emailErrorId}
                         className="px-1 text-xs font-medium text-danger-600 dark:text-danger-400 animate-in fade-in slide-in-from-top-1"
-                      >
+                    >
                         Por favor ingresa un correo válido (ej: nombre@ejemplo.com)
                       </p>
                     )}
-                  </div>
-                  <div className="rounded-lg border border-border bg-neutral-50/80 p-3 dark:bg-neutral-900/30">
-                    <label className="flex items-start gap-2.5">
-                      <input
-                        type="checkbox"
-                        checked={canViewAuth0Sync ? auth0AutoSyncEnabled : false}
-                        readOnly
-                        disabled
-                        className="mt-0.5 h-4 w-4 rounded border-border"
-                      />
-                      <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                        {auth0SyncLabel}
-                      </span>
-                    </label>
-                    <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-400">
-                      {auth0SyncDescription}
-                    </p>
                   </div>
                 </div>
 

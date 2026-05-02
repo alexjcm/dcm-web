@@ -49,7 +49,7 @@ const notifyContributorAuth0Outcome = ({
   }
 
   if (auth0.status === "error") {
-    toast.error(`${baseSuccess} Se guardó localmente, pero falló la sincronización con Auth0.`);
+    toast.error(`${baseSuccess} Se guardó localmente, pero falló la sincronización con Auth0.`, { duration: 8000 });
     return;
   }
 
@@ -95,7 +95,7 @@ export const useContributorMutations = ({
 
   const createContributor = async (draft: ContributorDraft) => {
     if (!draft.name.trim()) {
-      toast.error("El nombre es obligatorio.");
+      toast.error("El nombre es obligatorio.", { duration: 8000 });
       return;
     }
 
@@ -109,7 +109,7 @@ export const useContributorMutations = ({
     setSavingContributor(false);
 
     if (!response.ok) {
-      toast.error(response.error.detail);
+      toast.error(response.error.detail, { duration: 8000 });
       return;
     }
 
@@ -124,7 +124,7 @@ export const useContributorMutations = ({
     }
 
     if (!draft.name.trim()) {
-      toast.error("El nombre es obligatorio.");
+      toast.error("El nombre es obligatorio.", { duration: 8000 });
       return;
     }
 
@@ -138,7 +138,7 @@ export const useContributorMutations = ({
     setSavingContributor(false);
 
     if (!response.ok) {
-      toast.error(response.error.detail);
+      toast.error(response.error.detail, { duration: 8000 });
       return;
     }
 
@@ -162,7 +162,7 @@ export const useContributorMutations = ({
     setChangingStatus(false);
 
     if (!response.ok) {
-      toast.error(response.error.detail);
+      toast.error(response.error.detail, { duration: 8000 });
       return;
     }
 

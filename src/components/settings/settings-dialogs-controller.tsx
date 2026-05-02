@@ -117,7 +117,7 @@ export const SettingsDialogsController = ({
     setSavingAuth0AutoSync(false);
 
     if (!response.ok) {
-      toast.error(response.error.detail);
+      toast.error(response.error.detail, { duration: 8000 });
       return;
     }
 
@@ -143,7 +143,7 @@ export const SettingsDialogsController = ({
     setPendingAmountCents(null);
 
     if (!response.ok) {
-      toast.error(response.error.detail);
+      toast.error(response.error.detail, { duration: 8000 });
       return;
     }
 
@@ -168,8 +168,6 @@ export const SettingsDialogsController = ({
             open
             title="Nuevo Contribuyente"
             submitLabel="Registrar"
-            auth0AutoSyncEnabled={auth0AutoSyncEnabled}
-            canViewAuth0Sync={canViewAuth0Sync}
             draft={newContributor}
             submitting={savingContributor}
             onClose={closeCreateContributorModal}
@@ -183,8 +181,6 @@ export const SettingsDialogsController = ({
             open
             title="Editar Contribuyente"
             submitLabel="Guardar cambios"
-            auth0AutoSyncEnabled={auth0AutoSyncEnabled}
-            canViewAuth0Sync={canViewAuth0Sync}
             draft={editDraft}
             submitting={savingContributor}
             onClose={closeEditContributorModal}

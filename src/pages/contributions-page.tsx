@@ -176,7 +176,7 @@ export const ContributionsPage = () => {
                 placeholder="Buscar contribuyente..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full sm:w-64"
+                className="w-full rounded-[20px] border-primary-100/70 bg-white/82 py-2 text-[15px] shadow-none placeholder:text-neutral-500/75 dark:border-neutral-700 dark:bg-neutral-800/88 dark:placeholder:text-neutral-500 sm:w-64 sm:rounded-xl sm:py-2.5 sm:text-sm sm:shadow-sm"
               />
             </div>
           </div>
@@ -209,7 +209,7 @@ export const ContributionsPage = () => {
         </Card>
       ) : (
         <>
-          <div className="flex flex-col gap-2.5 md:hidden">
+          <div className="flex flex-col gap-2 md:hidden">
             {visibleContributors.map((contributor) => {
               const isExpanded = expandedContributorId === contributor.contributorId;
 
@@ -226,19 +226,35 @@ export const ContributionsPage = () => {
                         previous === contributor.contributorId ? null : contributor.contributorId
                       )
                     }
-                    className="flex min-h-[40px] w-full items-center justify-between gap-3 px-4 py-2 text-left"
+                    className="flex min-h-[32px] w-full items-center justify-between gap-3 px-4 py-1.5 text-left"
                     aria-expanded={isExpanded}
                     aria-controls={`contributor-month-grid-${contributor.contributorId}`}
                   >
-                    <div className="min-w-0">
-                      <p className="truncate text-base font-extrabold text-neutral-900 dark:text-neutral-100">{contributor.name}</p>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[15px] font-bold text-neutral-900 dark:text-neutral-100">{contributor.name}</p>
                     </div>
-                    <ChevronDown
-                      size={16}
-                      className={`shrink-0 text-neutral-500 transition-transform duration-200 dark:text-neutral-400 ${
-                        isExpanded ? "rotate-180" : ""
-                      }`}
-                    />
+                    <div className="flex shrink-0 items-center gap-3.5">
+                      <div className="text-right">
+                        <p className="text-[8px] font-bold uppercase tracking-[0.08em] text-neutral-400 dark:text-neutral-500">
+                          Total anual
+                        </p>
+                        <p className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+                          {formatCentsAsCurrency(contributor.totalPaidCents)}
+                        </p>
+                      </div>
+                      <span
+                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-primary-100 bg-primary-50/60 text-neutral-500 transition-all dark:border-neutral-700 dark:bg-neutral-700/80 dark:text-neutral-300 ${
+                          isExpanded ? "border-primary-200 bg-primary-100/70 text-primary-700 dark:border-primary-500/30 dark:bg-primary-500/10 dark:text-primary-300" : ""
+                        }`}
+                      >
+                        <ChevronDown
+                          size={16}
+                          className={`transition-transform duration-200 ${
+                            isExpanded ? "rotate-180" : ""
+                          }`}
+                        />
+                      </span>
+                    </div>
                   </button>
 
                   {isExpanded ? (
@@ -246,12 +262,6 @@ export const ContributionsPage = () => {
                       id={`contributor-month-grid-${contributor.contributorId}`}
                       className="border-t border-primary-50 px-4 pb-4 pt-3.5 dark:border-neutral-700"
                     >
-                      <div className="mb-2.5 flex items-center justify-end gap-2">
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-neutral-400">Total anual aportado</p>
-                        <p className="text-right text-sm font-extrabold text-primary-700 dark:text-primary-400">
-                          {formatCentsAsCurrency(contributor.totalPaidCents)}
-                        </p>
-                      </div>
                       <div className="grid grid-cols-3 gap-2.5">
                         {monthList.map((month) => {
                           const contribution = contributionMap.get(byContributionCellKey(contributor.contributorId, month)) ?? null;
