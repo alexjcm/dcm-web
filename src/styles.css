@@ -189,6 +189,12 @@ a {
   color: inherit;
 }
 
+a[x-apple-data-detectors] {
+  color: inherit !important;
+  text-decoration: inherit !important;
+  font: inherit !important;
+}
+
 h1,
 h2,
 h3,

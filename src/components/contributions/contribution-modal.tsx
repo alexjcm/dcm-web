@@ -253,6 +253,7 @@ export const ContributionModal = ({
                     disabled={submitting}
                     aria-invalid={formError ? true : undefined}
                     aria-describedby={formError ? formErrorId : undefined}
+                    className="font-semibold"
                   />
                   
                   {(formError || lockedReason) && (

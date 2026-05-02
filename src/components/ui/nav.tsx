@@ -127,7 +127,7 @@ export const AppNav = () => {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between gap-4">
           <div className="flex flex-col">
-            <h1 className="text-[16px] font-bold uppercase tracking-[0.24em] text-primary-600 sm:text-[18px]">
+            <h1 className="text-[17px] font-bold uppercase tracking-[0.24em] text-primary-600 sm:text-[20px]">
               DCM
             </h1>
           </div>
