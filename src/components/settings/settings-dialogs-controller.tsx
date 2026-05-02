@@ -22,6 +22,7 @@ const ConfirmModal = lazy(async () => {
 
 type SettingsDialogsControllerProps = {
   auth0AutoSyncEnabled: boolean;
+  canViewAuth0Sync: boolean;
   pendingAmountCents: number | null;
   setPendingAmountCents: (value: number | null) => void;
   children: (controls: {
@@ -36,6 +37,7 @@ type SettingsDialogsControllerProps = {
 
 export const SettingsDialogsController = ({
   auth0AutoSyncEnabled,
+  canViewAuth0Sync,
   pendingAmountCents,
   setPendingAmountCents,
   children
@@ -167,6 +169,7 @@ export const SettingsDialogsController = ({
             title="Nuevo Contribuyente"
             submitLabel="Registrar"
             auth0AutoSyncEnabled={auth0AutoSyncEnabled}
+            canViewAuth0Sync={canViewAuth0Sync}
             draft={newContributor}
             submitting={savingContributor}
             onClose={closeCreateContributorModal}
@@ -181,6 +184,7 @@ export const SettingsDialogsController = ({
             title="Editar Contribuyente"
             submitLabel="Guardar cambios"
             auth0AutoSyncEnabled={auth0AutoSyncEnabled}
+            canViewAuth0Sync={canViewAuth0Sync}
             draft={editDraft}
             submitting={savingContributor}
             onClose={closeEditContributorModal}
@@ -229,7 +233,11 @@ export const SettingsDialogsController = ({
             title={pendingStatusChange.status === 1 ? "Desactivar contribuyente" : "Activar contribuyente"}
             description={
               pendingStatusChange.status === 1
-                ? `Se desactivará a ${pendingStatusChange.name}. No podrá realizar nuevos aportes, pero se conserva su historial. Si la sincronización automática está activa y existe cuenta en Auth0, su acceso quedará restringido a viewer.`
+                ? canViewAuth0Sync
+                  ? auth0AutoSyncEnabled
+                    ? `Se desactivará a ${pendingStatusChange.name}. No podrá realizar nuevos aportes, pero se conserva su historial. Si existe cuenta en Auth0, su acceso quedará restringido a viewer.`
+                    : `Se desactivará a ${pendingStatusChange.name}. No podrá realizar nuevos aportes, pero se conserva su historial. Los cambios de acceso en Auth0 no se sincronizarán automáticamente mientras esa opción esté desactivada.`
+                  : `Se desactivará a ${pendingStatusChange.name}. No podrá realizar nuevos aportes, pero se conserva su historial. Si existe integración con Auth0, el acceso se reconciliará según la configuración definida por el superadmin.`
                 : `Se activará nuevamente a ${pendingStatusChange.name}. Volverá a estar disponible para registrar aportes.`
             }
             confirmLabel={pendingStatusChange.status === 1 ? "Desactivar" : "Activar"}

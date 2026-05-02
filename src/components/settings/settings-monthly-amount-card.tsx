@@ -55,6 +55,7 @@ export const SettingsMonthlyAmountCard = ({
                   value={amountInput}
                   disabled={!canEdit || saving}
                   onChange={(event) => onAmountChange(event.target.value)}
+                  className="text-base font-semibold sm:text-sm"
                 />
               </div>
               <Button

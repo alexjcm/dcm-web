@@ -2,7 +2,6 @@ import { Outlet } from "react-router";
 
 import { AppVersionFooter } from "../ui/app-version-footer";
 import { AppNav } from "../ui/nav";
-import { AppToaster } from "../ui/toaster";
 
 export const AppShell = () => {
   return (
@@ -12,7 +11,6 @@ export const AppShell = () => {
         <Outlet />
       </main>
       <AppVersionFooter />
-      <AppToaster />
     </div>
   );
 };

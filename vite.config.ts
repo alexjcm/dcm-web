@@ -64,7 +64,7 @@ export default defineConfig(({ mode }) => {
       react(),
       tailwindcss(),
       VitePWA({
-        registerType: "prompt",
+        registerType: "autoUpdate",
         injectRegister: null,
         includeAssets: [
           "favicon.png",
@@ -104,6 +104,7 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           navigateFallback: "index.html",
+          cleanupOutdatedCaches: true,
           runtimeCaching
         }
       })

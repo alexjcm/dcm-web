@@ -15,7 +15,8 @@ import { useSettingsPageData } from "../hooks/use-settings-page-data";
 export const SettingsPage = () => {
   const { permissionsLoaded, hasPermission } = useAppContext();
   const canEditMonthlyAmount = hasPermission(APP_PERMISSIONS.settingsWrite);
-  const canEditAuth0Sync = hasPermission(APP_PERMISSIONS.auth0SyncWrite);
+  const canViewAuth0Sync = hasPermission(APP_PERMISSIONS.auth0SyncWrite);
+  const canEditAuth0Sync = canViewAuth0Sync;
   const canManageContributors = hasPermission(APP_PERMISSIONS.contributorsWrite);
   const {
     settings,
@@ -65,6 +66,7 @@ export const SettingsPage = () => {
 
       <SettingsDialogsController
         auth0AutoSyncEnabled={auth0AutoSyncEnabled}
+        canViewAuth0Sync={canViewAuth0Sync}
         pendingAmountCents={pendingAmountCents}
         setPendingAmountCents={setPendingAmountCents}
       >
@@ -86,15 +88,17 @@ export const SettingsPage = () => {
                 onAmountChange={handleAmountInputChange}
                 onRequestUpdate={requestMonthlyAmountUpdate}
               />
-              <SettingsAuth0IntegrationCard
-                enabled={auth0AutoSyncEnabled}
-                saving={savingAuth0AutoSync}
-                canEdit={canEditAuth0Sync}
-                onRequestToggle={requestAuth0AutoSyncChange}
-                onBlockedToggleAttempt={() => {
-                  toast.info("Solo un superadmin puede modificar la sincronización automática con Auth0.");
-                }}
-              />
+              {canViewAuth0Sync ? (
+                <SettingsAuth0IntegrationCard
+                  enabled={auth0AutoSyncEnabled}
+                  saving={savingAuth0AutoSync}
+                  canEdit={canEditAuth0Sync}
+                  onRequestToggle={requestAuth0AutoSyncChange}
+                  onBlockedToggleAttempt={() => {
+                    toast.info("Solo un superadmin puede modificar la sincronización automática con Auth0.");
+                  }}
+                />
+              ) : null}
             </div>
 
             <div className="min-w-0">

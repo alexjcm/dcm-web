@@ -123,7 +123,7 @@ export const SummaryPage = () => {
             {formatCentsAsCurrency(totals.collectedCents)}
           </p>
           <p className="mt-3 max-w-xl text-xs leading-5 text-neutral-600 sm:mt-4 sm:text-sm sm:leading-6 dark:text-neutral-400">
-            Acumulado total de aportes efectivamente recibidos durante el año en curso.
+            Acumulado total de aportes efectivamente recibidos durante el año seleccionado.
           </p>
         </div>
       </Card>

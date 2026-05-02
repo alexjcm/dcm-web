@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter, useNavigate } from "react-router";
 
 import { App } from "./App";
+import { AppToaster } from "./components/ui/toaster";
 import { AppVersionFooter } from "./components/ui/app-version-footer";
 import { AUTH0_AUDIENCE, AUTH0_CLIENT_ID, AUTH0_DOMAIN, IS_AUTH_CONFIG_VALID } from "./config/auth";
 import { AppContextProvider } from "./context/app-context";
@@ -115,6 +116,7 @@ createRoot(rootElement).render(
   <StrictMode>
     <BrowserRouter>
       <Auth0ProviderWithNavigation />
+      <AppToaster />
     </BrowserRouter>
   </StrictMode>
 );
