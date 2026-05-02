@@ -67,9 +67,10 @@ When an administrator creates a database user directly from the Auth0 dashboard:
 ## Contributor sync behavior in the UI
 
 ### Global toggle
-- `auth0_auto_sync_enabled` controls contributor lifecycle sync from the admin UI.
+- `auth0_auto_sync_enabled` controls contributor lifecycle sync from the Settings UI.
 - If the toggle is `OFF`, create/edit/activate/deactivate operations persist only in DCM.
 - The Auth0 login/linking Action does not depend on this toggle.
+- The toggle is visible to users with `settings:read`, but only users with `auth0_sync:write` can modify it.
 
 ### No manual sync action
 - The Settings screen no longer exposes manual buttons to create, verify, or retry contributor access in Auth0.
@@ -110,6 +111,9 @@ When an administrator creates a database user directly from the Auth0 dashboard:
 ## Notes for this app
 - The frontend requests an access token with `audience`.
 - The backend uses permissions (`permissions`) with `scope` as a fallback.
+- The Settings screen is available to users with `settings:read`.
+- The monthly amount card is editable with `settings:write`.
+- The Auth0 auto-sync toggle is editable only with `auth0_sync:write`.
 
 ## PWA and session behavior
 - The app can be installed as a PWA, but authentication still depends on Auth0.

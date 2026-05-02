@@ -34,7 +34,7 @@ export const AppNav = () => {
   const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : "U");
   const { theme, toggle } = useTheme();
   const isOnline = useOnlineStatus();
-  const canManageSettings = hasPermission(APP_PERMISSIONS.settingsWrite);
+  const canManageSettings = hasPermission(APP_PERMISSIONS.settingsRead);
   const canEditContributions = hasPermission(APP_PERMISSIONS.contributionsWrite);
   const showIosInstallHint = useMemo(() => isAppleMobileDevice() && !isStandalone, [isStandalone]);
 

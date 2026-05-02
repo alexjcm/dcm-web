@@ -23,10 +23,6 @@ type SettingsDialogsControllerProps = {
   auth0AutoSyncEnabled: boolean;
   pendingAmountCents: number | null;
   setPendingAmountCents: (value: number | null) => void;
-  onSavingAmountChange: (value: boolean) => void;
-  onEditContributor: (contributor: Contributor) => void;
-  onToggleContributorStatus: (contributor: Contributor) => void;
-  onOpenCreateContributor: () => void;
   children: (controls: {
     openCreateContributorModal: () => void;
     startEditingContributor: (contributor: Contributor) => void;
@@ -41,10 +37,6 @@ export const SettingsDialogsController = ({
   auth0AutoSyncEnabled,
   pendingAmountCents,
   setPendingAmountCents,
-  onSavingAmountChange,
-  onEditContributor,
-  onToggleContributorStatus,
-  onOpenCreateContributor,
   children
 }: SettingsDialogsControllerProps) => {
   const api = useApiClient();
@@ -132,13 +124,11 @@ export const SettingsDialogsController = ({
 
   const syncSavingAmount = (value: boolean) => {
     setSavingAmount(value);
-    onSavingAmountChange(value);
   };
 
   const openCreateContributorModal = () => {
     setNewContributor(emptyContributorDraft);
     setIsCreateContributorOpen(true);
-    onOpenCreateContributor();
   };
 
   const closeCreateContributorModal = () => {
@@ -178,7 +168,6 @@ export const SettingsDialogsController = ({
       name: contributor.name,
       email: contributor.email ?? ""
     });
-    onEditContributor(contributor);
   };
 
   const closeEditContributorModal = () => {
@@ -217,7 +206,6 @@ export const SettingsDialogsController = ({
 
   const requestContributorStatusChange = (contributor: Contributor) => {
     setPendingStatusChange(contributor);
-    onToggleContributorStatus(contributor);
   };
 
   const changeContributorStatus = async () => {

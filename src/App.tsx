@@ -82,7 +82,7 @@ export const App = () => {
         <Route
           path="settings"
           element={
-            <PermissionRoute required={APP_PERMISSIONS.settingsWrite}>
+            <PermissionRoute required={APP_PERMISSIONS.settingsRead}>
               {withSuspense(<SettingsPage />)}
             </PermissionRoute>
           }

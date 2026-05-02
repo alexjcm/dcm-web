@@ -1,4 +1,5 @@
 import { ShieldAlert } from "lucide-react";
+import { toast } from "sonner";
 
 import { SettingsDialogsController } from "../components/settings/settings-dialogs-controller";
 import { SettingsAuth0IntegrationCard } from "../components/settings/settings-auth0-integration-card";
@@ -13,6 +14,9 @@ import { useSettingsPageData } from "../hooks/use-settings-page-data";
 
 export const SettingsPage = () => {
   const { permissionsLoaded, hasPermission } = useAppContext();
+  const canEditMonthlyAmount = hasPermission(APP_PERMISSIONS.settingsWrite);
+  const canEditAuth0Sync = hasPermission(APP_PERMISSIONS.auth0SyncWrite);
+  const canManageContributors = hasPermission(APP_PERMISSIONS.contributorsWrite);
   const {
     settings,
     sortedContributors,
@@ -28,7 +32,7 @@ export const SettingsPage = () => {
     return <SectionLoader label="Cargando permisos..." />;
   }
 
-  if (!hasPermission(APP_PERMISSIONS.settingsWrite)) {
+  if (!hasPermission(APP_PERMISSIONS.settingsRead)) {
     return (
       <Card className="border-danger-300 bg-danger-100 dark:border-danger-800 dark:bg-danger-900">
         <div className="flex items-center gap-3 text-danger-900 dark:text-danger-50">
@@ -36,8 +40,8 @@ export const SettingsPage = () => {
           <p className="text-sm font-bold uppercase tracking-wider">Acceso Restringido</p>
         </div>
         <p className="mt-2 text-sm leading-relaxed text-danger-900 dark:text-danger-200">
-          Esta sección está reservada para administradores. Se requiere el permiso{" "}
-          <code className="rounded bg-danger-200 px-1.5 py-0.5 font-bold text-danger-950 dark:bg-danger-800 dark:text-danger-100">{APP_PERMISSIONS.settingsWrite}</code> para realizar cambios en la configuración global.
+          Esta sección requiere el permiso{" "}
+          <code className="rounded bg-danger-200 px-1.5 py-0.5 font-bold text-danger-950 dark:bg-danger-800 dark:text-danger-100">{APP_PERMISSIONS.settingsRead}</code> para consultar la configuración disponible.
         </p>
       </Card>
     );
@@ -63,10 +67,6 @@ export const SettingsPage = () => {
         auth0AutoSyncEnabled={auth0AutoSyncEnabled}
         pendingAmountCents={pendingAmountCents}
         setPendingAmountCents={setPendingAmountCents}
-        onSavingAmountChange={() => undefined}
-        onEditContributor={() => undefined}
-        onToggleContributorStatus={() => undefined}
-        onOpenCreateContributor={() => undefined}
       >
         {({
           openCreateContributorModal,
@@ -82,19 +82,25 @@ export const SettingsPage = () => {
                 amountInput={amountInput}
                 loading={settings.loading && !settings.data}
                 saving={savingAmount}
+                canEdit={canEditMonthlyAmount}
                 onAmountChange={handleAmountInputChange}
                 onRequestUpdate={requestMonthlyAmountUpdate}
               />
               <SettingsAuth0IntegrationCard
                 enabled={auth0AutoSyncEnabled}
                 saving={savingAuth0AutoSync}
+                canEdit={canEditAuth0Sync}
                 onRequestToggle={requestAuth0AutoSyncChange}
+                onBlockedToggleAttempt={() => {
+                  toast.info("Solo un superadmin puede modificar la sincronización automática con Auth0.");
+                }}
               />
             </div>
 
             <div className="min-w-0">
               <SettingsContributorsCard
                 contributors={sortedContributors}
+                canEdit={canManageContributors}
                 onCreateContributor={openCreateContributorModal}
                 onEditContributor={startEditingContributor}
                 onToggleContributorStatus={requestContributorStatusChange}

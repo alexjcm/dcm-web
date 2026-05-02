@@ -45,7 +45,7 @@ npm run build
 
 ## Functional Scope
 - Session-protected routes.
-- Permission guard for Settings (`settings:write`).
+- Permission guard for Settings (`settings:read`), with per-section write controls for `contributors:write`, `settings:write`, and `auth0_sync:write`.
 - HTTP client with `Authorization: Bearer <access_token>`.
 - Dashboard, annual view, contributions, and settings.
 

@@ -14,6 +14,7 @@ import type { Contributor } from "../../types/domain";
 
 type SettingsContributorsCardProps = {
   contributors: Contributor[];
+  canEdit: boolean;
   onCreateContributor: () => void;
   onEditContributor: (contributor: Contributor) => void;
   onToggleContributorStatus: (contributor: Contributor) => void;
@@ -21,6 +22,7 @@ type SettingsContributorsCardProps = {
 
 export const SettingsContributorsCard = ({
   contributors,
+  canEdit,
   onCreateContributor,
   onEditContributor,
   onToggleContributorStatus
@@ -45,7 +47,7 @@ export const SettingsContributorsCard = ({
             <span className="hidden rounded-full border border-primary-200 bg-[rgba(255,255,255,0.92)] px-2.5 py-1 text-[11px] font-bold text-neutral-600 dark:border-primary-500/20 dark:bg-primary-500/10 dark:text-primary-300 sm:inline-block">
               {contributors.length} registros
             </span>
-            <Button size="sm" icon={Plus} onClick={onCreateContributor} className="w-full text-sm sm:w-auto">
+            <Button size="sm" icon={Plus} onClick={onCreateContributor} disabled={!canEdit} className="w-full text-sm sm:w-auto">
               Nuevo contribuyente
             </Button>
           </div>
@@ -126,6 +128,7 @@ export const SettingsContributorsCard = ({
                         variant="outline"
                         size="sm"
                         icon={Edit2}
+                        disabled={!canEdit}
                         onClick={() => onEditContributor(contributor)}
                         aria-label="Editar contribuyente"
                         title="Editar contribuyente"
@@ -135,6 +138,7 @@ export const SettingsContributorsCard = ({
                       size="sm"
                       variant={contributor.status === 1 ? "outline" : "secondary"}
                       icon={contributor.status === 1 ? Trash2 : Check}
+                      disabled={!canEdit}
                       onClick={() => onToggleContributorStatus(contributor)}
                       className={`whitespace-nowrap ${contributor.status === 1 ? "!px-2.5 !border-danger-300 !bg-danger-50/80 !text-danger-700 hover:!border-danger-400 hover:!bg-danger-100 dark:!border-danger-700/70 dark:!bg-danger-900/25 dark:!text-danger-300 dark:hover:!bg-danger-900/40" : ""}`}
                       aria-label={contributor.status === 1 ? "Desactivar contribuyente" : "Activar contribuyente"}

@@ -9,6 +9,7 @@ type SettingsMonthlyAmountCardProps = {
   amountInput: string;
   loading: boolean;
   saving: boolean;
+  canEdit: boolean;
   onAmountChange: (value: string) => void;
   onRequestUpdate: () => void;
 };
@@ -17,6 +18,7 @@ export const SettingsMonthlyAmountCard = ({
   amountInput,
   loading,
   saving,
+  canEdit,
   onAmountChange,
   onRequestUpdate
 }: SettingsMonthlyAmountCardProps) => {
@@ -39,6 +41,11 @@ export const SettingsMonthlyAmountCard = ({
             <p className="text-sm leading-6 text-neutral-600 dark:text-neutral-400">
               Establece el aporte mensual sugerido para los contribuyentes.
             </p>
+            {!canEdit ? (
+              <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
+                Solo un superadmin puede modificar esta configuración.
+              </p>
+            ) : null}
             <div className="flex items-end gap-2">
               <div className="min-w-0 flex-1">
                 <Input
@@ -46,12 +53,14 @@ export const SettingsMonthlyAmountCard = ({
                   inputMode="decimal"
                   prefix="$"
                   value={amountInput}
+                  disabled={!canEdit || saving}
                   onChange={(event) => onAmountChange(event.target.value)}
                 />
               </div>
               <Button
                 icon={Save}
                 onClick={onRequestUpdate}
+                disabled={!canEdit}
                 isLoading={saving}
                 className="h-[42px] shrink-0 whitespace-nowrap px-3.5"
               >
