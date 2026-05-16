@@ -110,12 +110,20 @@ export default defineConfig(({ mode }) => {
       })
     ],
     build: {
-      rollupOptions: {
+      rolldownOptions: {
         output: {
-          manualChunks: {
-            react: ["react", "react-dom", "react-router"],
-            auth0: ["@auth0/auth0-react"],
-            ui: ["@headlessui/react", "sonner"]
+          manualChunks(id) {
+            if (id.includes("node_modules")) {
+              if (id.match(/\/(react|react-dom|react-router)\//)) {
+                return "vendor-react";
+              }
+              if (id.includes("@auth0/auth0-react")) {
+                return "vendor-auth0";
+              }
+              if (id.match(/\/(headlessui|sonner|lucide-react)\//)) {
+                return "vendor-ui";
+              }
+            }
           }
         }
       }
