@@ -37,5 +37,5 @@ export const useContributionsYearAll = (year: number) => {
     [api, year]
   );
 
-  return useApiResource(loader, [year], [RESOURCE_KEYS.contributions]);
+  return useApiResource(loader, [RESOURCE_KEYS.contributions]);
 };

@@ -226,7 +226,7 @@ export const ContributionsPage = () => {
                         previous === contributor.contributorId ? null : contributor.contributorId
                       )
                     }
-                    className="flex min-h-[32px] w-full items-center justify-between gap-3 px-4 py-1.5 text-left"
+                    className="flex min-h-[44px] w-full items-center justify-between gap-3 px-4 py-2.5 text-left"
                     aria-expanded={isExpanded}
                     aria-controls={`contributor-month-grid-${contributor.contributorId}`}
                   >
@@ -488,10 +488,14 @@ export const ContributionsPage = () => {
 
       {canEditContributions && (
         <Button
-          className="fixed bottom-6 right-6 z-40 h-14 w-14 rounded-full shadow-[0_8px_30px_rgb(37,99,235,0.24)] hover:shadow-[0_8px_30px_rgb(37,99,235,0.4)] md:hidden flex items-center justify-center p-0"
+          className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full p-0 shadow-[0_8px_30px_rgb(37,99,235,0.24)] hover:shadow-[0_8px_30px_rgb(37,99,235,0.4)] md:hidden"
           onClick={openGlobalModal}
           disabled={!canMutateCurrentPeriod}
           aria-label="Nuevo Aporte"
+          style={{
+            bottom: "calc(1.5rem + env(safe-area-inset-bottom))",
+            right: "calc(1.5rem + env(safe-area-inset-right))"
+          }}
         >
           <span className="text-3xl leading-none -mt-1">+</span>
         </Button>

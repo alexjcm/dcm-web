@@ -15,5 +15,5 @@ export const useContributors = (status: ContributorStatusFilter = "active") => {
     [api, status]
   );
 
-  return useApiResource(loader, [status], [RESOURCE_KEYS.contributors]);
+  return useApiResource(loader, [RESOURCE_KEYS.contributors]);
 };

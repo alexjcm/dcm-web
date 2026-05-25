@@ -184,7 +184,7 @@ export const SettingsContributorsCard = ({
       <button
         type="button"
         onClick={(event) => openMobileAccess(contributor, event)}
-        className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-primary-100 bg-white/90 text-neutral-700 shadow-sm transition hover:border-primary-300 hover:bg-primary-50/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-200 dark:hover:border-primary-500 dark:hover:bg-primary-900/10"
+        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary-100 bg-white/90 text-neutral-700 shadow-sm transition hover:border-primary-300 hover:bg-primary-50/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-200 dark:hover:border-primary-500 dark:hover:bg-primary-900/10"
         aria-label={`Ver estado de acceso: ${statusText}`}
         aria-expanded={mobileAccessOverlay?.contributor.id === contributor.id}
         title={statusText}
@@ -295,7 +295,7 @@ export const SettingsContributorsCard = ({
                         type="button"
                         disabled={!canEdit}
                         onClick={(event) => openMobileActions(contributor, event)}
-                        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-primary-100 bg-white/90 text-neutral-700 shadow-sm transition hover:border-primary-300 hover:bg-primary-50/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-200 dark:hover:border-primary-500 dark:hover:bg-primary-900/10"
+                        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary-100 bg-white/90 text-neutral-700 shadow-sm transition hover:border-primary-300 hover:bg-primary-50/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-200 dark:hover:border-primary-500 dark:hover:bg-primary-900/10"
                         aria-label="Ver acciones del contribuyente"
                         aria-expanded={mobileActionsOverlay?.contributor.id === contributor.id}
                         title="Ver acciones del contribuyente"

@@ -13,5 +13,5 @@ export const useContributionsMeta = (year: number) => {
     [api, year]
   );
  
-  return useApiResource(loader, [year], [RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary]);
+  return useApiResource(loader, [RESOURCE_KEYS.contributions, RESOURCE_KEYS.summary]);
 };

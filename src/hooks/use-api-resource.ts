@@ -20,7 +20,6 @@ type ResourceState<T> = {
 
 export const useApiResource = <T>(
   loader: Loader<T>,
-  deps: ReadonlyArray<unknown>,
   invalidationKeys: ReadonlyArray<ResourceKey> = [],
   enabled: boolean = true
 ): ResourceState<T> => {
@@ -90,7 +89,7 @@ export const useApiResource = <T>(
       active = false;
       controller.abort();
     };
-  }, [enabled, loader, reloadNonce, invalidationVersion, ...deps]);
+  }, [enabled, loader, reloadNonce, invalidationVersion]);
 
   return {
     data,

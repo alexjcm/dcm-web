@@ -13,5 +13,5 @@ export const useSummary = (year: number) => {
     [api, year]
   );
 
-  return useApiResource(loader, [year], [RESOURCE_KEYS.summary]);
+  return useApiResource(loader, [RESOURCE_KEYS.summary]);
 };

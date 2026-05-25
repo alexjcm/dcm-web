@@ -12,7 +12,7 @@ export const useSettings = (enabled: boolean = true) => {
 
   const loader = useCallback((signal: AbortSignal) => api.get<SettingsData>("/api/settings", { signal }), [api]);
 
-  const resource = useApiResource(loader, [], [RESOURCE_KEYS.settings], enabled);
+  const resource = useApiResource(loader, [RESOURCE_KEYS.settings], enabled);
 
   const monthlyAmountCents = useMemo(() => {
     const raw = resource.data?.items.find((item) => item.key === "monthly_amount_cents")?.value;
