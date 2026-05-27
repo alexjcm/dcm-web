@@ -1,10 +1,10 @@
 import { useEffect, useState, useMemo, useRef } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
-import { useSearchParams } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import { API_BASE_URL } from '../config/app'
 import { useOnlineStatus } from '../hooks/use-online-status'
 import { PageLoader } from '../components/ui/loaders'
-import { persistLinkSession, readLinkSessionToken, readLinkState } from '../lib/auth-link-session'
+import { clearLinkSession, persistLinkSession, readLinkSessionToken } from '../lib/auth-link-session'
 
 type CandidateIdentity = {
   user_id: string
@@ -14,6 +14,7 @@ type CandidateIdentity = {
 
 export const LinkAccountPage = () => {
   const { loginWithRedirect, getAccessTokenSilently, isAuthenticated, isLoading, user, error: auth0Error } = useAuth0()
+  const navigate = useNavigate()
   const isOnline = useOnlineStatus()
   const [searchParams, setSearchParams] = useSearchParams()
   const [error, setError] = useState<string | null>(null)
@@ -22,26 +23,18 @@ export const LinkAccountPage = () => {
   const linkingRef = useRef(false)
 
   const urlSessionToken = searchParams.get('session_token')
-  const urlRedirectState = searchParams.get('state')
-  const urlLinkState = searchParams.get('link_state')
 
-  // Persist the original Auth0 redirect state once and keep using it for the whole linking flow.
   useEffect(() => {
-    const nextLinkState =
-      urlLinkState ||
-      ((urlSessionToken && urlRedirectState) ? urlRedirectState : null)
-
-    if (urlSessionToken || nextLinkState) {
+    if (urlSessionToken) {
       persistLinkSession({
         sessionToken: urlSessionToken,
-        linkState: nextLinkState,
       })
 
       if (isAuthenticated || !!user) {
         setSearchParams({}, { replace: true })
       }
     }
-  }, [isAuthenticated, setSearchParams, urlLinkState, urlRedirectState, urlSessionToken, user])
+  }, [isAuthenticated, setSearchParams, urlSessionToken, user])
 
   const sessionToken = urlSessionToken || readLinkSessionToken()
 
@@ -54,24 +47,17 @@ export const LinkAccountPage = () => {
     }
   }, [sessionToken])
 
-  const tokenLinkState =
-    payload && typeof payload.state === 'string' && payload.state.trim().length > 0
-      ? payload.state
-      : null
-  const linkState = tokenLinkState || urlLinkState || readLinkState()
-  const baseContinueUrl = payload?.continue_url
   const candidates: CandidateIdentity[] = payload?.candidate_identities ?? []
 
   useEffect(() => {
-    if (!sessionToken && !linkState) {
+    if (!sessionToken) {
       return
     }
 
     persistLinkSession({
       sessionToken,
-      linkState,
     })
-  }, [linkState, sessionToken])
+  }, [sessionToken])
 
   // Auto-seleccionar si solo hay un candidato
   useEffect(() => {
@@ -80,14 +66,15 @@ export const LinkAccountPage = () => {
     }
   }, [candidates.length, selectedCandidate])
 
-  // 5. AUTO-ENLACE: Disparar automáticamente al estar autenticado
-  useEffect(() => {
-    if (isAuthenticated && !linking && !linkingRef.current && sessionToken && selectedCandidate?.user_id && !error) {
-      executeCompleteLink()
-    }
-  }, [isAuthenticated, linking, sessionToken, selectedCandidate, error])
+  const authenticatedAsPrimary = isAuthenticated && user?.sub === selectedCandidate?.user_id
 
-  const executeCompleteLink = async () => {
+  useEffect(() => {
+    if (authenticatedAsPrimary && !linking && !linkingRef.current && sessionToken && selectedCandidate?.user_id && !error) {
+      void executeCompleteLink()
+    }
+  }, [authenticatedAsPrimary, linking, sessionToken, selectedCandidate, error])
+
+  const executeCompleteLink = async (): Promise<void> => {
     if (linkingRef.current) return
     const candidateId = selectedCandidate?.user_id
     if (!candidateId) return
@@ -97,13 +84,13 @@ export const LinkAccountPage = () => {
     setError(null)
 
     try {
-      if (!sessionToken || !linkState || !baseContinueUrl) {
+      if (!sessionToken) {
         throw new Error('Faltan datos de sesión críticos.')
       }
 
       const token = await getAccessTokenSilently()
 
-      const res = await fetch(`${API_BASE_URL}/api/auth/link-token`, {
+      const res = await fetch(`${API_BASE_URL}/api/auth/link-account`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -112,7 +99,6 @@ export const LinkAccountPage = () => {
         body: JSON.stringify({
           sessionToken,
           candidateUserId: candidateId,
-          state: linkState,
         }),
       })
 
@@ -121,12 +107,9 @@ export const LinkAccountPage = () => {
         throw new Error(data.error?.detail || 'Error en el servidor de enlace')
       }
 
-      const continueUrl = new URL(baseContinueUrl)
-      continueUrl.searchParams.set('state', linkState)
-      continueUrl.searchParams.set('session_token', sessionToken)
-      continueUrl.searchParams.set('proof_token', data.data.proofToken)
-
-      window.location.href = continueUrl.toString()
+      clearLinkSession()
+      setSearchParams({}, { replace: true })
+      navigate('/contributions', { replace: true })
 
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error desconocido'
@@ -143,14 +126,13 @@ export const LinkAccountPage = () => {
       return
     }
 
-    if (!sessionToken || !linkState) {
+    if (!sessionToken) {
       setError('Faltan datos de sesión críticos.')
       return
     }
 
     setSelectedCandidate(candidate)
     const returnToParams = new URLSearchParams()
-    returnToParams.set('link_state', linkState)
     returnToParams.set('session_token', sessionToken)
     const returnToUrl = `/link-account?${returnToParams.toString()}`
 
@@ -211,10 +193,16 @@ export const LinkAccountPage = () => {
           </button>
         )}
 
-        {isAuthenticated && !linking && !error && (
+        {isAuthenticated && !linking && !error && authenticatedAsPrimary && (
           <div className="flex flex-col items-center justify-center py-4 space-y-4">
             <PageLoader label="Finalizando enlace..." />
             <p className="text-xs text-neutral-400">Si tardas mucho, pulsa F5</p>
+          </div>
+        )}
+
+        {isAuthenticated && !linking && !error && !authenticatedAsPrimary && (
+          <div className="p-3 bg-red-50 text-red-700 text-xs rounded-lg border border-red-100">
+            Debes confirmar con la cuenta DCM existente para completar el enlace.
           </div>
         )}
 

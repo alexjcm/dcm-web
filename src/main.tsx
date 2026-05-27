@@ -78,7 +78,6 @@ const Auth0ProviderWithNavigation = () => {
             const params = new URLSearchParams(searchStr);
             persistLinkSession({
               sessionToken: params.get('session_token'),
-              linkState: params.get('link_state'),
             });
           } catch (e) { /* ignore error */ }
         }

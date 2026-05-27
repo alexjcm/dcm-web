@@ -60,8 +60,8 @@ When an administrator creates a database user directly from the Auth0 dashboard:
 ## Account Linking
 - **Logic:** Suggested Google ↔ canonical DCM account linking via Auth0 Actions and DCM API.
 - **Action Configuration:** Requires `SESSION_TOKEN_SECRET`, `DCM_PWA_URL`, `AUTH0_DOMAIN`, `M2M_CLIENT_ID`, and `M2M_CLIENT_SECRET`.
-- **PWA:** `/link-account` route for confirmation. Automatic recovery from `Invalid state` in `main.tsx`.
-- **API:** `POST /api/auth/link-token` endpoint for identity validation.
+- **PWA:** `/link-account` asks the user to confirm the canonical DCM account with `Username-Password-Authentication`.
+- **API:** `POST /api/auth/link-account` performs the final Management API link after the user returns authenticated as the primary account.
 - **Metadata:** `account_linking_timestamp` and `dcm_managed = true` must remain on the primary profile after linking.
 
 ## Contributor sync behavior in the UI

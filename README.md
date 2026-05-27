@@ -24,6 +24,7 @@ VITE_API_BASE_URL=http://localhost:8787
 ## Authentication and Permissions
 - Login/logout with Auth0 Login.
 - The frontend requests an access token with `audience`.
+- Social account linking is initiated by an Auth0 Action and completed after the user re-authenticates the canonical DCM account in `/link-account`.
 - Detailed Documentation:
   - **[RBAC Architecture](../dcm-api/docs/RBAC.md)**: Permissions and roles model.
   - **[Auth0 Configuration](./docs/auth0-setup.md)**: Session flows and identity security.
