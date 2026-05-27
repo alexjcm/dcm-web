@@ -63,6 +63,7 @@ When an administrator creates a database user directly from the Auth0 dashboard:
 - **PWA:** `/link-account` asks the user to confirm the canonical DCM account with `Username-Password-Authentication`.
 - **API:** `POST /api/auth/link-account` performs the final Management API link after the user returns authenticated as the primary account.
 - **Metadata:** `account_linking_timestamp` and `dcm_managed = true` must remain on the primary profile after linking.
+- **Behavior:** The SPA does not resume Auth0 through `/continue`; after confirming the primary account, it completes the link through the DCM API and continues directly into the app.
 
 ## Contributor sync behavior in the UI
 
