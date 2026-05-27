@@ -4,6 +4,7 @@ import { useSearchParams } from 'react-router'
 import { API_BASE_URL } from '../config/app'
 import { useOnlineStatus } from '../hooks/use-online-status'
 import { PageLoader } from '../components/ui/loaders'
+import { persistLinkSession, readLinkSessionToken, readLinkState } from '../lib/auth-link-session'
 
 type CandidateIdentity = {
   user_id: string
@@ -20,24 +21,29 @@ export const LinkAccountPage = () => {
   const [selectedCandidate, setSelectedCandidate] = useState<CandidateIdentity | null>(null)
   const linkingRef = useRef(false)
 
-  // 1. Efecto de limpieza y persistencia: Solo limpiar cuando ya estamos autenticados
-  useEffect(() => {
-    const urlSessionToken = searchParams.get('session_token')
-    const urlState = searchParams.get('link_state') || searchParams.get('state')
+  const urlSessionToken = searchParams.get('session_token')
+  const urlRedirectState = searchParams.get('state')
+  const urlLinkState = searchParams.get('link_state')
 
-    if (urlSessionToken || urlState) {
-      if (urlSessionToken) sessionStorage.setItem('dcm_session_token', urlSessionToken)
-      if (urlState) sessionStorage.setItem('dcm_link_state', urlState)
-      
+  // Persist the original Auth0 redirect state once and keep using it for the whole linking flow.
+  useEffect(() => {
+    const nextLinkState =
+      urlLinkState ||
+      ((urlSessionToken && urlRedirectState) ? urlRedirectState : null)
+
+    if (urlSessionToken || nextLinkState) {
+      persistLinkSession({
+        sessionToken: urlSessionToken,
+        linkState: nextLinkState,
+      })
+
       if (isAuthenticated || !!user) {
         setSearchParams({}, { replace: true })
       }
     }
-  }, [isAuthenticated, user, searchParams, setSearchParams])
+  }, [isAuthenticated, setSearchParams, urlLinkState, urlRedirectState, urlSessionToken, user])
 
-  // 2. Leer de URL con fallback a sessionStorage para estabilidad total
-  const sessionToken = searchParams.get('session_token') || sessionStorage.getItem('dcm_session_token')
-  const state = searchParams.get('link_state') || searchParams.get('state') || sessionStorage.getItem('dcm_link_state')
+  const sessionToken = urlSessionToken || readLinkSessionToken()
 
   const payload = useMemo(() => {
     if (!sessionToken) return null
@@ -48,8 +54,24 @@ export const LinkAccountPage = () => {
     }
   }, [sessionToken])
 
+  const tokenLinkState =
+    payload && typeof payload.state === 'string' && payload.state.trim().length > 0
+      ? payload.state
+      : null
+  const linkState = tokenLinkState || urlLinkState || readLinkState()
   const baseContinueUrl = payload?.continue_url
   const candidates: CandidateIdentity[] = payload?.candidate_identities ?? []
+
+  useEffect(() => {
+    if (!sessionToken && !linkState) {
+      return
+    }
+
+    persistLinkSession({
+      sessionToken,
+      linkState,
+    })
+  }, [linkState, sessionToken])
 
   // Auto-seleccionar si solo hay un candidato
   useEffect(() => {
@@ -75,7 +97,7 @@ export const LinkAccountPage = () => {
     setError(null)
 
     try {
-      if (!sessionToken || !state || !baseContinueUrl) {
+      if (!sessionToken || !linkState || !baseContinueUrl) {
         throw new Error('Faltan datos de sesión críticos.')
       }
 
@@ -90,7 +112,7 @@ export const LinkAccountPage = () => {
         body: JSON.stringify({
           sessionToken,
           candidateUserId: candidateId,
-          state,
+          state: linkState,
         }),
       })
 
@@ -99,7 +121,12 @@ export const LinkAccountPage = () => {
         throw new Error(data.error?.detail || 'Error en el servidor de enlace')
       }
 
-      window.location.href = `${baseContinueUrl}?state=${state}&session_token=${sessionToken}&proof_token=${data.data.proofToken}`
+      const continueUrl = new URL(baseContinueUrl)
+      continueUrl.searchParams.set('state', linkState)
+      continueUrl.searchParams.set('session_token', sessionToken)
+      continueUrl.searchParams.set('proof_token', data.data.proofToken)
+
+      window.location.href = continueUrl.toString()
 
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Error desconocido'
@@ -116,8 +143,16 @@ export const LinkAccountPage = () => {
       return
     }
 
+    if (!sessionToken || !linkState) {
+      setError('Faltan datos de sesión críticos.')
+      return
+    }
+
     setSelectedCandidate(candidate)
-    const returnToUrl = `/link-account?link_state=${state}&session_token=${sessionToken}`
+    const returnToParams = new URLSearchParams()
+    returnToParams.set('link_state', linkState)
+    returnToParams.set('session_token', sessionToken)
+    const returnToUrl = `/link-account?${returnToParams.toString()}`
 
     await loginWithRedirect({
       appState: { returnTo: returnToUrl },

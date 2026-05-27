@@ -8,6 +8,7 @@ import { AppToaster } from "./components/ui/toaster";
 import { AppVersionFooter } from "./components/ui/app-version-footer";
 import { AUTH0_AUDIENCE, AUTH0_CLIENT_ID, AUTH0_DOMAIN, IS_AUTH_CONFIG_VALID } from "./config/auth";
 import { AppContextProvider } from "./context/app-context";
+import { clearLinkSession, persistLinkSession } from "./lib/auth-link-session";
 import { clearDefaultLoginAttempt, clearSessionRecoveryAttempt, normalizeReturnTo } from "./lib/auth-navigation";
 import "./pwa";
 import "./styles.css";
@@ -75,13 +76,10 @@ const Auth0ProviderWithNavigation = () => {
           try {
             const searchStr = returnTo.includes('?') ? returnTo.split('?')[1] : '';
             const params = new URLSearchParams(searchStr);
-            const token = params.get('session_token');
-            const lstate = params.get('link_state') || params.get('state');
-            
-            if (token) {
-              sessionStorage.setItem('dcm_session_token', token);
-              if (lstate) sessionStorage.setItem('dcm_link_state', lstate);
-            }
+            persistLinkSession({
+              sessionToken: params.get('session_token'),
+              linkState: params.get('link_state'),
+            });
           } catch (e) { /* ignore error */ }
         }
 
@@ -103,8 +101,7 @@ const AuthErrorGuard = ({ children }: { children: React.ReactNode }) => {
   const { error, isLoading } = useAuth0();
 
   if (!isLoading && (error?.message?.includes('state') || error?.message?.includes('Invalid state'))) {
-    sessionStorage.removeItem('dcm_session_token');
-    sessionStorage.removeItem('dcm_link_state');
+    clearLinkSession();
     window.location.href = '/';
     return null;
   }
