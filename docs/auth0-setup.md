@@ -32,6 +32,12 @@ When an administrator creates a database user directly from the Auth0 dashboard:
 - This is an exceptional path reserved for `superadmin`.
 - If that user should be treated as a canonical DCM account for linking, set `app_metadata.dcm_managed = true`.
 
+### `dcm_managed` operational note
+- `app_metadata.dcm_managed = true` identifies the canonical primary DCM account.
+- It should exist on the `auth0|...` account that DCM manages as the main identity.
+- It should not be used as a workaround on separate `google-oauth2|...` accounts.
+- If a legacy DCM user is missing this flag, correct it through backfill before troubleshooting Google linking.
+
 ## Recommended frontend variables:
 - `VITE_AUTH0_DOMAIN=dcm-platform.us.auth0.com`
 - Optional UX alternative: Configure a Custom Error Page in Auth0 that redirects to `https://contrib-dcm.pages.dev/auth/error`.
