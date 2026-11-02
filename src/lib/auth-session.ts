@@ -110,7 +110,7 @@ export const getFriendlyAuthErrorMessage = (error: unknown): string | null => {
 
   // Handle unauthorized client/audience mismatch
   if (code === "unauthorized" || message.toLowerCase().includes("not authorized to access resource server")) {
-    return "No se pudo iniciar el acceso al sistema. Es posible que falte una configuración de permisos en el proveedor de identidad. Por favor, contacta al administrador.";
+    return "No se pudo iniciar el acceso al sistema. Es posible que falte una configuración de permisos en el proveedor de identidad. Contacta al administrador.";
   }
 
   return message || "Ocurrió un problema inesperado durante la autenticación.";

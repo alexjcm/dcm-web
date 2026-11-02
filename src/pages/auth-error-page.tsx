@@ -14,7 +14,7 @@ export const AuthErrorPage = () => {
 
   useEffect(() => {
     if (error || errorDescription) {
-      console.group("🔐 Auth0 Error Trace");
+      console.group("Auth0 Error Trace");
       console.error("Error:", error);
       console.error("Description:", errorDescription);
       console.info("State:", state);
@@ -32,7 +32,7 @@ export const AuthErrorPage = () => {
             onClick={() => navigate("/contributions")}
             className="text-xs font-bold text-neutral-400 hover:text-neutral-900 transition-colors flex items-center gap-1"
           >
-            <ArrowLeft size={14} /> Volver al Portal
+            <ArrowLeft size={14} /> Volver al portal
           </button>
         </div>
       </header>
@@ -60,7 +60,7 @@ export const AuthErrorPage = () => {
               </Button>
               
               <p className="text-xs font-medium text-neutral-500 max-w-[240px] leading-relaxed">
-                Contáctese con el administrador si el problema persiste.
+                Contacta al administrador si el problema persiste.
               </p>
             </div>
 

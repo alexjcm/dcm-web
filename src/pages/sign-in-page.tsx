@@ -81,18 +81,18 @@ export const SignInPage = () => {
         <div className="pointer-events-none absolute inset-0">
           <div className="absolute left-[8%] top-[14%] h-48 w-48 rounded-full bg-[rgba(37,99,235,0.12)] blur-3xl" />
           <div className="absolute bottom-[10%] right-[8%] h-64 w-64 rounded-full bg-[rgba(143,168,216,0.18)] blur-3xl" />
-          <div className="absolute inset-x-0 top-0 h-48 bg-[var(--gradient-signin-mask)]" />
+          <div className="absolute inset-x-0 top-0 h-48 bg-[var(--surface-header)]" />
         </div>
 
         <div className="relative w-full max-w-[420px]">
-          <div className="overflow-hidden rounded-[var(--radius-dialog)] border border-border bg-[var(--gradient-signin)] px-6 py-8 shadow-dialog ring-1 ring-white/70 sm:min-h-[360px] sm:px-8 sm:py-9 dark:ring-white/10">
+          <div className="overflow-hidden rounded-[var(--radius-dialog)] border border-border bg-[var(--surface-signin)] px-6 py-8 shadow-dialog ring-1 ring-white/70 sm:min-h-[360px] sm:px-8 sm:py-9 dark:ring-white/10">
             <div className="mb-8 flex flex-col items-center gap-4 text-center">
               <div className="flex h-[4.25rem] w-[4.25rem] shrink-0 items-center justify-center rounded-[var(--radius-card)] border border-primary-100 bg-primary-600 text-white shadow-primary sm:h-[4.6rem] sm:w-[4.6rem]">
                 <ShieldCheck size={28} />
               </div>
               <div>
                 <p className="text-xl font-bold uppercase tracking-[0.22em] text-primary-600 sm:text-2xl">DCM</p>
-                <h1 className="mt-1.5 text-lg font-medium leading-relaxed text-neutral-700 sm:text-xl dark:text-neutral-300">Gestión de Aportes</h1>
+                <h1 className="mt-1.5 text-lg font-medium leading-relaxed text-neutral-700 sm:text-xl dark:text-neutral-300">Gestión de aportes</h1>
               </div>
             </div>
 

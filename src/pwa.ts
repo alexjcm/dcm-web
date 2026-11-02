@@ -10,8 +10,8 @@ registerSW({
     }
 
     offlineReadyShown = true;
-    toast.success("Modo offline listo.", {
-      description: "La interfaz puede abrirse sin conexion, pero Auth0 y la API siguen requiriendo red."
+    toast.success("Modo sin conexión disponible.", {
+      description: "La interfaz puede abrirse sin conexión, pero Auth0 y la API siguen requiriendo red."
     });
   },
   onRegisterError(error) {

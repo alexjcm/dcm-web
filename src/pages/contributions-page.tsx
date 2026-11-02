@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState } from "react";
+import { Link } from "react-router";
 import { ChevronDown } from "lucide-react";
 
 import { Card } from "../components/ui/card";
@@ -15,7 +16,7 @@ import { useContributionsYearAll } from "../hooks/use-contributions-year-all";
 import { byContributionCellKey, useContributionsPageDerived } from "../hooks/use-contributions-page-derived";
 import { useContributionsMeta } from "../hooks/use-contributions-meta";
 import { getCurrentBusinessMonth } from "../lib/business-time";
-import { getMonthLabel } from "../lib/date";
+import { getMonthLabel, getMonthLongLabel } from "../lib/date";
 import { formatCentsAsCurrency } from "../lib/money";
 import { APP_PERMISSIONS } from "../config/permissions";
 
@@ -72,6 +73,7 @@ export const ContributionsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
  
   const canEditContributions = hasPermission(APP_PERMISSIONS.contributionsWrite);
+  const canManageSettings = hasPermission(APP_PERMISSIONS.settingsRead);
   const [expandedContributorId, setExpandedContributorId] = useState<number | null>(null);
   const contributorItems = meta.data?.contributors ?? [];
   const monthlyAmountCents = meta.data?.monthlyAmountCents ?? 0;
@@ -108,16 +110,22 @@ export const ContributionsPage = () => {
 
   if (meta.error) {
     return (
-      <div className="rounded-[var(--radius-alert)] border border-danger-300 bg-danger-100 p-4 text-sm font-bold text-danger-900 animate-in fade-in dark:border-danger-800 dark:bg-danger-900 dark:text-danger-50">
-        No se pudo cargar la configuración de aportes: {meta.error}
+      <div role="alert" className="flex flex-col items-start gap-3 rounded-[var(--radius-alert)] border border-danger-300 bg-danger-100 p-4 text-sm font-bold text-danger-900 animate-in fade-in dark:border-danger-800 dark:bg-danger-900 dark:text-danger-50">
+        <p>No se pudo cargar la configuración de aportes: {meta.error}</p>
+        <Button variant="outline" size="sm" onClick={meta.reload} disabled={meta.loading}>
+          Reintentar
+        </Button>
       </div>
     );
   }
 
   if (allContributions.error) {
     return (
-      <div className="rounded-[var(--radius-alert)] border border-danger-300 bg-danger-100 p-4 text-sm font-bold text-danger-900 animate-in fade-in dark:border-danger-800 dark:bg-danger-900 dark:text-danger-50">
-        No se pudo cargar el detalle mensual: {allContributions.error}
+      <div role="alert" className="flex flex-col items-start gap-3 rounded-[var(--radius-alert)] border border-danger-300 bg-danger-100 p-4 text-sm font-bold text-danger-900 animate-in fade-in dark:border-danger-800 dark:bg-danger-900 dark:text-danger-50">
+        <p>No se pudo cargar el detalle mensual: {allContributions.error}</p>
+        <Button variant="outline" size="sm" onClick={allContributions.reload} disabled={allContributions.loading}>
+          Reintentar
+        </Button>
       </div>
     );
   }
@@ -127,12 +135,12 @@ export const ContributionsPage = () => {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 pb-20 md:pb-6">
+    <div className="space-y-6 animate-in fade-in duration-500 pb-6">
       <header className="-mt-2">
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-start lg:gap-8 w-full md:w-auto">
             <div className="flex items-center justify-between gap-3 w-full lg:w-auto">
-              <h2 className="text-2xl md:text-2xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-100 line-clamp-1">Aportes</h2>
+              <h1 className="[font-family:var(--font-sans)] text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100 line-clamp-1">Aportes</h1>
               <div className="flex items-center gap-1.5">
                 <YearSelect
                   activeYear={activeYear}
@@ -146,22 +154,25 @@ export const ContributionsPage = () => {
                   description={
                     <div className="space-y-4">
                       <p className="text-[13px] leading-relaxed text-neutral-600 dark:text-neutral-400">
-                        Selecciona un contribuyente, despliega su panel y toca un mes para registrar o corregir el aporte de forma individual.
+                        Elige un contribuyente y abre su detalle. Toca un mes para registrar o corregir el aporte.
                       </p>
                       
                       <div className="space-y-2.5 pt-1">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-neutral-500 dark:text-neutral-400">
-                          Significado de colores
+                        <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
+                          Estados de los aportes
                         </p>
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="inline-flex items-center rounded-full border border-success-300 bg-success-100/70 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success-800 dark:border-success-500/30 dark:bg-success-500/10 dark:text-success-400">
+                          <span className="inline-flex items-center rounded-full border border-neutral-300 bg-neutral-100 px-2.5 py-0.5 text-[11px] font-semibold text-neutral-700 dark:border-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
+                            Sin aporte
+                          </span>
+                          <span className="inline-flex items-center rounded-full border border-success-300 bg-success-100/70 px-2.5 py-0.5 text-[11px] font-semibold text-success-800 dark:border-success-500/30 dark:bg-success-500/10 dark:text-success-400">
                             Meta alcanzada
                           </span>
-                          <span className="inline-flex items-center rounded-full border border-primary-300 bg-primary-100/70 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-primary-800 dark:border-primary-500/30 dark:bg-primary-500/10 dark:text-primary-400">
-                            Colaborando
+                          <span className="inline-flex items-center rounded-full border border-primary-300 bg-primary-100/70 px-2.5 py-0.5 text-[11px] font-semibold text-primary-800 dark:border-primary-500/30 dark:bg-primary-500/10 dark:text-primary-400">
+                            Aporte parcial
                           </span>
-                          <span className="inline-flex items-center rounded-full border border-success-400 bg-success-200/50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-success-900 ring-1 ring-success-200/50 dark:border-success-500/40 dark:bg-success-500/20 dark:text-success-300">
-                            Colaborador destacado
+                          <span className="inline-flex items-center rounded-full border border-success-400 bg-success-200/50 px-2.5 py-0.5 text-[11px] font-semibold text-success-900 ring-1 ring-success-200/50 dark:border-success-500/40 dark:bg-success-500/20 dark:text-success-300">
+                            Aporte superior a la meta
                           </span>
                         </div>
                       </div>
@@ -176,14 +187,23 @@ export const ContributionsPage = () => {
                 placeholder="Buscar contribuyente..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full rounded-[20px] border-primary-100/70 bg-white/82 py-2 text-[15px] shadow-none placeholder:text-neutral-500/75 dark:border-neutral-700 dark:bg-neutral-800/88 dark:placeholder:text-neutral-500 sm:w-64 sm:rounded-xl sm:py-2.5 sm:text-sm sm:shadow-sm"
+                className="w-full border-border bg-white py-2 text-[15px] placeholder:text-neutral-500 dark:border-neutral-700 dark:bg-neutral-800 dark:placeholder:text-neutral-500 sm:w-64 sm:py-2.5 sm:text-sm"
               />
             </div>
+            {canEditContributions && (
+              <Button
+                onClick={openGlobalModal}
+                disabled={!canMutateCurrentPeriod}
+                className="w-full md:hidden"
+              >
+                Nuevo aporte
+              </Button>
+            )}
           </div>
           <div className="hidden shrink-0 md:block">
             {canEditContributions && (
               <Button onClick={openGlobalModal} disabled={!canMutateCurrentPeriod}>
-                Nuevo Aporte
+                Nuevo aporte
               </Button>
             )}
           </div>
@@ -200,12 +220,30 @@ export const ContributionsPage = () => {
       )}
 
       {visibleContributors.length === 0 ? (
-        <Card className="border-primary-200 bg-[var(--gradient-surface)] dark:border-primary-900">
-          <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
-            {searchQuery.trim()
-              ? `No se encontraron contribuyentes para "${searchQuery.trim()}".`
-              : "No hay contribuyentes para mostrar en este año."}
-          </p>
+        <Card className="dark:border-neutral-700">
+          {searchQuery.trim() ? (
+            <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+              No se encontraron contribuyentes para "{searchQuery.trim()}".
+            </p>
+          ) : (
+            <div className="flex flex-col items-start gap-3">
+              <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                No hay contribuyentes registrados para {activeYear}.
+              </p>
+              {canManageSettings ? (
+                <Link
+                  to="/settings"
+                  className="inline-flex min-h-11 items-center rounded-xl border border-primary-100 bg-white px-3 py-2 text-sm font-semibold text-neutral-700 transition-colors hover:border-primary-400 hover:bg-primary-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:border-primary-500 dark:hover:bg-primary-900/10"
+                >
+                  Administrar contribuyentes
+                </Link>
+              ) : (
+                <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                  Pide a un administrador que agregue contribuyentes.
+                </p>
+              )}
+            </div>
+          )}
         </Card>
       ) : (
         <>
@@ -216,7 +254,7 @@ export const ContributionsPage = () => {
               return (
                 <Card
                   key={contributor.contributorId}
-                  className="overflow-hidden border-primary-100 bg-white shadow-sm transition-shadow hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:border-neutral-700 dark:bg-neutral-800"
+                  className="overflow-hidden dark:border-neutral-700 dark:bg-neutral-800"
                   bodyClassName="p-0"
                 >
                   <button
@@ -235,7 +273,7 @@ export const ContributionsPage = () => {
                     </div>
                     <div className="flex shrink-0 items-center gap-3.5">
                       <div className="text-right">
-                        <p className="text-[8px] font-bold uppercase tracking-[0.08em] text-neutral-400 dark:text-neutral-500">
+                        <p className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400">
                           Total anual
                         </p>
                         <p className="text-sm font-semibold text-neutral-500 dark:text-neutral-400">
@@ -243,8 +281,8 @@ export const ContributionsPage = () => {
                         </p>
                       </div>
                       <span
-                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-primary-100 bg-primary-50/60 text-neutral-500 transition-all dark:border-neutral-700 dark:bg-neutral-700/80 dark:text-neutral-300 ${
-                          isExpanded ? "border-primary-200 bg-primary-100/70 text-primary-700 dark:border-primary-500/30 dark:bg-primary-500/10 dark:text-primary-300" : ""
+                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-border bg-neutral-50 text-neutral-500 transition-colors dark:border-neutral-700 dark:bg-neutral-700/80 dark:text-neutral-300 ${
+                          isExpanded ? "border-neutral-300 bg-neutral-100 text-neutral-900 dark:border-neutral-600 dark:bg-neutral-700 dark:text-neutral-100" : ""
                         }`}
                       >
                         <ChevronDown
@@ -269,7 +307,7 @@ export const ContributionsPage = () => {
                           const state = getContributionCellState(amountCents, monthlyAmountCents);
                           const isCurrentMonth = isCurrentBusinessYear && month === currentBusinessMonth;
                           const isFutureMonth = isCurrentBusinessYear && month > currentBusinessMonth;
-                          const isInteractive = canMutateCurrentPeriod && contributor.status === 1;
+                          const isInteractive = canMutateCurrentPeriod && contributor.status === 1 && canEditContributions;
                           const baseCellStyle = isFutureMonth
                             ? getFutureCellStyle()
                             : !isInteractive
@@ -281,15 +319,17 @@ export const ContributionsPage = () => {
                               key={month}
                               type="button"
                               onClick={() => openModalForCell(contributor, month)}
-                              className={`flex min-h-[50px] flex-col items-center justify-center gap-0.5 rounded-[var(--radius-pill)] border px-1 py-1.5 shadow-sm transition-all ${baseCellStyle} ${
+                              className={`flex min-h-[50px] flex-col items-center justify-center gap-0.5 rounded-lg border px-1 py-1.5 transition-colors ${baseCellStyle} ${
                                 isCurrentMonth ? "border-primary-400 ring-2 ring-primary-100/50 dark:border-primary-500 dark:ring-primary-900/40" : ""
                               } ${
                                 isInteractive ? "cursor-pointer hover:border-primary-300 hover:ring-2 hover:ring-primary-100 dark:hover:border-primary-700 dark:hover:ring-primary-900/50" : "cursor-not-allowed"
                               }`}
                               disabled={!isInteractive}
+                              aria-label={`${amountCents > 0 ? "Corregir" : "Registrar"} aporte de ${contributor.name} para ${getMonthLongLabel(month)} de ${activeYear}`}
+                              title={`${amountCents > 0 ? "Corregir" : "Registrar"} aporte de ${getMonthLongLabel(month)} de ${activeYear}`}
                             >
                               <div className="flex items-center justify-center gap-1.5">
-                                <span className="text-[11px] font-bold uppercase tracking-[0.09em] text-current opacity-80">{getMonthLabel(month)}</span>
+                                <span className="text-[11px] font-semibold capitalize text-current opacity-80">{getMonthLabel(month).toLocaleLowerCase("es-EC")}</span>
                                 {isCurrentMonth && <span className="h-1.5 w-1.5 rounded-full bg-primary-500"></span>}
                               </div>
                               <div className={`text-[14px] font-black leading-tight ${amountCents === 0 ? "opacity-85" : ""}`}>
@@ -307,24 +347,28 @@ export const ContributionsPage = () => {
           </div>
 
           <Card
-            className="hidden md:block overflow-hidden border-primary-200 bg-[var(--gradient-surface)] dark:border-primary-900"
+            className="hidden overflow-hidden md:block dark:border-neutral-700"
             bodyClassName="p-0"
           >
             <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-[rgba(66,90,111,0.28)]">
-              <div className="flex items-center justify-between border-b border-border bg-[var(--gradient-table-bar)] px-5 py-3">
+              <div className="flex items-center justify-between border-b border-border bg-[var(--surface-table-bar)] px-5 py-3">
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-600 dark:text-neutral-400">
+                  <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-neutral-600 dark:text-neutral-400">
                     <div className="flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded border border-success-300 bg-success-200/90 dark:border-success-400 dark:bg-success-400 dark:shadow-[0_0_8px_rgba(34,197,94,0.4)]"></span>
+                      <span className="h-2.5 w-2.5 rounded border border-neutral-300 bg-neutral-100 dark:border-neutral-600 dark:bg-neutral-800"></span>
+                      Sin aporte
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="h-2.5 w-2.5 rounded border border-success-300 bg-success-200/90 dark:border-success-400 dark:bg-success-400"></span>
                       Alcanzada
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded border border-primary-300 bg-primary-200/90 dark:border-primary-400 dark:bg-primary-400 dark:shadow-[0_0_8px_rgba(37,99,235,0.4)]"></span>
-                      Colaborando
+                      <span className="h-2.5 w-2.5 rounded border border-primary-300 bg-primary-200/90 dark:border-primary-400 dark:bg-primary-400"></span>
+                      Aporte parcial
                     </div>
                     <div className="flex items-center gap-2">
-                      <span className="h-2.5 w-2.5 rounded border border-success-400 bg-success-400 dark:border-success-400 dark:bg-success-400/90 dark:shadow-[0_0_8px_rgba(34,197,94,0.3)]"></span>
-                      Colaborador destacado
+                      <span className="h-2.5 w-2.5 rounded border border-success-400 bg-success-400 dark:border-success-400 dark:bg-success-400/90"></span>
+                      Aporte superior a la meta
                     </div>
                   </div>
                 </div>
@@ -332,8 +376,8 @@ export const ContributionsPage = () => {
 
               <table className="w-full min-w-[1000px] border-collapse text-sm">
                 <thead>
-                  <tr className="bg-primary-50/50 dark:bg-primary-900/10">
-                    <th className="sticky left-0 z-20 border-b border-r border-border bg-white px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-neutral-600 shadow-sm dark:bg-neutral-900 dark:text-neutral-400">
+                  <tr>
+                    <th className="sticky left-0 z-20 border-b border-r border-border bg-white px-5 py-3 text-left text-xs font-medium text-neutral-600 dark:bg-neutral-900 dark:text-neutral-400">
                       Contribuyente
                     </th>
                     {monthList.map((month) => {
@@ -343,9 +387,9 @@ export const ContributionsPage = () => {
                       return (
                         <th
                           key={month}
-                          className={`border-b border-border px-2 py-3 text-center text-[11px] font-bold uppercase tracking-wider ${
+                          className={`border-b border-border px-2 py-3 text-center text-xs font-medium ${
                             isCurrentMonth
-                              ? "bg-primary-100/70 text-primary-800 shadow-[inset_0_2px_0_0_#2563eb] dark:bg-primary-900/40 dark:text-primary-300 dark:shadow-[inset_0_2px_0_0_#3b82f6]"
+                              ? "bg-primary-50 text-primary-800 dark:bg-primary-900/40 dark:text-primary-300"
                               : "text-neutral-600 dark:text-neutral-400"
                           } ${isFutureMonth ? "bg-primary-50/40 text-neutral-500 dark:bg-neutral-950/40 dark:text-neutral-500" : ""}`}
                         >
@@ -353,7 +397,7 @@ export const ContributionsPage = () => {
                         </th>
                       );
                     })}
-                     <th className="border-b border-border bg-primary-50/80 px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-neutral-700 shadow-sm dark:bg-neutral-900 dark:text-neutral-400">
+                     <th className="border-b border-border bg-neutral-50 px-4 py-3 text-right text-xs font-medium text-neutral-700 dark:bg-neutral-900 dark:text-neutral-400">
                       Total
                     </th>
                   </tr>
@@ -362,7 +406,7 @@ export const ContributionsPage = () => {
                 <tbody className="divide-y divide-border">
                   {visibleContributors.map((contributor) => (
                     <tr key={contributor.contributorId} className="group transition-colors hover:bg-primary-50/30 dark:hover:bg-primary-900/15">
-                      <td className="sticky left-0 z-10 border-r border-border bg-white px-5 py-3 shadow-sm transition-colors group-hover:bg-primary-50/10 dark:bg-neutral-900 dark:group-hover:bg-neutral-800/60">
+                      <td className="sticky left-0 z-10 border-r border-border bg-white px-5 py-3 transition-colors group-hover:bg-neutral-50 dark:bg-neutral-900 dark:group-hover:bg-neutral-800/60">
                         <div className="flex items-center gap-3">
                           <div className="min-w-0">
                             <div className="truncate font-bold text-neutral-900 dark:text-neutral-100">{contributor.name}</div>
@@ -389,7 +433,7 @@ export const ContributionsPage = () => {
                             <button
                               type="button"
                               onClick={() => openModalForCell(contributor, month)}
-                              className={`w-full min-h-[44px] rounded-xl border px-2 py-2 text-[12px] font-extrabold shadow-sm transition-all ${baseCellStyle} ${
+                              className={`w-full min-h-[44px] rounded-lg border px-2 py-2 text-[12px] font-semibold transition-colors ${baseCellStyle} ${
                                 isCurrentMonth ? "border-primary-300 ring-2 ring-primary-100 dark:border-primary-700 dark:ring-primary-900/40" : ""
                               } ${
                                 isInteractive
@@ -401,7 +445,7 @@ export const ContributionsPage = () => {
                                 canMutateCurrentPeriod
                                   ? contributor.status === 0
                                     ? "Contribuyente inactivo"
-                                    : "Registrar o corregir aporte"
+                                    : `${amountCents > 0 ? "Corregir" : "Registrar"} aporte de ${contributor.name} para ${getMonthLongLabel(month)} de ${activeYear}`
                                   : contributionRestrictionMessage ?? "No editable"
                               }
                               title={
@@ -439,6 +483,8 @@ export const ContributionsPage = () => {
             monthlyAmountCents={monthlyAmountCents}
             defaultYear={activeYear}
             defaultMonth={selectedCell ? selectedCell.month : currentBusinessMonth}
+            minYear={meta.data.minYear}
+            currentBusinessYear={currentBusinessYear}
             initialContribution={selectedCell?.existingContribution ?? null}
             fixedContributorId={selectedCell?.contributor.contributorId}
             fixedYear={activeYear}
@@ -469,7 +515,7 @@ export const ContributionsPage = () => {
           pendingDelete
             ? (
               <span>
-                ¿Estás seguro que deseas eliminar el aporte de{" "}
+                ¿Estás seguro de que deseas eliminar el aporte de{" "}
                 <strong>{pendingDelete.contributorName}</strong>{" "}
                 correspondiente a {getMonthLabel(pendingDelete.contribution.month)}/{pendingDelete.contribution.year}? Esta acción borrará el registro de la base de datos de este mes.
               </span>
@@ -486,22 +532,6 @@ export const ContributionsPage = () => {
         }}
       />
 
-      {canEditContributions && (
-        <Button
-          className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full p-0 shadow-[0_8px_30px_rgb(37,99,235,0.24)] hover:shadow-[0_8px_30px_rgb(37,99,235,0.4)] md:hidden"
-          onClick={openGlobalModal}
-          disabled={!canMutateCurrentPeriod}
-          aria-label="Nuevo Aporte"
-          style={{
-            bottom: "calc(1.5rem + env(safe-area-inset-bottom))",
-            right: "calc(1.5rem + env(safe-area-inset-right))"
-          }}
-        >
-          <span className="text-3xl leading-none -mt-1">+</span>
-        </Button>
-      )}
-
- 
     </div>
   );
 };

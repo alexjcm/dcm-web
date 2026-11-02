@@ -48,7 +48,7 @@ export const ConfirmModal = ({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-neutral-900/32 backdrop-blur-sm" />
+          <div className="fixed inset-0 bg-neutral-900/32" />
         </TransitionChild>
 
         <div className="fixed inset-0 overflow-y-auto p-4 md:p-8">
@@ -62,7 +62,7 @@ export const ConfirmModal = ({
               leaveFrom="opacity-100 translate-y-0 scale-100"
               leaveTo="opacity-0 translate-y-4 scale-95"
             >
-              <DialogPanel className="w-full max-w-md overflow-hidden rounded-[var(--radius-dialog)] border border-border bg-card shadow-dialog transition-all">
+              <DialogPanel className="w-full max-w-md overflow-hidden rounded-[var(--radius-dialog)] border border-border bg-card shadow-dialog transition-[opacity,transform]">
                 <div className={panelPaddingClass}>
                   <div className={`flex items-start ${panelGapClass}`}>
                     <div className={`flex shrink-0 items-center justify-center shadow-sm ${iconClass} ${

@@ -25,7 +25,7 @@ export const ScreenHelpButton = ({ title, description, className = "", toastId }
             title: "!text-lg !font-extrabold !tracking-tight text-neutral-900 dark:text-neutral-100",
             description: "!mt-2",
             closeButton:
-              "!h-8 !w-8 !rounded-lg !border !border-border !bg-white/95 !text-neutral-600 hover:!bg-neutral-100 dark:!border-neutral-600 dark:!bg-neutral-800 dark:!text-neutral-300 dark:hover:!bg-neutral-700"
+              "!h-8 !w-8 !rounded-lg !border !border-border !bg-white !text-neutral-600 hover:!bg-neutral-100 dark:!border-neutral-600 dark:!bg-neutral-800 dark:!text-neutral-300 dark:hover:!bg-neutral-700"
           }
         });
       }}

@@ -98,12 +98,7 @@ export const SettingsDialogsController = ({
       return;
     }
 
-    if (!auth0AutoSyncEnabled && nextValue) {
-      setPendingAuth0AutoSyncValue(true);
-      return;
-    }
-
-    void saveAuth0AutoSyncSetting(nextValue);
+    setPendingAuth0AutoSyncValue(nextValue);
   };
 
   const saveAuth0AutoSyncSetting = async (nextValue: boolean) => {
@@ -166,7 +161,7 @@ export const SettingsDialogsController = ({
         {isCreateContributorOpen ? (
           <ContributorModal
             open
-            title="Nuevo Contribuyente"
+            title="Nuevo contribuyente"
             submitLabel="Registrar"
             draft={newContributor}
             submitting={savingContributor}
@@ -179,7 +174,7 @@ export const SettingsDialogsController = ({
         {editingContributor ? (
           <ContributorModal
             open
-            title="Editar Contribuyente"
+            title="Editar contribuyente"
             submitLabel="Guardar cambios"
             draft={editDraft}
             submitting={savingContributor}

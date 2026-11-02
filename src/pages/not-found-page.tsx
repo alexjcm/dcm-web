@@ -22,7 +22,7 @@ export const NotFoundPage = () => {
           icon={Home}
           onClick={() => navigate("/summary")}
         >
-          Volver al Resumen
+          Volver al resumen
         </Button>
       </main>
       <AppVersionFooter />

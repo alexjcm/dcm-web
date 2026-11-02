@@ -9,14 +9,14 @@ const stateStyles: Record<ContributionState, string> = {
 
 const stateLabels: Record<ContributionState, string> = {
   pending: "Sin aportes",
-  incomplete: "Colaborando",
+  incomplete: "Aporte parcial",
   complete: "Meta alcanzada",
-  overpaid: "Colaborador destacado"
+  overpaid: "Aporte superior a la meta"
 };
 
 export const ContributionStateBadge = ({ state }: { state: ContributionState }) => {
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${stateStyles[state]}`}>
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${stateStyles[state]}`}>
       {stateLabels[state]}
     </span>
   );
@@ -27,7 +27,7 @@ export const ContributorStatusBadge = ({ status }: { status: ContributorStatus }
 
   return (
     <span
-      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${
+      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${
         isActive 
           ? "border-success-300 bg-success-100/70 text-success-800 dark:border-success-500/30 dark:bg-success-500/10 dark:text-success-400" 
           : "border-danger-300 bg-danger-100/70 text-danger-800 dark:border-danger-500/30 dark:bg-danger-500/10 dark:text-danger-400"
@@ -64,7 +64,7 @@ const auth0StateLabels: Record<Auth0SyncStatus, string> = {
 
 export const ContributorAuth0StatusBadge = ({ status }: { status: Auth0SyncStatus }) => {
   return (
-    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider ${auth0StateStyles[status]}`}>
+    <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[11px] font-semibold ${auth0StateStyles[status]}`}>
       {auth0StateLabels[status]}
     </span>
   );

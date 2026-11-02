@@ -1,6 +1,4 @@
 import { useMemo } from "react";
-import { TrendingUp, Scale } from "lucide-react";
-
 import { SectionLoader } from "../components/ui/loaders";
 import { ContributionStateBadge } from "../components/ui/state-badge";
 import { YearSelect } from "../components/ui/year-select";
@@ -8,6 +6,7 @@ import { useAppContext } from "../context/app-context";
 import { formatCentsAsCurrency } from "../lib/money";
 import { useSummary } from "../hooks/use-summary";
 import { Card } from "../components/ui/card";
+import { Button } from "../components/ui/button";
 import { ScreenHelpButton } from "../components/ui/screen-help-button";
 import type { ContributionState } from "../types/domain";
 
@@ -35,9 +34,9 @@ const mobileStateStyles: Record<ContributionState, string> = {
 
 const mobileStateLabels: Record<ContributionState, string> = {
   pending: "Sin aportes",
-  incomplete: "Colaborando",
+  incomplete: "Aporte parcial",
   complete: "Meta alcanzada",
-  overpaid: "Colaborador destacado"
+  overpaid: "Aporte superior a la meta"
 };
 
 const progressValueStyles: Record<ContributionState, string> = {
@@ -73,8 +72,11 @@ export const SummaryPage = () => {
 
   if (summary.error) {
     return (
-      <div className="rounded-[var(--radius-alert)] border border-danger-300 bg-danger-100 p-4 text-sm font-bold text-danger-900 animate-in fade-in slide-in-from-top-1 dark:border-danger-800 dark:bg-danger-900 dark:text-danger-50">
-        No se pudo cargar el resumen: {summary.error}
+      <div role="alert" className="flex flex-col items-start gap-3 rounded-[var(--radius-alert)] border border-danger-300 bg-danger-100 p-4 text-sm font-bold text-danger-900 animate-in fade-in slide-in-from-top-1 dark:border-danger-800 dark:bg-danger-900 dark:text-danger-50">
+        <p>No se pudo cargar el resumen: {summary.error}</p>
+        <Button variant="outline" size="sm" onClick={summary.reload} disabled={summary.loading}>
+          Reintentar
+        </Button>
       </div>
     );
   }
@@ -89,9 +91,9 @@ export const SummaryPage = () => {
     <div className="space-y-6 animate-in fade-in duration-500">
       <header className="-mt-2">
         <div className="flex items-start justify-between gap-2.5">
-          <h2 className="min-w-0 flex-1 text-2xl font-extrabold leading-tight tracking-tight text-neutral-900 dark:text-neutral-100">
+          <h1 className="[font-family:var(--font-sans)] min-w-0 flex-1 text-2xl font-semibold leading-tight tracking-tight text-neutral-900 dark:text-neutral-100">
             Resumen de Aportes
-          </h2>
+          </h1>
           <div className="flex shrink-0 items-center gap-1.5">
             <YearSelect
               activeYear={activeYear}
@@ -109,25 +111,13 @@ export const SummaryPage = () => {
       </header>
 
       <Card
-        className="relative overflow-hidden border-primary-300 bg-[var(--gradient-surface)] dark:border-primary-900"
+        className="border-neutral-300 dark:border-neutral-700"
         bodyClassName="px-4 py-3 sm:px-6 sm:py-5"
       >
-        <div className="absolute inset-y-0 right-0 hidden w-[34%] bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.22),transparent_58%)] sm:block dark:bg-[radial-gradient(circle_at_top,rgba(30,58,138,0.15),transparent_58%)]" />
-        <div className="absolute right-5 top-5 hidden opacity-80 sm:block">
-          <div className="flex items-center gap-3 text-neutral-400">
-            <div className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-card)] border border-white/50 bg-white/60 shadow-sm dark:border-white/10 dark:bg-white/5">
-              <TrendingUp size={24} className="text-primary-700 dark:text-primary-400" />
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-[var(--radius-card)] border border-white/50 bg-white/60 shadow-sm dark:border-white/10 dark:bg-white/5">
-              <Scale size={24} className="text-primary-400 dark:text-primary-500" />
-            </div>
-          </div>
-        </div>
-
-        <div className="relative">
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-primary-600">Total Recaudado</p>
+        <div>
+          <p className="text-sm font-medium text-neutral-600 dark:text-neutral-400">Total recaudado</p>
           <div className="mt-2 flex items-start gap-4 sm:mt-4 sm:items-start sm:gap-6">
-            <p className="shrink-0 text-3xl font-black leading-none text-primary-900 sm:text-5xl dark:text-primary-200">
+            <p className="shrink-0 text-3xl font-bold leading-none text-neutral-950 sm:text-4xl dark:text-white">
               {formatCentsAsCurrency(totals.collectedCents)}
             </p>
             <p className="max-w-xs text-xs leading-5 text-neutral-600 sm:max-w-xl sm:text-sm sm:leading-6 dark:text-neutral-400">
@@ -140,12 +130,12 @@ export const SummaryPage = () => {
       <Card bodyClassName="p-0">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="border-b border-border bg-primary-50/60 dark:bg-primary-900/20">
+            <thead className="border-b border-border">
               <tr>
-                <th className="pl-0 pr-2 py-3 text-left font-bold uppercase tracking-wider text-neutral-600 text-[11px] dark:text-neutral-400 sm:pr-3">Contribuyente</th>
-                <th className="hidden px-4 py-3 text-left font-bold uppercase tracking-wider text-neutral-600 text-[11px] dark:text-neutral-400 md:table-cell md:px-6">Estado</th>
-                <th className="px-2 py-3 text-right font-bold uppercase tracking-wider text-neutral-600 text-[11px] dark:text-neutral-400 sm:px-4 md:px-6">Aportado</th>
-                <th className="px-2 py-3 text-right font-bold uppercase tracking-wider text-neutral-600 text-[11px] dark:text-neutral-400 sm:px-4 md:px-6">
+                <th className="pl-0 pr-2 py-3 text-left text-xs font-medium text-neutral-600 dark:text-neutral-400 sm:pr-3">Contribuyente</th>
+                <th className="hidden px-4 py-3 text-left text-xs font-medium text-neutral-600 dark:text-neutral-400 md:table-cell md:px-6">Estado</th>
+                <th className="px-2 py-3 text-right text-xs font-medium text-neutral-600 dark:text-neutral-400 sm:px-4 md:px-6">Aportado</th>
+                <th className="px-2 py-3 text-right text-xs font-medium text-neutral-600 dark:text-neutral-400 sm:px-4 md:px-6">
                   <span className="inline-flex flex-col leading-tight text-right">
                     <span>Progreso</span>
                     <span>Anual</span>
@@ -157,7 +147,7 @@ export const SummaryPage = () => {
               {contributors.length === 0 ? (
                 <tr>
                   <td colSpan={4} className="px-4 py-8 text-center text-sm font-medium text-neutral-500 dark:text-neutral-400">
-                    No hay contribuyentes para mostrar en este año.
+                    No hay contribuyentes registrados para {activeYear}.
                   </td>
                 </tr>
               ) : (
@@ -170,7 +160,7 @@ export const SummaryPage = () => {
                         </div>
                         <div className="mt-1 md:hidden">
                           <span
-                            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${mobileStateStyles[item.state]}`}
+                            className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-semibold ${mobileStateStyles[item.state]}`}
                           >
                             {mobileStateLabels[item.state]}
                           </span>
@@ -186,7 +176,7 @@ export const SummaryPage = () => {
                       <div className="flex flex-col items-end gap-1.5 sm:flex-row sm:items-center sm:justify-end sm:gap-2">
                          <div className="order-1 h-2 w-24 overflow-hidden rounded-full bg-neutral-300/70 dark:bg-neutral-700/90 ring-1 ring-neutral-300/30 dark:ring-neutral-600/60 sm:order-2 sm:w-16">
                             <div
-                              className={`h-full rounded-full transition-all duration-500 ${
+                              className={`h-full rounded-full transition-[width] duration-500 ${
                                 item.monthsComplete >= 12
                                   ? "bg-success-500 shadow-[0_0_4px_rgba(34,197,94,0.22)]"
                                   : "bg-primary-500 shadow-[0_0_4px_rgba(59,130,246,0.2)]"

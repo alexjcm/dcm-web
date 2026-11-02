@@ -50,7 +50,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             aria-describedby={describedBy}
             aria-invalid={ariaInvalid}
             className={`
-              w-full rounded-xl border border-border bg-white py-2.5 text-sm text-neutral-900 shadow-sm transition-colors
+              w-full rounded-lg border border-border bg-white py-2.5 text-sm text-neutral-900 transition-colors
               placeholder:text-neutral-400
               focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-400
               disabled:cursor-not-allowed disabled:opacity-50
@@ -107,7 +107,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             aria-describedby={describedBy}
             aria-invalid={ariaInvalid}
             className={`
-              w-full appearance-none rounded-xl border border-border bg-white py-2.5 text-sm text-neutral-900 shadow-sm transition-colors
+              w-full appearance-none rounded-lg border border-border bg-white py-2.5 text-sm text-neutral-900 transition-colors
               focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-400
               disabled:cursor-not-allowed disabled:opacity-50
               dark:bg-neutral-800 dark:text-neutral-100

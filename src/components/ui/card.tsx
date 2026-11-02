@@ -17,10 +17,10 @@ export const Card = ({
 }: CardProps) => {
   return (
     <article
-      className={`overflow-hidden rounded-[var(--radius-card)] border border-border bg-card shadow-card transition-all hover:shadow-lg ${className}`}
+      className={`overflow-hidden rounded-[var(--radius-card)] border border-border bg-card transition-colors ${className}`}
     >
       {header && (
-        <div className="border-b border-border bg-[var(--gradient-card-header)] px-4 py-3 sm:px-6 sm:py-4">
+        <div className="border-b border-border bg-[var(--surface-header)] px-4 py-3 sm:px-6 sm:py-4">
           <div className="text-sm font-semibold tracking-[0.01em] text-neutral-900 dark:text-neutral-100">{header}</div>
         </div>
       )}
@@ -28,7 +28,7 @@ export const Card = ({
         {children}
       </div>
       {footer && (
-        <div className="border-t border-border bg-[var(--gradient-card-footer)] px-6 py-3">
+        <div className="border-t border-border bg-[var(--surface-footer)] px-6 py-3">
           {footer}
         </div>
       )}

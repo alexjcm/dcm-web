@@ -95,6 +95,11 @@ export const AppContextProvider = ({ children }: PropsWithChildren) => {
           return;
         }
 
+        if (!accessToken) {
+          setPermissions([]);
+          return;
+        }
+
         setPermissions(extractPermissionsFromAccessToken(accessToken));
       } catch (error) {
         console.warn(

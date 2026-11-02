@@ -38,7 +38,7 @@ export const SettingsPage = () => {
       <Card className="border-danger-300 bg-danger-100 dark:border-danger-800 dark:bg-danger-900">
         <div className="flex items-center gap-3 text-danger-900 dark:text-danger-50">
           <ShieldAlert size={20} />
-          <p className="text-sm font-bold uppercase tracking-wider">Acceso Restringido</p>
+          <p className="text-sm font-bold uppercase tracking-wider">Acceso restringido</p>
         </div>
         <p className="mt-2 text-sm leading-relaxed text-danger-900 dark:text-danger-200">
           Esta sección requiere el permiso{" "}
@@ -52,9 +52,9 @@ export const SettingsPage = () => {
     <div className="space-y-6 animate-in fade-in duration-500">
       <header className="-mt-2">
         <div className="flex items-start justify-between gap-2.5">
-          <h2 className="min-w-0 flex-1 text-2xl font-extrabold leading-tight tracking-tight text-neutral-900 dark:text-neutral-100">
-            Panel de Administración
-          </h2>
+          <h1 className="[font-family:var(--font-sans)] min-w-0 flex-1 text-2xl font-semibold leading-tight tracking-tight text-neutral-900 dark:text-neutral-100">
+            Panel de administración
+          </h1>
           <ScreenHelpButton
             title="Ajustes"
             description="Actualiza el monto base mensual, administra contribuyentes y controla la sincronización con el sistema de autenticación Auth0."

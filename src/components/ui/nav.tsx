@@ -54,7 +54,7 @@ export const AppNav = () => {
       };
     }
     return {
-      label: "Viewer",
+      label: "Solo lectura",
       icon: <User size={12} className="shrink-0" />,
       styles: "border-neutral-200 bg-neutral-50 text-neutral-800 dark:border-neutral-500/30 dark:bg-neutral-500/10 dark:text-neutral-400"
     };
@@ -86,10 +86,10 @@ export const AppNav = () => {
   }, []);
 
   const navLinkClass = ({ isActive }: { isActive: boolean }): string => {
-    return `flex min-w-0 shrink items-center justify-center gap-1 px-2 py-2 text-[14px] font-bold transition-all rounded-lg sm:justify-start sm:gap-2 sm:px-3 sm:text-sm md:px-4 ${
+    return `flex min-w-0 shrink items-center justify-center gap-1 rounded-lg px-2 py-2 text-[14px] font-semibold transition-colors sm:justify-start sm:gap-2 sm:px-3 sm:text-sm md:px-4 ${
       isActive 
-        ? "border border-black/5 bg-black/[0.055] text-primary-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] [&_svg]:text-primary-400 dark:border-white/7 dark:bg-white/[0.095] dark:text-white dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.045)] dark:[&_svg]:text-primary-300" 
-        : "text-primary-900/72 hover:bg-primary-50 hover:text-primary-900 [&_svg]:text-neutral-400 hover:[&_svg]:text-neutral-500 dark:text-primary-300/78 dark:hover:bg-neutral-800 dark:hover:text-primary-200 dark:[&_svg]:text-neutral-500 dark:hover:[&_svg]:text-neutral-400"
+        ? "bg-neutral-200 text-neutral-950 [&_svg]:text-neutral-700 dark:bg-neutral-700 dark:text-white dark:[&_svg]:text-neutral-200"
+        : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-950 [&_svg]:text-neutral-400 hover:[&_svg]:text-neutral-600 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-white dark:[&_svg]:text-neutral-500 dark:hover:[&_svg]:text-neutral-300"
     }`;
   };
 
@@ -123,7 +123,7 @@ export const AppNav = () => {
   };
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-[var(--gradient-nav-header)] backdrop-blur-md">
+    <header className="sticky top-0 z-30 border-b border-border bg-[var(--surface-nav)]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-[4.5rem] items-center justify-between gap-4 sm:h-20">
           <div className="flex flex-col">
@@ -145,7 +145,7 @@ export const AppNav = () => {
               onClick={toggle}
               aria-label={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
               title={theme === "dark" ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
-              className="group flex h-10 w-10 items-center justify-center rounded-xl text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
+              className="group flex h-10 w-10 items-center justify-center rounded-lg text-neutral-600 transition-colors hover:bg-neutral-100 hover:text-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:hover:text-neutral-100"
             >
               <span className="transition-transform duration-300 ease-out group-active:scale-95">
                 {theme === "dark" ? <Sun size={18} className="animate-in fade-in duration-200" /> : <Moon size={18} className="animate-in fade-in duration-200" />}
@@ -153,7 +153,7 @@ export const AppNav = () => {
             </button>
 
             <Menu as="div" className="relative z-50">
-              <MenuButton className="flex items-center justify-center rounded-full border border-primary-200 bg-white p-0.5 shadow-sm transition hover:ring-4 hover:ring-primary-100 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:hover:ring-primary-900/40">
+              <MenuButton className="flex items-center justify-center rounded-full border border-border bg-white p-0.5 transition hover:ring-2 hover:ring-neutral-200 focus:outline-none dark:border-neutral-700 dark:bg-neutral-800 dark:hover:ring-neutral-700">
                 {user?.picture && !imageError ? (
                   <img 
                     src={user.picture} 
@@ -188,7 +188,7 @@ export const AppNav = () => {
                     <p className="mb-2 truncate text-xs font-semibold text-neutral-500 dark:text-neutral-400">
                       {userEmail ?? user?.email ?? "Cargando sesión..."}
                     </p>
-                    <div className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[10px] font-bold uppercase tracking-widest shadow-sm ${role.styles}`}>
+                    <div className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[11px] font-semibold ${role.styles}`}>
                       {role.icon}
                       <span>{role.label}</span>
                     </div>
@@ -222,7 +222,7 @@ export const AppNav = () => {
                           }`}
                         >
                           <LogOut size={16} className={focus ? "text-danger-600" : "text-neutral-400 group-hover:text-danger-600"} />
-                          Cerrar Sesión
+                          Cerrar sesión
                         </button>
                       )}
                     </MenuItem>
@@ -233,8 +233,8 @@ export const AppNav = () => {
           </div>
         </div>
 
-        <div className="mb-1 rounded-[16px] border border-white/5 bg-white/[0.02] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.02)] sm:mb-0 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
-          <nav className="grid grid-cols-3 gap-1.5 sm:flex sm:items-center sm:gap-2">
+        <div className="mb-1 sm:mb-0">
+          <nav className="grid grid-flow-col auto-cols-fr gap-1.5 sm:flex sm:items-center sm:gap-2">
             <NavLink to="/contributions" className={navLinkClass}>
               <CalendarDays size={16} className="shrink-0" />
               <span>Aportes</span>

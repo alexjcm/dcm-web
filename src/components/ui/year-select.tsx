@@ -32,7 +32,7 @@ export const YearSelect = ({
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.16em] text-neutral-600">
+      <div className="flex items-center gap-2 text-xs font-medium text-neutral-600">
         Año
       </div>
 

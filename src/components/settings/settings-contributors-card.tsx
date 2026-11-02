@@ -184,7 +184,7 @@ export const SettingsContributorsCard = ({
       <button
         type="button"
         onClick={(event) => openMobileAccess(contributor, event)}
-        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-primary-100 bg-white/90 text-neutral-700 shadow-sm transition hover:border-primary-300 hover:bg-primary-50/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-200 dark:hover:border-primary-500 dark:hover:bg-primary-900/10"
+        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border bg-white text-neutral-700 transition-colors hover:border-neutral-400 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-900/10"
         aria-label={`Ver estado de acceso: ${statusText}`}
         aria-expanded={mobileAccessOverlay?.contributor.id === contributor.id}
         title={statusText}
@@ -221,21 +221,21 @@ export const SettingsContributorsCard = ({
   return (
     <>
       <Card
-        className="overflow-visible border-primary-200 bg-[var(--gradient-surface)] shadow-card dark:border-neutral-700"
+        className="overflow-visible dark:border-neutral-700"
         header={
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center justify-between w-full sm:w-auto">
               <div className="flex items-center gap-2">
-                <Users size={18} className="text-primary-700" />
-                Lista de Contribuyentes
+                <Users size={18} className="text-neutral-500 dark:text-neutral-400" />
+                Lista de contribuyentes
               </div>
-              <span className="rounded-full border border-primary-200 bg-[rgba(255,255,255,0.92)] px-2.5 py-1 text-[11px] font-bold text-neutral-600 dark:border-primary-500/20 dark:bg-primary-500/10 dark:text-primary-300 sm:hidden">
+              <span className="rounded-full border border-border bg-white px-2.5 py-1 text-[11px] font-semibold text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 sm:hidden">
                 {contributors.length}
               </span>
             </div>
 
             <div className="flex w-full flex-col items-center gap-3 sm:w-auto sm:flex-row sm:gap-2">
-              <span className="hidden rounded-full border border-primary-200 bg-[rgba(255,255,255,0.92)] px-2.5 py-1 text-[11px] font-bold text-neutral-600 dark:border-primary-500/20 dark:bg-primary-500/10 dark:text-primary-300 sm:inline-block">
+              <span className="hidden rounded-full border border-border bg-white px-2.5 py-1 text-[11px] font-semibold text-neutral-600 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-300 sm:inline-block">
                 {contributors.length} registros
               </span>
               <Button size="sm" icon={Plus} onClick={onCreateContributor} disabled={!canEdit} className="w-full text-[13px] sm:w-auto sm:text-sm">
@@ -248,12 +248,12 @@ export const SettingsContributorsCard = ({
       >
         <div className="overflow-x-auto overflow-y-visible">
           <table className="w-full text-sm">
-            <thead className="border-b border-border bg-primary-50/60 dark:bg-primary-900/20">
+            <thead className="border-b border-border">
               <tr>
-                <th className="px-2 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 sm:px-4 md:px-6">Nombres</th>
-                <th className="pl-2 pr-1 py-3 text-center text-[11px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 sm:px-4 md:px-6">Estado</th>
-                <th className="hidden px-2 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 sm:px-4 lg:table-cell lg:px-6">Acceso</th>
-                <th className="pl-1 pr-2 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-neutral-600 dark:text-neutral-400 sm:px-4 sm:text-left md:px-6">Acciones</th>
+                <th className="px-2 py-3 text-left text-xs font-medium text-neutral-600 dark:text-neutral-400 sm:px-4 md:px-6">Nombres</th>
+                <th className="pl-2 pr-1 py-3 text-center text-xs font-medium text-neutral-600 dark:text-neutral-400 sm:px-4 md:px-6">Estado</th>
+                <th className="hidden px-2 py-3 text-left text-xs font-medium text-neutral-600 dark:text-neutral-400 sm:px-4 lg:table-cell lg:px-6">Acceso</th>
+                <th className="pl-1 pr-2 py-3 text-right text-xs font-medium text-neutral-600 dark:text-neutral-400 sm:px-4 sm:text-left md:px-6">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border dark:divide-white/5">
@@ -295,7 +295,7 @@ export const SettingsContributorsCard = ({
                         type="button"
                         disabled={!canEdit}
                         onClick={(event) => openMobileActions(contributor, event)}
-                        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-primary-100 bg-white/90 text-neutral-700 shadow-sm transition hover:border-primary-300 hover:bg-primary-50/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-800/80 dark:text-neutral-200 dark:hover:border-primary-500 dark:hover:bg-primary-900/10"
+                        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-border bg-white text-neutral-700 transition-colors hover:border-neutral-400 hover:bg-neutral-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-900/10"
                         aria-label="Ver acciones del contribuyente"
                         aria-expanded={mobileActionsOverlay?.contributor.id === contributor.id}
                         title="Ver acciones del contribuyente"

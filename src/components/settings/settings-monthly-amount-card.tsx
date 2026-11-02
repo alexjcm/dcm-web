@@ -24,12 +24,12 @@ export const SettingsMonthlyAmountCard = ({
 }: SettingsMonthlyAmountCardProps) => {
   return (
     <Card
-      className="w-full border-primary-200 bg-[var(--gradient-surface)] shadow-card dark:border-neutral-700"
+      className="w-full dark:border-neutral-700"
       bodyClassName="px-4 py-4 sm:px-6 sm:py-5"
       header={
         <div className="flex items-center gap-2 text-neutral-900 dark:text-neutral-100">
-          <Coins size={18} className="text-primary-700 dark:text-primary-400" />
-          Monto Base Mensual
+          <Coins size={18} className="text-neutral-500 dark:text-neutral-400" />
+          Monto base mensual
         </div>
       }
     >
@@ -65,7 +65,7 @@ export const SettingsMonthlyAmountCard = ({
                 isLoading={saving}
                 className="h-[42px] shrink-0 whitespace-nowrap px-3.5"
               >
-                Actualizar Monto
+                Actualizar monto
               </Button>
             </div>
           </>

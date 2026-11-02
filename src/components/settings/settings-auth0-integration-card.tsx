@@ -22,11 +22,11 @@ export const SettingsAuth0IntegrationCard = ({
 
   return (
     <Card
-      className="w-full border-primary-200 bg-[var(--gradient-surface)] shadow-card dark:border-neutral-700"
+      className="w-full dark:border-neutral-700"
       bodyClassName="px-4 py-4 sm:px-6 sm:py-5"
       header={
         <div className="flex items-center gap-2 text-neutral-900 dark:text-neutral-100">
-          <ShieldCheck size={18} className="text-primary-700 dark:text-primary-400" />
+          <ShieldCheck size={18} className="text-neutral-500 dark:text-neutral-400" />
           Sistema de autenticación
         </div>
       }
@@ -36,7 +36,7 @@ export const SettingsAuth0IntegrationCard = ({
           Controla si el sistema sincroniza automáticamente el acceso de los contribuyentes con el sistema de autenticación
         </p>
 
-        <div className="rounded-xl border border-border bg-white/80 p-3.5 dark:bg-neutral-900/30">
+        <div className="rounded-lg border border-border bg-white p-3.5 dark:bg-neutral-900/30">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
               <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">Sincronizar con sistema de autenticación</p>
@@ -68,7 +68,7 @@ export const SettingsAuth0IntegrationCard = ({
               } ${visuallyDisabled ? "cursor-not-allowed opacity-60" : ""}`}
             >
               <span
-                className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform ${
+                className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${
                   enabled ? "translate-x-7" : "translate-x-1"
                 }`}
               />

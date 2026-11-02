@@ -7,7 +7,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  /* Primary Scale (Blue) */
+  /* Primary Scale (Blue) — reserved for current-period data and focus. */
   --color-primary-50: #eff6ff;
   --color-primary-100: #dbeafe;
   --color-primary-200: #bfdbfe;
@@ -19,7 +19,7 @@
   --color-primary-800: #1e40af;
   --color-primary-900: #1e3a8a;
 
-  /* Neutral Scale (Slate-based for premium feel) */
+  /* Neutral Scale */
   --color-neutral-50: #f8fafc;
   --color-neutral-100: #f1f5f9;
   --color-neutral-200: #e2e8f0;
@@ -79,22 +79,22 @@
   --font-sans: "Aptos", "Segoe UI Variable Text", "Segoe UI", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", "Times New Roman", ui-serif, serif;
 
-  /* Shadow Tokens */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-  --shadow-dialog: 0 24px 60px -8px rgba(37, 99, 235, 0.16);
-  --shadow-primary: 0 12px 24px -4px rgba(37, 99, 235, 0.24);
-  --shadow-card: 0 12px 30px -4px rgba(37, 99, 235, 0.08);
-  --shadow-dropdown: 0 10px 35px rgba(0, 0, 0, 0.08);
+  /* Resting surfaces separate by tone and border. Only overlays elevate. */
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --shadow-2xl: none;
+  --shadow-dialog: 0 16px 40px -16px rgb(15 23 42 / 0.32);
+  --shadow-primary: none;
+  --shadow-card: none;
+  --shadow-dropdown: 0 12px 28px -16px rgb(15 23 42 / 0.28);
 
   /* Border Radius Tokens */
-  --radius-card:   1.25rem;
-  --radius-dialog: 1.75rem;
-  --radius-alert:  1.15rem;
-  --radius-pill:   1.2rem;
+  --radius-card:   0.75rem;
+  --radius-dialog: 1rem;
+  --radius-alert:  0.75rem;
+  --radius-pill:   0.5rem;
 }
 
 
@@ -107,18 +107,15 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* --- Gradient tokens (light mode) ---
-     Change the palette here; components use var() so no file hunting needed. */
-  --gradient-nav-header:   linear-gradient(180deg, rgba(255,255,255,0.94), rgba(247,249,252,0.90));
-  --gradient-card-header:  linear-gradient(180deg, rgba(255,255,255,0.90), rgba(239,246,255,0.42));
-  --gradient-card-footer:  linear-gradient(180deg, rgba(255,255,255,0.66), rgba(239,246,255,0.34));
-  --gradient-modal-header: linear-gradient(180deg, rgba(255,255,255,0.90), rgba(239,246,255,0.60));
-  --gradient-modal-footer: linear-gradient(180deg, rgba(255,255,255,0.70), rgba(239,246,255,0.50));
-  --gradient-surface:      linear-gradient(180deg, rgba(255,255,255,0.99), rgba(239,246,255,0.76));
-  --gradient-loader:       linear-gradient(180deg, rgba(255,255,255,0.94), rgba(239,246,255,0.72));
-  --gradient-table-bar:    linear-gradient(180deg, rgba(255,255,255,0.84), rgba(239,246,255,0.62));
-  --gradient-signin:       linear-gradient(180deg, rgba(255,255,255,0.995), rgba(239,246,255,0.88));
-  --gradient-signin-mask:  linear-gradient(180deg, rgba(255,255,255,0.86), transparent);
+  /* Flat surface roles for an operational, data-first interface. */
+  --surface-nav: #ffffff;
+  --surface-header: #fafbfc;
+  --surface-footer: #fafbfc;
+  --surface-modal: #ffffff;
+  --surface-panel: #ffffff;
+  --surface-loader: #fafbfc;
+  --surface-table-bar: #fafbfc;
+  --surface-signin: #ffffff;
 }
 
 /*
@@ -134,17 +131,14 @@
   --color-card:          #1e293b; /* slate-800 */
   --color-border:        #334155; /* slate-700 */
 
-  /* Gradient tokens — dark overrides */
-  --gradient-nav-header:   linear-gradient(180deg, rgba(15,23,42,0.94),  rgba(15,23,42,0.90));
-  --gradient-card-header:  linear-gradient(180deg, rgba(30,41,59,0.90),  rgba(30,58,138,0.12));
-  --gradient-card-footer:  linear-gradient(180deg, rgba(30,41,59,0.90),  rgba(30,58,138,0.08));
-  --gradient-modal-header: linear-gradient(180deg, rgba(30,41,59,0.90),  rgba(30,58,138,0.10));
-  --gradient-modal-footer: linear-gradient(180deg, rgba(15,23,42,0.70),  rgba(30,58,138,0.08));
-  --gradient-surface:      #1e293b; /* flat slate-800 */
-  --gradient-loader:       linear-gradient(180deg, rgba(30,41,59,0.94),  rgba(30,58,138,0.10));
-  --gradient-table-bar:    linear-gradient(180deg, rgba(30,41,59,0.84),  rgba(30,58,138,0.10));
-  --gradient-signin:       linear-gradient(180deg, rgba(30,41,59,0.96), rgba(30,58,138,0.15));
-  --gradient-signin-mask:  linear-gradient(180deg, rgba(15,23,42,0.86), transparent);
+  --surface-nav: #0f172a;
+  --surface-header: #1e293b;
+  --surface-footer: #0f172a;
+  --surface-modal: #1e293b;
+  --surface-panel: #1e293b;
+  --surface-loader: #1e293b;
+  --surface-table-bar: #1e293b;
+  --surface-signin: #1e293b;
 
   /* Shadow tokens — dark overrides */
   --shadow-dropdown: 0 10px 35px rgba(0, 0, 0, 0.30);
@@ -162,18 +156,14 @@ html {
     transition only fires on user clicks, not on initial page load.
   */
   transition: background-color 250ms ease, color 250ms ease;
-  background:
-    radial-gradient(circle at top left, rgba(143, 168, 216, 0.10), transparent 28%),
-    radial-gradient(circle at top right, rgba(37, 99, 235, 0.10), transparent 34%),
-    var(--color-background);
+  background: var(--color-background);
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(247, 249, 252, 1) 100%);
+  background: var(--color-background);
 }
 
 /* Dark mode body background */
